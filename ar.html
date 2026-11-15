@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>الواقع المعزز | الحيود</title>
+<link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1E3557;--gold:#A8741A;--teal:#1F7A80;--hot:#E0622B;--cold:#2B7BB9}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#0b1626;font-family:Almarai,sans-serif;color:#fff;touch-action:none}
+#cam{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+#bgFallback{position:fixed;inset:0;background:radial-gradient(circle at 50% 30%,#2a4a73,#0b1626 70%);z-index:0}
+#gl{position:fixed;inset:0;z-index:1}
+.glass{background:rgba(15,30,55,.62);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.18);border-radius:18px}
+#top{position:fixed;top:calc(8px + env(safe-area-inset-top));left:8px;right:8px;z-index:3;display:flex;align-items:center;gap:8px;padding:6px 10px}
+#top img{height:34px;background:#fff;border-radius:8px;padding:2px}#top h1{flex:1;margin:0;font-size:clamp(14px,3.6vw,20px);text-align:center}
+#info{position:fixed;top:calc(64px + env(safe-area-inset-top));right:8px;z-index:3;width:min(420px,calc(100% - 16px));padding:12px 14px;transition:.3s}
+#info h2{margin:0 0 4px;font-size:20px;color:#F2C14E}#info p{margin:0;font-size:15px;line-height:1.75}
+#info.min p{display:none}
+#bottom{position:fixed;bottom:calc(8px + env(safe-area-inset-bottom));left:8px;right:8px;z-index:3}
+#chips{display:flex;gap:8px;overflow-x:auto;padding:8px;scrollbar-width:none}#chips::-webkit-scrollbar{display:none}
+#chips button{flex:0 0 auto;font:inherit;font-weight:800;font-size:15px;color:#fff;border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);padding:9px 14px;border-radius:999px;cursor:pointer}
+#chips button.on{background:linear-gradient(135deg,#E0622B,#F2B01E);border-color:#fff;box-shadow:0 0 18px rgba(242,176,30,.7)}
+#ctrl{display:flex;gap:8px;align-items:center;padding:8px 10px;margin-bottom:8px;flex-wrap:wrap}
+#ctrl label{font-size:14px;font-weight:700}#ctrl input[type=range]{flex:1;min-width:140px;accent-color:#E0622B}
+.ib{font:inherit;font-weight:800;font-size:14px;color:#fff;border:0;border-radius:12px;padding:9px 12px;cursor:pointer;background:var(--teal)}
+.ib.g{background:var(--gold)}.ib.h{background:var(--hot)}
+#side{position:fixed;left:10px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:10px}
+#side button{width:50px;height:50px;border-radius:50%;border:2px solid rgba(255,255,255,.4);background:rgba(15,30,55,.6);color:#fff;font-size:22px;cursor:pointer;backdrop-filter:blur(8px)}
+#quiz,#shot,#perm,#intro{position:fixed;inset:0;z-index:5;display:none;align-items:center;justify-content:center;background:rgba(5,12,24,.55);padding:16px}
+#quiz .box,#shot .box,#perm .box,#intro .box{width:min(520px,100%);padding:18px;text-align:center}
+#quiz h3{margin:0 0 12px;font-size:21px;line-height:1.6}
+.qo{display:block;width:100%;font:inherit;font-weight:700;font-size:17px;margin:8px 0;padding:12px;border-radius:14px;border:2px solid rgba(255,255,255,.4);background:rgba(255,255,255,.1);color:#fff;cursor:pointer;text-align:right}
+.qo.ok{background:#2E8B57;border-color:#2E8B57}.qo.no{background:#C0392B;border-color:#C0392B}
+#qfb{min-height:24px;margin-top:8px;line-height:1.7}
+#shot img{width:100%;border-radius:12px}
+#toast{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%) scale(.8);z-index:6;font-size:30px;font-weight:800;opacity:0;transition:.35s;pointer-events:none;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+#toast.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#hint{position:fixed;left:50%;top:58%;transform:translateX(-50%);z-index:2;font-size:14px;background:rgba(0,0,0,.4);padding:6px 12px;border-radius:999px;transition:opacity 1s;pointer-events:none}
+.big{font-size:54px;margin:4px 0}
+</style></head><body>
+<div id="bgFallback"></div>
+<video id="cam" playsinline muted autoplay></video>
+<canvas id="gl"></canvas>
+<div id="top" class="glass"><img src="img/moe.png" alt=""><h1>🔍 الواقع المعزز: الحيود من حولي</h1><span style="width:34px"></span></div>
+<div id="info" class="glass" onclick="this.classList.toggle('min')"><h2 id="iT"></h2><p id="iP"></p></div>
+<div id="side"><button onclick="openQuiz()" title="سؤال">❓</button><button onclick="snap()" title="التقاط">📸</button><button onclick="recenter()" title="توسيط">🎯</button><button onclick="toggleSnd()" id="sndB" title="الصوت">🔊</button></div>
+<div id="hint">اسحبي لتدوير النموذج • قرّبي بإصبعين • حرّكي الجوال حولك</div>
+<div id="bottom"><div id="ctrl" class="glass"></div><div id="chips" class="glass"></div><div style="text-align:center;font-size:13px;font-weight:800;margin-top:4px;text-shadow:0 1px 6px rgba(0,0,0,.8)">صُمّم بحب ♥ د. أفنان الطلحي</div></div>
+<div id="quiz"><div class="box glass"><h3 id="qq"></h3><div id="qo"></div><div id="qfb"></div><button class="ib g" onclick="closeQ()" style="margin-top:10px">إغلاق</button></div></div>
+<div id="shot"><div class="box glass"><img id="shotImg" alt=""><p>اضغطي مطولًا على الصورة لحفظها، أو:</p><a id="dl" class="ib h" style="display:inline-block;text-decoration:none" download="ar-diffraction.png">⬇ حفظ الصورة</a> <button class="ib" onclick="document.getElementById('shot').style.display='none'">إغلاق</button></div></div>
+<div id="perm"><div class="box glass"><div class="big">📷</div><h3>اسمحي بالوصول إلى الكاميرا</h3><p style="line-height:1.8">لعرض النماذج فوق ما حولك. إن ظهرت رسالة الإذن اضغطي «سماح».</p><button class="ib h" onclick="startCam(true)">تشغيل الكاميرا</button> <button class="ib" onclick="document.getElementById('perm').style.display='none'">المتابعة بدون كاميرا</button></div></div>
+<div id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ---------- camera: request immediately ----------
+const video=document.getElementById('cam');
+async function startCam(fromBtn){
+  try{
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw 0;
+    const st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false});
+    video.srcObject=st;await video.play().catch(()=>{});document.getElementById('bgFallback').style.display='none';document.getElementById('perm').style.display='none';
+  }catch(e){document.getElementById('perm').style.display='flex'}
+  if(fromBtn)enableGyro();
+}
+startCam(false);
+
+// ---------- sounds (natural only) ----------
+const SND={};['applause','knock','drop','bubble','whoosh'].forEach(n=>{SND[n]=new Audio('snd/'+n+'.mp3')});SND.bubble.loop=true;
+let sndOn=true,amb=null,unlocked=false;
+function sfx(n,v=.8){if(!sndOn)return;try{const a=SND[n].cloneNode();a.volume=v;a.play().catch(()=>{})}catch(e){}}
+function ambient(n){if(amb){amb.pause();amb=null}if(!n||!sndOn||!unlocked)return;amb=SND[n];amb.volume=.35;amb.currentTime=0;amb.play().catch(()=>{})}
+function toggleSnd(){sndOn=!sndOn;document.getElementById('sndB').textContent=sndOn?'🔊':'🔇';if(!sndOn&&amb)amb.pause();else ambient(SC[cur].amb)}
+document.addEventListener('pointerdown',()=>{if(!unlocked){unlocked=true;enableGyro();ambient(SC[cur].amb)}},{once:false});
+
+// ---------- three ----------
+const cv=document.getElementById('gl');
+const R=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true,preserveDrawingBuffer:true});
+R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(innerWidth,innerHeight);R.outputEncoding=THREE.sRGBEncoding;
+const scene=new THREE.Scene();const cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.05,100);
+scene.add(new THREE.HemisphereLight(0xffffff,0x334466,.9));const dl=new THREE.DirectionalLight(0xffffff,.9);dl.position.set(2,4,3);scene.add(dl);
+const pl=new THREE.PointLight(0xffaa66,.6,10);pl.position.set(-2,1,2);scene.add(pl);
+const anchor=new THREE.Group();anchor.position.set(0,-.15,-3);scene.add(anchor);
+const holder=new THREE.Group();anchor.add(holder);
+// shadow disc
+const disc=new THREE.Mesh(new THREE.CircleGeometry(1.5,48),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.22}));disc.rotation.x=-Math.PI/2;disc.position.y=-1.05;anchor.add(disc);
+const ring=new THREE.Mesh(new THREE.RingGeometry(1.45,1.52,64),new THREE.MeshBasicMaterial({color:0xF2C14E,transparent:true,opacity:.8,side:2}));ring.rotation.x=-Math.PI/2;ring.position.y=-1.04;anchor.add(ring);
+addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();R.setSize(innerWidth,innerHeight)});
+
+// ---------- gyro (look around: objects stay in the room) ----------
+let gyro=false,q0=null;const qd=new THREE.Quaternion(),eu=new THREE.Euler(),zee=new THREE.Vector3(0,0,1),q1=new THREE.Quaternion(-Math.sqrt(.5),0,0,Math.sqrt(.5));
+function onOri(e){if(e.alpha==null)return;gyro=true;const a=THREE.MathUtils.degToRad(e.alpha),b=THREE.MathUtils.degToRad(e.beta),g=THREE.MathUtils.degToRad(e.gamma),o=THREE.MathUtils.degToRad(screen.orientation?screen.orientation.angle:(window.orientation||0));
+eu.set(b,a,-g,'YXZ');qd.setFromEuler(eu);qd.multiply(q1);qd.multiply(new THREE.Quaternion().setFromAxisAngle(zee,-o));if(!q0){q0=qd.clone().invert();}}
+function enableGyro(){if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){DeviceOrientationEvent.requestPermission().then(r=>{if(r==='granted')addEventListener('deviceorientation',onOri)}).catch(()=>{})}else addEventListener('deviceorientation',onOri)}
+function recenter(){q0=null;rotY=0;rotX=0;zoom=1;sfx('whoosh',.5)}
+
+// ---------- touch rotate / pinch ----------
+let rotY=0,rotX=0,zoom=1,drag=null,pinch=null;
+cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};document.getElementById('hint').style.opacity=0});
+addEventListener('pointermove',e=>{if(!drag||pinch)return;rotY+=(e.clientX-drag.x)*.01;rotX=Math.max(-.6,Math.min(.6,rotX+(e.clientY-drag.y)*.006));drag={x:e.clientX,y:e.clientY}});
+addEventListener('pointerup',()=>drag=null);
+cv.addEventListener('touchmove',e=>{if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);if(pinch)zoom=Math.max(.5,Math.min(2.2,zoom*d/pinch));pinch=d}},{passive:true});
+cv.addEventListener('touchend',()=>pinch=null);
+cv.addEventListener('wheel',e=>{zoom=Math.max(.5,Math.min(2.2,zoom*(e.deltaY>0?.92:1.08)))},{passive:true});
+
+// ---------- helpers ----------
+const RD=()=>{const u=Math.random()*2-1,a=Math.random()*6.2832,s=Math.sqrt(1-u*u);return new THREE.Vector3(s*Math.cos(a),u,s*Math.sin(a))};
+const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.35,metalness:.1},o));
+function glow(color,size){const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');const gr=g.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.25,color);gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,128,128);
+const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));s.scale.set(size,size,1);return s}
+function label(txt,bg='#1E3557',fg='#fff',w=1.1){const c=document.createElement('canvas');c.width=512;c.height=128;const g=c.getContext('2d');const draw=()=>{g.clearRect(0,0,512,128);g.fillStyle=bg;g.globalAlpha=.88;g.beginPath();g.moveTo(30,10);g.lineTo(482,10);g.quadraticCurveTo(502,10,502,30);g.lineTo(502,98);g.quadraticCurveTo(502,118,482,118);g.lineTo(30,118);g.quadraticCurveTo(10,118,10,98);g.lineTo(10,30);g.quadraticCurveTo(10,10,30,10);g.fill();g.globalAlpha=1;g.fillStyle=fg;g.font='800 52px Almarai';g.textAlign='center';g.textBaseline='middle';g.direction='rtl';g.fillText(s.userData.t,256,66);tex.needsUpdate=true};
+const tex=new THREE.CanvasTexture(c);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false}));s.scale.set(w,w/4,1);s.userData.t=txt;s.userData.set=t=>{s.userData.t=t;draw()};draw();s.renderOrder=10;return s}
+const tcol=(T)=>{const c=Math.max(0,Math.min(1,(T+10)/110));return new THREE.Color().setRGB(.17+c*.8,.48-c*.1+(c>.5?-.2*(c-.5):0),.73-c*.62)};
+let slider=null,sval=60,rodK=1;
+function setCtrl(html){document.getElementById('ctrl').innerHTML=html;document.getElementById('ctrl').style.display=html?'flex':'none'}
+
+// ---------- scenes ----------
+function wl(l){let r=0,g=0,b=0;if(l>=380&&l<440){r=-(l-440)/60;b=1}else if(l<490){g=(l-440)/50;b=1}else if(l<510){g=1;b=-(l-510)/20}else if(l<580){r=(l-510)/70;g=1}else if(l<645){r=1;g=-(l-645)/65}else if(l<=780){r=1}let f=l<420?.3+.7*(l-380)/40:l>700?.3+.7*(780-l)/80:1;return[r*f,g*f,b*f]}
+function filmCol(d,n){let s=[0,0,0];for(let k=400;k<=700;k+=10){const c=wl(k),r=Math.pow(Math.sin(2*Math.PI*n*d/k),2);s[0]+=c[0]*r;s[1]+=c[1]*r;s[2]+=c[2]*r}return s.map(v=>Math.min(255,v/11*255))}
+function filmTex(w,h,fn){const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');const im=g.createImageData(w,h);for(let y=0;y<h;y++)for(let x=0;x<w;x++){const d=fn(x/w,y/h),col=filmCol(d,1.33),o=(y*w+x)*4;im.data[o]=col[0];im.data[o+1]=col[1];im.data[o+2]=col[2];im.data[o+3]=255}g.putImageData(im,0,0);const t=new THREE.CanvasTexture(c);t.wrapS=THREE.RepeatWrapping;return t}
+function fringeTex(lam){const c=document.createElement('canvas');c.width=512;c.height=64;const g=c.getContext('2d');const im=g.createImageData(512,64);const col=wl(lam);for(let x=0;x<512;x++){const X=(x-256)/256*12e-3,th=X/1.0,ph=Math.PI*.25e-3*th/(lam*1e-9),be=Math.PI*.04e-3*th/(lam*1e-9),env=be?Math.pow(Math.sin(be)/be,2):1,k=Math.pow(Math.cos(ph),2)*env;for(let y=0;y<64;y++){const o=(y*512+x)*4;im.data[o]=col[0]*k*255;im.data[o+1]=col[1]*k*255;im.data[o+2]=col[2]*k*255;im.data[o+3]=255}}g.putImageData(im,0,0);return new THREE.CanvasTexture(c)}
+function slitTex(lam,w,white){const W=512,H=64,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');const im=g.createImageData(W,H);
+for(let x=0;x<W;x++){let col=[0,0,0];const th=(x-W/2)/(W/2)*0.03;const L=white?[400,430,460,490,520,550,580,610,640,670,700]:[lam];
+L.forEach(l=>{const b=Math.PI*w*1e-3*th/(l*1e-9),k=b?Math.pow(Math.sin(b)/b,2):1,c2=wl(l),kk=Math.pow(k,.5);col[0]+=c2[0]*kk;col[1]+=c2[1]*kk;col[2]+=c2[2]*kk});
+const n=white?L.length/2.2:1;for(let y=0;y<H;y++){const o=(y*W+x)*4;im.data[o]=Math.min(255,col[0]/n*255);im.data[o+1]=Math.min(255,col[1]/n*255);im.data[o+2]=Math.min(255,col[2]/n*255);im.data[o+3]=255}}
+g.putImageData(im,0,0);return new THREE.CanvasTexture(c)}
+function airyTex(sep){const W=512,H=256,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');const im=g.createImageData(W,H);
+const A=(r)=>{const x=r*3.83/40;if(x<1e-6)return 1;const s=Math.sin(x)/x;return s*s};
+for(let y=0;y<H;y++)for(let x=0;x<W;x++){const r1=Math.hypot(x-(W/2-sep/2),y-H/2),r2=Math.hypot(x-(W/2+sep/2),y-H/2);let k=A(r1)+A(r2);k=Math.min(1,Math.pow(k,.6));const o=(y*W+x)*4;im.data[o]=255*k;im.data[o+1]=240*k;im.data[o+2]=200*k;im.data[o+3]=255}
+g.putImageData(im,0,0);return new THREE.CanvasTexture(c)}
+function cdTex(){const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');
+for(let a=0;a<360;a+=1){const l=400+300*(.5+.5*Math.sin(a*Math.PI/45));const col=wl(l);g.strokeStyle=css3(col,.75);g.beginPath();g.moveTo(128,128);g.lineTo(128+128*Math.cos(a*Math.PI/180),128+128*Math.sin(a*Math.PI/180));g.stroke()}
+const gr=g.createRadialGradient(128,128,10,128,128,128);gr.addColorStop(0,'rgba(230,230,240,1)');gr.addColorStop(.2,'rgba(220,220,235,.9)');gr.addColorStop(.35,'rgba(210,210,230,.2)');gr.addColorStop(1,'rgba(200,200,220,.1)');g.fillStyle=gr;g.fillRect(0,0,256,256);
+g.fillStyle='#0b1626';g.beginPath();g.arc(128,128,16,0,7);g.fill();return new THREE.CanvasTexture(c)}
+function css3(c,a){return `rgba(${Math.round(c[0]*255)},${Math.round(c[1]*255)},${Math.round(c[2]*255)},${a})`}
+let sW=.08,sLam=650,gMode=0,rSep=80,spAng=0;
+const SC=[
+{n:'〰 الشق المفرد',t:'حيود الضوء عبر شق مفرد',p:'ضوء ليزر يمر خلال شق ضيق فينتشر بعيدًا عن مساره المستقيم (الحيود)، ويتكوّن على الشاشة هدب مركزي مضيء عريض وأهداب أخفت على جانبيه. حرّكي المؤشر لتغيّري عرض الشق w: كلما ضاق الشق اتّسع النمط.',
+ amb:null,ctrl:'<label>عرض الشق w = <b id="wv">0.08</b> mm</label><input type="range" min="0.03" max="0.25" step="0.01" value="0.08" oninput="sW=+this.value;document.getElementById(\'wv\').textContent=(+this.value).toFixed(2)">',
+ q:['عندما يضيق الشق، فإن نمط الحيود على الشاشة:',['يضيق','يتّسع','لا يتغير'],1],
+ build(g){sW=.08;this.w=0;const box=new THREE.Mesh(new THREE.BoxGeometry(.5,.25,.25),M(0x333344,{metalness:.6}));box.position.set(-1.3,0,0);g.add(box);
+ this.beam=new THREE.Mesh(new THREE.BoxGeometry(.75,.03,.03),new THREE.MeshBasicMaterial({color:0xff2222}));this.beam.position.set(-.68,0,0);g.add(this.beam);
+ const bar=M(0xb0a890,{metalness:.3});this.top=new THREE.Mesh(new THREE.BoxGeometry(.05,.8,.6),bar);this.bot=this.top.clone();g.add(this.top);g.add(this.bot);
+ this.arcs=[];for(let i=0;i<10;i++){const m=new THREE.Mesh(new THREE.RingGeometry(.98,1,48,1,-.6,1.2),new THREE.MeshBasicMaterial({color:0xff3333,transparent:true,side:2}));m.position.set(-.27,0,0);m.userData.o=i/10;g.add(m);this.arcs.push(m)}
+ this.scr=new THREE.Mesh(new THREE.PlaneGeometry(.9,1.7),new THREE.MeshBasicMaterial({map:slitTex(650,.08)}));this.scr.position.set(1.15,0,0);this.scr.rotation.y=-Math.PI/2;g.add(this.scr);
+ const fr=new THREE.Mesh(new THREE.BoxGeometry(.04,1.78,.98),M(0x222222));fr.position.set(1.18,0,0);g.add(fr);
+ const l=label('الشاشة','#2B2A6B');l.position.set(1.15,1.12,0);g.add(l);const l2=label('شق مفرد','#A8741A');l2.position.set(-.27,1.0,0);g.add(l2);this.ll=label('w = 0.08 mm','#C2185B');this.ll.position.set(-1.3,.45,0);g.add(this.ll);setCtrl(this.ctrl)},
+ update(dt,t){if(this.w!==sW){this.w=sW;const gap=.04+sW*.6;this.top.position.set(-.3,gap/2+.4,0);this.bot.position.set(-.3,-gap/2-.4,0);this.scr.material.map=slitTex(650,sW);this.scr.material.needsUpdate=true;this.ll.userData.set('w = '+sW.toFixed(2)+' mm');
+ const sp=Math.min(1.5,.012/sW+.05);this.arcs.forEach(a=>{a.geometry.dispose();a.geometry=new THREE.RingGeometry(.98,1,48,1,-sp,2*sp)})}
+ this.arcs.forEach(a=>{const p=(t*.25+a.userData.o)%1;const s=.05+p*1.45;a.scale.set(s,s,1);a.material.opacity=(1-p)*.85})}},
+{n:'🌈 عرض الهدب',still:1,t:'عرض الهدب المركزي: 2x₁ = 2λL/w',p:'غيّري لون الليزر وراقبي عرض الهدب المركزي على الشاشة: الأحمر (طوله الموجي أكبر) يعطي هدبًا أعرض من الأزرق. وفي الضوء الأبيض يكون المركز أبيض وحوافه ملوّنة.',
+ amb:null,ctrl:'<button class="ib h" onclick="sLam=650;sfx(\'drop\',.5)">🔴 أحمر 650 nm</button><button class="ib" onclick="sLam=532;sfx(\'drop\',.5)">🟢 أخضر 532 nm</button><button class="ib g" onclick="sLam=450;sfx(\'drop\',.5)">🔵 أزرق 450 nm</button><button class="ib" style="background:#666" onclick="sLam=0;sfx(\'drop\',.5)">⚪ أبيض</button>',
+ q:['أي الألوان يُكوّن هدبًا مركزيًّا أعرض عبر الشق نفسه؟',['الأزرق','الأحمر','الأخضر'],1],
+ build(g){sLam=650;this.lam=-1;this.scr=new THREE.Mesh(new THREE.PlaneGeometry(2.4,1.1),new THREE.MeshBasicMaterial({map:slitTex(650,.05)}));this.scr.position.set(0,.1,0);g.add(this.scr);
+ const fr=new THREE.Mesh(new THREE.BoxGeometry(2.5,1.2,.04),M(0x222222));fr.position.set(0,.1,-.03);g.add(fr);
+ this.arrow=new THREE.Mesh(new THREE.BoxGeometry(1,.03,.03),new THREE.MeshBasicMaterial({color:0xF2C14E}));this.arrow.position.set(0,-.6,0);g.add(this.arrow);
+ this.ll=label('2x₁ = 26 mm','#C2185B','#fff',1.3);this.ll.position.set(0,-.85,0);g.add(this.ll);const l=label('الشاشة','#2B2A6B');l.position.set(0,.95,0);g.add(l);setCtrl(this.ctrl)},
+ update(dt,t){if(this.lam!==sLam){this.lam=sLam;const L=sLam||550;this.scr.material.map=slitTex(L,.05,sLam===0);this.scr.material.needsUpdate=true;
+ const w2=2*L*1e-9*1/5e-5*1e3;this.arrow.scale.x=L/650;this.ll.userData.set(sLam?('2x₁ = '+w2.toFixed(1)+' mm'):'مركز أبيض وحواف ملوّنة')}this.scr.position.z=.01*Math.sin(t*2)}},
+{n:'🔦 المحزوز',t:'محزوز الحيود: λ = d sinθ',p:'المحزوز آلاف الشقوق المتقاربة جدًّا. يتراكب حيودها فتخرج حزم ضيقة عند زوايا تحقق mλ = d sinθ. الأحمر ينحرف أكثر من الأزرق، وفي الضوء الأبيض تظهر أطياف كاملة على جانبي هدب مركزي أبيض.',
+ amb:null,ctrl:'<button class="ib h" onclick="gMode=650;sfx(\'drop\',.5)">🔴 أحمر</button><button class="ib g" onclick="gMode=450;sfx(\'drop\',.5)">🔵 أزرق</button><button class="ib" style="background:#666" onclick="gMode=0;sfx(\'drop\',.5)">⚪ أبيض</button>',
+ q:['في محزوز الحيود، أي الألوان ينحرف بزاوية أكبر؟',['البنفسجي','الأحمر','جميعها بالزاوية نفسها'],1],
+ build(g){gMode=650;this.m=-1;const gr=new THREE.Mesh(new THREE.BoxGeometry(.04,1.2,.8),M(0xB39DDB,{transparent:true,opacity:.7,metalness:.4}));gr.position.set(-.7,0,0);g.add(gr);
+ for(let i=0;i<24;i++){const ln=new THREE.Mesh(new THREE.BoxGeometry(.045,.012,.82),new THREE.MeshBasicMaterial({color:0x4527A0}));ln.position.set(-.7,-.57+i*.05,0);g.add(ln)}
+ const inb=new THREE.Mesh(new THREE.BoxGeometry(.8,.04,.04),new THREE.MeshBasicMaterial({color:0xffffff}));inb.position.set(-1.12,0,0);g.add(inb);
+ this.rays=new THREE.Group();g.add(this.rays);const l=label('محزوز حيود','#6A3FB5');l.position.set(-.7,.9,0);g.add(l);setCtrl(this.ctrl)},
+ update(dt,t){if(this.m!==gMode){this.m=gMode;while(this.rays.children.length)this.rays.remove(this.rays.children[0]);const L=gMode?[gMode]:[410,450,490,530,570,610,650,690];
+ const add=(ang,col,len)=>{const r=new THREE.Mesh(new THREE.BoxGeometry(len,.025,.025),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.9}));r.position.set(-.7+Math.cos(ang)*len/2,Math.sin(ang)*len/2,0);r.rotation.z=ang;this.rays.add(r);const s=glow(css3(new THREE.Color(col).toArray(),1),.25);s.position.set(-.7+Math.cos(ang)*len,Math.sin(ang)*len,0);this.rays.add(s)};
+ add(0,0xffffff,1.9);L.forEach(l=>{const c=new THREE.Color().setRGB(...wl(l));for(const m of[-1,1]){const s=m*l/1700;add(Math.asin(s),c.getHex(),1.9)}})}
+ this.rays.children.forEach((r,i)=>{if(r.material&&r.material.opacity!==undefined&&r.isMesh)r.material.opacity=.7+.3*Math.sin(t*4+i)})}},
+{n:'💿 القرص المدمج',t:'القرص المدمج محزوز حيود انعكاس',p:'على سطح القرص المدمج مسارات دقيقة متقاربة جدًّا (نحو 1.6 µm في CD) تعمل عمل محزوز انعكاس؛ فعندما يسقط عليه الضوء الأبيض ينعكس كل لون بزاوية مختلفة فتظهر ألوان قوس المطر، وتتغير بتغيير زاوية النظر.',
+ amb:null,ctrl:'',
+ q:['ألوان قوس المطر على القرص المدمج سببها:',['أصباغ ملوّنة على السطح','عمله عمل محزوز حيود انعكاس','انكسار الضوء في الهواء'],1],
+ build(g){this.cd=new THREE.Mesh(new THREE.CircleGeometry(.95,96),new THREE.MeshStandardMaterial({map:cdTex(),metalness:.9,roughness:.15,side:2}));this.cd.rotation.x=-1.1;g.add(this.cd);
+ this.fan=new THREE.Group();g.add(this.fan);for(let l=410;l<=690;l+=20){const c=new THREE.Color().setRGB(...wl(l));const r=new THREE.Mesh(new THREE.BoxGeometry(1.4,.02,.02),new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:.85}));const a=.5+(l-400)/300*.6;r.position.set(Math.cos(a)*.7,Math.sin(a)*.7+.1,.2);r.rotation.z=a;this.fan.add(r)}
+ const inb=new THREE.Mesh(new THREE.BoxGeometry(1.3,.03,.03),new THREE.MeshBasicMaterial({color:0xffffff}));inb.position.set(-.6,.55,.2);inb.rotation.z=-.75;g.add(inb);
+ const l=label('محزوز انعكاس','#1F7A80');l.position.y=1.25;g.add(l);setCtrl(this.ctrl)},
+ update(dt,t){this.cd.rotation.z=t*.4;this.fan.rotation.z=.08*Math.sin(t*1.5)}},
+{n:'🔬 المطياف',t:'المطياف: قياس الطول الموجي',p:'في المطياف يمر الضوء عبر شق ثم يسقط على المحزوز، وندير تلسكوب المطياف حتى نرى خطًّا ملوّنًا ونقرأ الزاوية θ؛ ثم نحسب λ = d sinθ. حرّكي المؤشر لتديري التلسكوب.',
+ amb:null,ctrl:'<label>زاوية التلسكوب θ = <b id="av">0</b>°</label><input type="range" min="0" max="25" step="0.5" value="0" oninput="spAng=+this.value;document.getElementById(\'av\').textContent=this.value">',
+ q:['يُحسب الطول الموجي في المطياف من العلاقة:',['λ = xd/L','λ = d sinθ','λ = 2x₁w/L'],1],
+ build(g){spAng=0;const tb=new THREE.Mesh(new THREE.CylinderGeometry(1,1,.08,64),M(0xF2E08A,{metalness:.3}));tb.position.y=-.3;g.add(tb);
+ const gr=new THREE.Mesh(new THREE.BoxGeometry(.03,.5,.4),M(0xB39DDB,{transparent:true,opacity:.75}));gr.position.y=-.02;g.add(gr);
+ const col=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,.9,24),M(0x555566,{metalness:.7}));col.rotation.z=Math.PI/2;col.position.set(-.7,-.02,0);g.add(col);
+ this.arm=new THREE.Group();g.add(this.arm);const tel=new THREE.Mesh(new THREE.CylinderGeometry(.09,.07,.9,24),M(0x37474F,{metalness:.7}));tel.rotation.z=Math.PI/2;tel.position.set(.65,-.02,0);this.arm.add(tel);
+ this.view=glow('rgba(255,255,255,.9)',.45);this.view.position.set(1.2,.35,0);this.arm.add(this.view);this.ll=label('θ = 0° : الهدب المركزي','#2B2A6B','#fff',1.5);this.ll.position.y=1.1;g.add(this.ll);setCtrl(this.ctrl)},
+ update(dt,t){this.arm.rotation.y=-spAng*Math.PI/180;const d=1700;const lam=d*Math.sin(spAng*Math.PI/180);let txt,col;
+ if(spAng<1.5){txt='θ = 0° : الهدب المركزي';col=[1,1,1]}else if(lam>=400&&lam<=700){txt='θ = '+spAng+'° ← λ = '+Math.round(lam)+' nm';col=wl(lam)}else{txt='θ = '+spAng+'° : لا خط هنا';col=[.1,.1,.1]}
+ if(this.ll.userData.t!==txt){this.ll.userData.set(txt);this.view.material.color.setRGB(...col)}this.view.scale.setScalar(.45+.05*Math.sin(t*5))}},
+{n:'🔭 معيار ريليه',still:1,t:'معيار ريليه: هل يتميّز النجمان؟',p:'صورة كل نجم في التلسكوب بقعة مضيئة تحيط بها حلقات بسبب الحيود عبر الفتحة. قرّبي النجمين بالمؤشر: عندما يقع مركز صورة أحدهما على الحلقة المعتمة الأولى للآخر نكون عند حد التمييز: x = 1.22λL/D.',
+ amb:null,ctrl:'<label>المسافة بين صورتي النجمين</label><input type="range" min="0" max="140" step="2" value="80" oninput="rSep=+this.value">',
+ q:['لزيادة قدرة التلسكوب على التمييز بين نجمين متقاربين نستخدم:',['فتحة أصغر قطرًا','فتحة أكبر قطرًا','ضوءًا طوله الموجي أكبر'],1],
+ build(g){rSep=80;this.s=-1;this.scr=new THREE.Mesh(new THREE.PlaneGeometry(2.4,1.2),new THREE.MeshBasicMaterial({map:airyTex(80)}));this.scr.position.y=.1;g.add(this.scr);
+ const fr=new THREE.Mesh(new THREE.BoxGeometry(2.5,1.3,.04),M(0x222222));fr.position.set(0,.1,-.03);g.add(fr);this.ll=label('متميّزان ✔','#2E8B57','#fff',1.3);this.ll.position.y=-.75;g.add(this.ll);setCtrl(this.ctrl)},
+ update(dt,t){if(this.s!==rSep){this.s=rSep;this.scr.material.map=airyTex(rSep);this.scr.material.needsUpdate=true;const s=rSep>=40?'متميّزان ✔':rSep>=28?'حد التمييز (ريليه)':'غير متميّزين ✖';this.ll.userData.set(s)}}}
+];
+let cur=0,built=null;
+function load(i){cur=i;while(holder.children.length)holder.remove(holder.children[0]);const s=SC[i];built=Object.create(s);built.build(holder);
+document.getElementById('iT').textContent=s.t;document.getElementById('iP').textContent=s.p;document.getElementById('info').classList.remove('min');
+document.querySelectorAll('#chips button').forEach((b,j)=>b.classList.toggle('on',j===i));holder.scale.setScalar(.01);pop=0;sfx('whoosh',.55);ambient(s.amb);try{history.replaceState(null,'','#s'+i)}catch(e){}}
+let pop=1;
+document.getElementById('chips').innerHTML=SC.map((s,i)=>`<button onclick="load(${i})">${s.n}</button>`).join('');
+// quiz
+function openQuiz(){const q=SC[cur].q;document.getElementById('qq').textContent='❓ '+q[0];document.getElementById('qfb').textContent='';
+document.getElementById('qo').innerHTML=q[1].map((o,i)=>`<button class="qo" onclick="qa(${i},this)">${'أبج'[i]}) ${o}</button>`).join('');document.getElementById('quiz').style.display='flex';sfx('drop',.5)}
+function qa(i,b){const q=SC[cur].q;if(b.parentNode.dataset.d)return;b.parentNode.dataset.d=1;const ok=i===q[2];b.classList.add(ok?'ok':'no');b.parentNode.children[q[2]].classList.add('ok');
+document.getElementById('qfb').textContent=ok?'🎉 أحسنتِ! إجابة صحيحة':'💡 الإجابة الصحيحة مظلّلة بالأخضر';sfx(ok?'applause':'knock',.8);if(ok)toast('⭐ +10')}
+function closeQ(){document.getElementById('quiz').style.display='none'}
+function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1200)}
+// snapshot
+function snap(){const c=document.createElement('canvas');c.width=cv.width;c.height=cv.height;const g=c.getContext('2d');
+if(video.videoWidth){const vr=video.videoWidth/video.videoHeight,cr=c.width/c.height;let sw=video.videoWidth,sh=video.videoHeight,sx=0,sy=0;if(vr>cr){sw=sh*cr;sx=(video.videoWidth-sw)/2}else{sh=sw/cr;sy=(video.videoHeight-sh)/2}g.drawImage(video,sx,sy,sw,sh,0,0,c.width,c.height)}else{g.fillStyle='#16304f';g.fillRect(0,0,c.width,c.height)}
+g.drawImage(cv,0,0);g.fillStyle='rgba(30,53,87,.8)';g.fillRect(0,c.height-70,c.width,70);g.fillStyle='#fff';g.font='700 30px Almarai';g.textAlign='center';g.direction='rtl';g.fillText(SC[cur].t+' • فيزياء 3 • صُمّم بحب ♥ د. أفنان الطلحي',c.width/2,c.height-25);
+const u=c.toDataURL('image/png');document.getElementById('shotImg').src=u;document.getElementById('dl').href=u;document.getElementById('shot').style.display='flex';sfx('drop',.7)}
+// loop
+const clock=new THREE.Clock();
+function loop(){const dt=Math.min(.05,clock.getDelta()),t=clock.elapsedTime;
+if(gyro&&q0){cam.quaternion.copy(q0).multiply(qd)}else{cam.quaternion.set(0,0,0,1)}
+pop=Math.min(1,pop+dt*2.2);const e=1-Math.pow(1-pop,3)*(1-pop*0)+Math.sin(pop*Math.PI)*.08;
+var asp=innerWidth/innerHeight;window.base=asp<1?.38+asp*.42:1;anchor.position.y=asp<1?-.35:-.15;holder.scale.setScalar(Math.max(.01,e)*zoom*base);disc.scale.setScalar(base);disc.position.y=ring.position.y=-1.05*base;holder.rotation.y+=((rotY+((drag||SC[cur].still)?0:t*.15))-holder.rotation.y)*.2;holder.rotation.x+=(rotX-holder.rotation.x)*.2;
+ring.material.opacity=.5+.3*Math.sin(t*3);ring.scale.setScalar((1+.03*Math.sin(t*3))*base);
+if(built)built.update.call(built,dt,t);R.render(scene,cam);requestAnimationFrame(loop)}
+document.fonts.load('800 52px Almarai').finally(()=>{const h=location.hash.match(/^#s(\d)$/);load(h?+h[1]:0);loop()});
+setTimeout(()=>document.getElementById('hint').style.opacity=0,6000);
+</script>
+</body></html>

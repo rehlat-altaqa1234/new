@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>المختبر الافتراضي | الحيود</title>
+<link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#2B2A6B;--gold:#A8741A;--teal:#1F7A80;--cream:#F3ECFB;--hot:#C2185B;--vio:#6A3FB5}
+*{box-sizing:border-box}
+body{margin:0;font-family:Almarai,sans-serif;color:var(--navy);min-height:100vh;background:#223 url(img/bg-lab.jpg) right center/cover fixed no-repeat}
+header{position:relative;min-height:150px;display:flex;align-items:flex-end}
+header::before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(43,42,107,.88),rgba(43,42,107,.15))}
+.hin{position:relative;padding:18px 20px;color:#fff;width:100%;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.hin h1{margin:0;font-size:clamp(22px,4vw,34px)}.hin p{margin:6px 0 0;opacity:.92}
+.logos img{height:58px;background:#fff;border-radius:10px;padding:4px}
+nav{display:flex;gap:8px;overflow-x:auto;padding:12px;background:rgba(255,255,255,.72);backdrop-filter:blur(6px);position:sticky;top:0;z-index:5;border-radius:14px;margin-top:8px}
+nav button{flex:0 0 auto;border:2px solid var(--navy);background:#fff;color:var(--navy);font:inherit;font-weight:700;padding:9px 14px;border-radius:999px;cursor:pointer}
+nav button.on{background:var(--navy);color:#fff}
+main{max-width:1100px;margin:auto;padding:16px}
+@media(min-width:1000px){.wrapL{width:62vw;max-width:1000px;margin-left:2vw!important;margin-right:auto!important}}
+.lab{display:none}.lab.on{display:block;animation:fi .4s}@keyframes fi{from{opacity:0;transform:translateY(8px)}}
+.card{background:rgba(255,255,255,.78);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:16px;box-shadow:0 4px 14px rgba(43,42,107,.1);margin-bottom:14px}
+h2{margin:0 0 6px;font-size:24px}
+.q{background:rgba(243,236,251,.9);border-right:5px solid var(--vio);padding:10px 12px;border-radius:10px;margin:8px 0;line-height:1.8}
+.row{display:flex;gap:14px;flex-wrap:wrap}.col{flex:1 1 300px}
+canvas{direction:ltr;width:100%;background:rgba(250,250,255,.9);border-radius:12px;border:1px solid #d7d2ea;display:block}
+canvas.dark{background:#0d0b1e}
+label{display:block;font-weight:700;margin:10px 0 4px}
+input[type=range]{width:100%;accent-color:var(--vio)}
+select,input[type=number]{font:inherit;padding:6px;border-radius:8px;border:1px solid #a9a3c8;width:100%}
+.btn{border:0;background:var(--teal);color:#fff;font:inherit;font-weight:700;padding:10px 16px;border-radius:10px;cursor:pointer;margin:6px 0 0 6px}
+.btn.gold{background:var(--gold)}.btn.hot{background:var(--hot)}.btn.vio{background:var(--vio)}
+.out{font-size:18px;font-weight:800;color:var(--teal);margin-top:8px;line-height:1.8}
+table{border-collapse:collapse;width:100%;margin-top:8px}td,th{border:1px solid #cfc8e6;padding:6px;text-align:center}th{background:var(--navy);color:#fff}
+.reveal{display:none;background:#E7F5EF;border-right:5px solid #2E8B57;padding:10px;border-radius:10px;margin-top:6px;line-height:1.9}
+.tag{display:inline-block;background:var(--vio);color:#fff;border-radius:999px;padding:3px 12px;font-size:13px;margin-bottom:6px}
+.ltr{direction:ltr;unicode-bidi:embed;display:inline-block}
+.chips button{border:2px solid var(--navy);background:#fff;font:inherit;padding:6px 10px;border-radius:10px;margin:3px;cursor:pointer}
+.chips button.on{background:var(--navy);color:#fff}
+.chips button.ok{background:#2E8B57;color:#fff;border-color:#2E8B57}.chips button.no{background:#c0392b;color:#fff;border-color:#c0392b}
+.warn{background:#FFF3E0;border-right:5px solid #E65100;padding:8px 12px;border-radius:10px;margin:8px 0}
+footer{text-align:center;padding:12px;font-size:14px;background:rgba(255,255,255,.75);margin:0 16px 16px;border-radius:12px}
+</style>
+</head>
+<body>
+<header><div class="hin"><div><h1>🔬 المختبر الافتراضي: الحيود</h1><p>فيزياء 3 • الفصل 7: التداخل والحيود • الدرس 7-2 • د. أفنان الطلحي</p></div><div class="logos"><img src="img/moe.png" alt="وزارة التعليم"></div></div></header>
+<nav id="nav" class="wrapL"></nav>
+<main class="wrapL">
+
+<section class="lab" id="slit" data-t="① حيود الشق المفرد">
+<div class="card"><span class="tag">تجربة 1</span><h2>حيود الضوء عبر شق مفرد</h2>
+<div class="q">غيّري عرض الشق w والطول الموجي λ والبعد L، وراقبي عرض الهدب المركزي المضيء 2x₁ على الشاشة.</div>
+<div class="warn">⚠ تحذير: لا تنظري مباشرة إلى أشعة الليزر.</div>
+<canvas id="sC" class="dark" width="900" height="330"></canvas>
+<canvas id="sS" class="dark" width="900" height="150" style="margin-top:8px"></canvas>
+<div class="row"><div class="col">
+<div class="chips"><button onclick="sSet(450)">🔵 أزرق 450 nm</button><button onclick="sSet(532)">🟢 أخضر 532 nm</button><button onclick="sSet(650)">🔴 أحمر 650 nm</button></div>
+<label>الطول الموجي λ = <b id="sLV">650</b> nm</label><input type="range" id="sL" min="400" max="700" value="650"></div>
+<div class="col"><label>عرض الشق w = <b id="sWV">0.100</b> mm</label><input type="range" id="sW" min="0.030" max="0.300" step="0.005" value="0.100">
+<label>البعد بين الشق والشاشة L = <b id="sDV">1.00</b> m</label><input type="range" id="sD" min="0.50" max="2.00" step="0.05" value="1.00"></div></div>
+<div class="out" id="sO"></div>
+<button class="btn gold" onclick="rv('r1')">▶ ماذا تلاحظين؟</button>
+<div class="reveal" id="r1">من المعادلة <span class="ltr">2x₁ = 2λL / w</span>: يزداد عرض الهدب المركزي بزيادة λ أو L، ويقل بزيادة عرض الشق w. فكلما ضاق الشق اتّسع نمط الحيود، ويتّضح الحيود عندما يقترب عرض الشق من الطول الموجي.</div></div>
+</section>
+
+<section class="lab" id="meas" data-t="② ليزر مجهول">
+<div class="card"><span class="tag">تجربة 2</span><h2>قيسي الطول الموجي لليزر مجهول بشق مفرد</h2>
+<div class="q">اختاري ليزرًا مجهولًا، ثم حرّكي المؤشرين الأصفرين إلى الهدبين المعتمين الأولين على جانبي الهدب المركزي لقياس العرض 2x₁، ثم احسبي λ.</div>
+<div class="chips" id="mCh"><button onclick="setM(0)">ليزر A</button><button onclick="setM(1)">ليزر B</button><button onclick="setM(2)">ليزر C</button></div>
+<canvas id="mC" class="dark" width="900" height="210"></canvas>
+<label>عرض الهدب المقيس 2x₁ = <b id="xV">0.0</b> mm</label><input type="range" id="xR" min="0" max="20" step="0.1" value="4">
+<p>المعطيات: <span class="ltr">w = 0.100 mm</span> ، <span class="ltr">L = 1.00 m</span></p>
+<label>احسبي λ (nm) واكتبيها:</label><input type="number" id="mIn" placeholder="مثال: 600">
+<button class="btn vio" onclick="chkM()">✔ تحققي</button> <button class="btn" onclick="addRow()">＋ أضيفي للجدول</button>
+<div class="out" id="mO"></div>
+<table><thead><tr><th>الليزر</th><th>2x₁ (mm)</th><th>λ المحسوبة (nm)</th><th>اللون</th></tr></thead><tbody id="mTb"></tbody></table>
+<button class="btn gold" onclick="rv('r2')">▶ طريقة الحل</button>
+<div class="reveal" id="r2"><span class="ltr">λ = (2x₁) w / 2L</span>. مثال: إذا كان <span class="ltr">2x₁ = 13.0 mm</span> فإن <span class="ltr">λ = (1.30×10⁻² m)(1.00×10⁻⁴ m) / 2(1.00 m) = 6.50×10⁻⁷ m = 650 nm</span> (أحمر).</div></div>
+</section>
+
+<section class="lab" id="grat" data-t="③ محزوز الحيود">
+<div class="card"><span class="tag">تجربة 3</span><h2>محزوز الحيود: λ = d sinθ</h2>
+<div class="q">غيّري عدد الشقوق لكل سنتيمتر واللون، وراقبي زوايا الهدب ومواقعها على الشاشة. متى يختفي هدب الرتبة الثانية؟</div>
+<canvas id="gC" class="dark" width="900" height="380"></canvas>
+<div class="row"><div class="col"><label>عدد الشقوق لكل cm: <b id="gNV">5000</b></label><input type="range" id="gN" min="1000" max="10000" step="500" value="5000">
+<label>البعد إلى الشاشة L = <b id="gLV">1.00</b> m</label><input type="range" id="gL" min="0.30" max="1.50" step="0.05" value="1.00"></div>
+<div class="col"><div class="chips" id="gCol"><button onclick="gSet(450)">🔵 أزرق</button><button onclick="gSet(532)">🟢 أخضر</button><button onclick="gSet(650)">🔴 أحمر</button><button onclick="gSet(0)">⚪ أبيض</button></div>
+<label>λ = <b id="gLam">650</b> nm</label><input type="range" id="gR" min="400" max="700" value="650"></div></div>
+<div class="out" id="gO"></div>
+<button class="btn gold" onclick="rv('r3')">▶ ماذا تلاحظين؟</button>
+<div class="reveal" id="r3"><span class="ltr">d = 1 / N</span> ثم <span class="ltr">sinθ = mλ / d</span>. كلما زاد عدد الشقوق لكل سنتيمتر صغرت d فزادت الزاوية وتباعدت الخطوط. والأحمر ينحرف أكثر من الأزرق. ولا يظهر الهدب إذا كانت <span class="ltr">mλ/d &gt; 1</span>. ولأن الزاوية كبيرة نحسب <span class="ltr">x = L tanθ</span> دون تقريب.</div></div>
+</section>
+
+<section class="lab" id="spec" data-t="④ المطياف">
+<div class="card"><span class="tag">تجربة 4</span><h2>المطياف: حلّلي ضوء مصباح الهيدروجين</h2>
+<div class="q">مطياف محزوزه 6000 شق لكل cm. أديري تلسكوب المطياف ببطء حتى تري خطًّا ملوّنًا، وسجّلي الزاوية θ، ثم احسبي λ = d sinθ.</div>
+<div class="row"><div class="col"><canvas id="pC" class="dark" width="440" height="440"></canvas></div>
+<div class="col"><label>زاوية التلسكوب θ = <b id="pAV">0.0</b>°</label><input type="range" id="pA" min="0" max="30" step="0.1" value="0">
+<canvas id="pV" class="dark" width="440" height="120" style="margin-top:8px"></canvas>
+<div class="out" id="pO"></div>
+<button class="btn" onclick="pRec()">＋ سجّلي هذا الخط</button>
+<table><thead><tr><th>θ (°)</th><th>λ = d sinθ (nm)</th><th>اللون</th></tr></thead><tbody id="pTb"></tbody></table></div></div>
+<button class="btn gold" onclick="rv('r4')">▶ النتيجة</button>
+<div class="reveal" id="r4"><span class="ltr">d = 1 cm / 6000 = 1.67×10⁻⁶ m</span>. خطوط الهيدروجين المرئية: أحمر 656 nm عند نحو 23.2°، وأزرق مخضر 486 nm عند نحو 16.9°، وبنفسجي 434 nm عند نحو 15.1°. لكل عنصر طيف خطي خاص يُعرف به كالبصمة.</div></div>
+</section>
+
+<section class="lab" id="disc" data-t="⑤ CD و DVD">
+<div class="card"><span class="tag">تجربة 5</span><h2>القرص المدمج محزوز انعكاس (المثال 3)</h2>
+<div class="q">وجّهي ليزرًا إلى قرص CD أو DVD وراقبي البقع المنعكسة على جدار يبعد L. من المسافة x بين البقع احسبي التباعد d بين مسارات القرص.</div>
+<canvas id="dC" class="dark" width="900" height="340"></canvas>
+<div class="row"><div class="col"><div class="chips" id="dDisk"><button onclick="dSetD(1.6)">💿 CD (1.6 µm)</button><button onclick="dSetD(0.741)">📀 DVD (0.741 µm)</button></div>
+<div class="chips" id="dColB"><button onclick="dSetL(650)">🔴 650 nm</button><button onclick="dSetL(532)">🟢 532 nm</button><button onclick="dSetL(450)">🔵 450 nm</button></div></div>
+<div class="col"><label>بعد الجدار L = <b id="dLV">1.25</b> m</label><input type="range" id="dL" min="0.40" max="2.00" step="0.05" value="1.25"></div></div>
+<div class="out" id="dO"></div>
+<button class="btn gold" onclick="rv('r5')">▶ طريقة الحل</button>
+<div class="reveal" id="r5"><span class="ltr">θ = tan⁻¹(x / L)</span> ثم <span class="ltr">d = λ / sinθ</span>. في المثال 3: <span class="ltr">θ = tan⁻¹(1.29/1.25) = 45.9°</span> و <span class="ltr">d = 532 nm / sin 45.9° = 7.41×10⁻⁷ m</span>. مسارات DVD أكثر تقاربًا من CD فتتباعد بقعها أكثر.</div></div>
+</section>
+
+<section class="lab" id="ray" data-t="⑥ معيار ريليه">
+<div class="card"><span class="tag">تجربة 6</span><h2>معيار ريليه: هل يتميّز النجمان؟</h2>
+<div class="q">غيّري قطر فتحة التلسكوب D والطول الموجي، وراقبي صورتي نجمين متقاربين. متى تتميّز الصورتان؟</div>
+<canvas id="rC" class="dark" width="900" height="300"></canvas>
+<div class="row"><div class="col"><label>قطر الفتحة D = <b id="rDV">2.40</b> m</label><input type="range" id="rD" min="0.05" max="2.40" step="0.05" value="2.40">
+<label>λ = <b id="rLV">550</b> nm</label><input type="range" id="rL" min="400" max="700" value="550"></div>
+<div class="col"><label>البعد بين النجمين x_جسم = <b id="rXV">2.0</b> ×10¹⁰ m</label><input type="range" id="rX" min="0.2" max="6" step="0.1" value="4.0">
+<p>بعد النجمين عن الأرض: <span class="ltr">L = 8.44 ly = 7.98×10¹⁶ m</span> (الشِّعرى اليمانية)</p></div></div>
+<div class="out" id="rO"></div>
+<button class="btn gold" onclick="rv('r6')">▶ القاعدة</button>
+<div class="reveal" id="r6">أقل مسافة للتمييز: <span class="ltr">x_جسم = 1.22 λ L / D</span>. إذا كانت المسافة الفعلية أكبر منها تتميّز الصورتان. ولزيادة قوة التمييز نكبّر قطر الفتحة D أو نستخدم طولًا موجيًّا أقصر. لتلسكوب هابل <span class="ltr">D = 2.4 m</span> تكون المسافة نحو <span class="ltr">2.2×10¹⁰ m</span> (المراجعة 21).</div></div>
+</section>
+
+</main>
+<footer>المختبر الافتراضي • فيزياء 3 • الدرس 7-2 الحيود<div style="margin-top:6px;font-size:18px;font-weight:800;color:#C2185B">صُمّم بحب ♥ د. أفنان الطلحي</div></footer>
+<audio id="sClick" src="snd/drop.mp3" preload="auto"></audio><audio id="sOk" src="snd/applause.mp3" preload="auto"></audio><audio id="sNo" src="snd/knock.mp3" preload="auto"></audio>
+<script>
+const $=i=>document.getElementById(i);
+const snd=n=>{try{const a=$(n).cloneNode();a.volume=.6;a.play().catch(()=>{})}catch(e){}};
+function rv(id){const e=$(id);e.style.display=e.style.display==='block'?'none':'block';snd('sClick')}
+const labs=[...document.querySelectorAll('.lab')];
+$('nav').innerHTML=labs.map((l,i)=>`<button onclick="go(${i})">${l.dataset.t}</button>`).join('');
+function go(i){labs.forEach((l,j)=>l.classList.toggle('on',i===j));[...$('nav').children].forEach((b,j)=>b.classList.toggle('on',i===j));snd('sClick');try{history.replaceState(null,'','#'+labs[i].id)}catch(e){}}
+function wl(l){let r=0,g=0,b=0;if(l>=380&&l<440){r=-(l-440)/60;b=1}else if(l<490){g=(l-440)/50;b=1}else if(l<510){g=1;b=-(l-510)/20}else if(l<580){r=(l-510)/70;g=1}else if(l<645){r=1;g=-(l-645)/65}else if(l<=780){r=1}
+let f=l<420?.3+.7*(l-380)/40:l>700?.3+.7*(780-l)/80:1;return[r*f,g*f,b*f]}
+const css=(c,a=1)=>`rgba(${Math.round(c[0]*255)},${Math.round(c[1]*255)},${Math.round(c[2]*255)},${a})`;
+const sinc2=b=>b===0?1:Math.pow(Math.sin(b)/b,2);
+const colName=l=>l<450?'بنفسجي':l<495?'أزرق':l<570?'أخضر':l<590?'أصفر':l<620?'برتقالي':'أحمر';
+function strip(cv,fn,mmPerPx){const g=cv.getContext('2d'),W=cv.width,H=cv.height;const im=g.createImageData(W,H);
+for(let x=0;x<W;x++){const c=fn((x-W/2)*mmPerPx);for(let y=0;y<H;y++){const o=(y*W+x)*4;im.data[o]=Math.min(255,c[0]*255);im.data[o+1]=Math.min(255,c[1]*255);im.data[o+2]=Math.min(255,c[2]*255);im.data[o+3]=255}}g.putImageData(im,0,0)}
+
+// 1 single slit
+let sLam=650;function sSet(l){sLam=l;$('sL').value=l;snd('sClick');sDraw()}
+['sL','sW','sD'].forEach(i=>$(i).oninput=()=>{if(i==='sL')sLam=+$('sL').value;sDraw()});
+let sT=0;
+function sDraw(){const w=+$('sW').value,L=+$('sD').value,lam=sLam,col=wl(lam);$('sLV').textContent=lam;$('sWV').textContent=w.toFixed(3);$('sDV').textContent=L.toFixed(2);
+const x2=2*lam*1e-9*L/(w*1e-3)*1e3;
+const S=$('sS');const mm=40/S.width;strip(S,x=>{const th=x*1e-3/L,k=Math.pow(sinc2(Math.PI*w*1e-3*th/(lam*1e-9)),.5);return col.map(v=>v*k)},mm);
+const g=S.getContext('2d');const half=x2/2/mm;g.strokeStyle='#F2C14E';g.lineWidth=2;g.beginPath();g.moveTo(S.width/2-half,130);g.lineTo(S.width/2+half,130);g.stroke();
+g.fillStyle='#F2C14E';g.font='700 18px Almarai';g.textAlign='center';g.fillText('2x₁',S.width/2,120);
+$('sO').innerHTML=`<span class="ltr">2x₁ = 2λL / w = 2(${(lam*1e-9).toExponential(2)})(${L.toFixed(2)}) / (${(w*1e-3).toExponential(2)}) = ${x2.toFixed(1)} mm</span>`}
+function sAnim(){const C=$('sC');if(!C||!labs[0].classList.contains('on')){requestAnimationFrame(sAnim);return}const g=C.getContext('2d'),W=C.width,H=C.height,w=+$('sW').value,col=wl(sLam);sT+=.016;
+g.fillStyle='#0d0b1e';g.fillRect(0,0,W,H);const cy=H/2,bx=330,gap=10+w*120;
+g.fillStyle='#455A64';g.fillRect(40,cy-25,80,50);g.fillStyle=css(col);g.fillRect(120,cy-3,210,6);
+for(let x=130+(sT*60)%22;x<bx;x+=22){g.strokeStyle=css(col,.8);g.lineWidth=2;g.beginPath();g.moveTo(x,cy-gap/2);g.lineTo(x,cy+gap/2);g.stroke()}
+g.fillStyle='#BCAAA4';g.fillRect(bx,20,10,cy-gap/2-20);g.fillRect(bx,cy+gap/2,10,H-20-(cy+gap/2));
+const spread=Math.min(1.3,(sLam*1e-9)/(w*1e-3)*90);
+for(let k=0;k<14;k++){const r=((sT*60)+k*26)%400+8;g.strokeStyle=css(col,Math.max(0,.9-r/450));g.beginPath();g.arc(bx+10,cy,r,-Math.min(spread,1.2)-.05,Math.min(spread,1.2)+.05);g.stroke()}
+g.fillStyle='#ECEFF1';g.fillRect(840,20,16,H-40);g.fillStyle='#fff';g.font='700 16px Almarai';g.textAlign='center';g.fillText('الشاشة',848,16);g.fillText('شق w',bx+5,H-4);
+requestAnimationFrame(sAnim)}
+
+// 2 unknown laser
+const ML=[650,532,445];let mi=0,rows=[];
+function setM(i){mi=i;[...$('mCh').children].forEach((b,j)=>b.classList.toggle('on',i===j));$('mO').textContent='';mDraw()}
+$('xR').oninput=mDraw;
+function mDraw(){const lam=ML[mi],C=$('mC'),mm=40/C.width;strip(C,x=>{const th=x*1e-3/1,k=Math.pow(sinc2(Math.PI*.1e-3*th/(lam*1e-9)),.5);return[k,k*.25,k*.25]},mm);
+const g=C.getContext('2d'),W=C.width,v=+$('xR').value;$('xV').textContent=v.toFixed(1);
+g.fillStyle='rgba(255,255,255,.85)';g.fillRect(0,165,W,45);g.fillStyle='#222';g.font='12px Almarai';g.textAlign='center';
+for(let m=-20;m<=20;m++){const x=W/2+m/mm;g.fillRect(x,165,1,m%5?8:16);if(m%5===0)g.fillText(m,x,200)}
+g.fillStyle='#F2C14E';[-1,1].forEach(s=>{const x=W/2+s*v/2/mm;g.fillRect(x-2,0,4,165)})}
+function chkM(){const lam=ML[mi],v=+$('mIn').value;const ok=Math.abs(v-lam)/lam<.05;$('mO').innerHTML=ok?'🎉 أحسنتِ! قيمة صحيحة ('+colName(lam)+')':'💡 راجعي: λ = (2x₁) w / 2L ، وقيسي 2x₁ بين المعتمين الأولين';snd(ok?'sOk':'sNo')}
+function addRow(){const v=+$('xR').value,lam=v*1e-3*1e-4/2*1e9;rows.push(`<tr><td>${'ABC'[mi]}</td><td>${v.toFixed(1)}</td><td>${lam.toFixed(0)}</td><td>${colName(lam)}</td></tr>`);$('mTb').innerHTML=rows.join('');snd('sClick')}
+
+// 3 grating
+let gLam=650;function gSet(l){gLam=l;if(l)$('gR').value=l;snd('sClick');gDraw()}
+['gN','gL','gR'].forEach(i=>$(i).oninput=()=>{if(i==='gR')gLam=+$('gR').value;gDraw()});
+function gDraw(){const N=+$('gN').value,L=+$('gL').value,d=1e-2/N,C=$('gC'),g=C.getContext('2d'),W=C.width,H=C.height;$('gNV').textContent=N;$('gLV').textContent=L.toFixed(2);$('gLam').textContent=gLam||'أبيض';
+g.fillStyle='#0d0b1e';g.fillRect(0,0,W,H);const gx=150,cy=H/2,sx=gx+L/1.5*660;
+g.fillStyle='#fff';g.fillRect(20,cy-2,gx-20,4);for(let y=40;y<H-40;y+=8){g.fillStyle='#B39DDB';g.fillRect(gx-3,y,6,5)}
+g.fillStyle='#ECEFF1';g.fillRect(Math.min(sx,W-20),10,12,H-20);const scale=(H/2-20)/0.9;let txt=[];
+const lams=gLam?[gLam]:[400,425,450,475,500,525,550,575,600,625,650,675,700];
+lams.forEach(l=>{const c=wl(l);for(let m=-2;m<=2;m++){const s=m*l*1e-9/d;if(Math.abs(s)>=1)continue;const th=Math.asin(s),x=L*Math.tan(th),y=cy-x*scale/ (L>0?1:1)*(0.9/Math.max(.9,L))*1;
+const ex=Math.min(sx,W-20),ey=cy-Math.tan(th)*(ex-gx);if(Math.abs(ey-cy)>H/2)continue;g.strokeStyle=m===0?'rgba(255,255,255,.9)':css(c,.8);g.lineWidth=gLam?2.5:1.2;g.beginPath();g.moveTo(gx,cy);g.lineTo(ex,ey);g.stroke();
+g.fillStyle=m===0?'#fff':css(c);g.beginPath();g.arc(ex+6,ey,gLam?6:3,0,7);g.fill();if(gLam&&m>0)txt.push(`m=${m}: θ = ${(th*180/Math.PI).toFixed(1)}° ، x = ${x.toFixed(3)} m`)}});
+if(gLam&&2*gLam*1e-9/d>=1)txt.push('m=2: لا يظهر لأن 2λ/d > 1');
+$('gO').innerHTML=`<span class="ltr">d = 1/${N} cm = ${d.toExponential(2)} m</span><br>`+txt.map(t=>`<span class="ltr">${t}</span>`).join('<br>')}
+
+// 4 spectrometer
+const HL=[656,486,434,410],pd=1e-2/6000;let prow=[];
+$('pA').oninput=pDraw;
+function pDraw(){const a=+$('pA').value,C=$('pC'),g=C.getContext('2d'),W=C.width,c=W/2;$('pAV').textContent=a.toFixed(1);
+g.fillStyle='#0d0b1e';g.fillRect(0,0,W,W);g.fillStyle='#F2E08A';g.beginPath();g.arc(c,c,170,0,7);g.fill();g.strokeStyle='#8a7a30';for(let k=0;k<360;k+=5){const r=k%30?160:150,t=k*Math.PI/180;g.beginPath();g.moveTo(c+170*Math.cos(t),c+170*Math.sin(t));g.lineTo(c+r*Math.cos(t),c+r*Math.sin(t));g.stroke()}
+g.fillStyle='#555';g.fillRect(20,c-10,c-30,20);g.fillStyle='#B39DDB';g.fillRect(c-4,c-50,8,100);
+const t=-a*Math.PI/180;g.save();g.translate(c,c);g.rotate(t);g.fillStyle='#37474F';g.fillRect(40,-14,170,28);g.fillStyle='#F2C14E';g.fillRect(205,-18,12,36);g.restore();
+g.fillStyle='#fff';g.font='700 18px Almarai';g.textAlign='center';g.fillText('θ = '+a.toFixed(1)+'°',c,W-20);
+const V=$('pV'),h=V.getContext('2d');h.fillStyle='#000';h.fillRect(0,0,V.width,V.height);let seen=null;
+[0,...HL].forEach(l=>{const th=l?Math.asin(l*1e-9/pd)*180/Math.PI:0;const dx=(th-a)*60;if(Math.abs(dx)<V.width/2){h.fillStyle=l?css(wl(l)):'#fff';h.fillRect(V.width/2+dx-3,0,6,V.height);if(Math.abs(th-a)<.25)seen=l}});
+h.strokeStyle='rgba(255,255,255,.5)';h.beginPath();h.moveTo(V.width/2,0);h.lineTo(V.width/2,V.height);h.stroke();
+$('pO').innerHTML=seen===null?'لا يوجد خط في مركز المنظار':seen===0?'الهدب المركزي (ضوء أبيض)':`خط ${colName(seen)} في المركز: <span class="ltr">λ = d sinθ = ${(pd*Math.sin(a*Math.PI/180)*1e9).toFixed(0)} nm</span>`;window._seen=seen}
+function pRec(){const a=+$('pA').value,l=pd*Math.sin(a*Math.PI/180)*1e9;prow.push(`<tr><td>${a.toFixed(1)}</td><td>${l.toFixed(0)}</td><td>${window._seen?colName(window._seen):'—'}</td></tr>`);$('pTb').innerHTML=prow.join('');snd(window._seen?'sOk':'sClick')}
+
+// 5 CD/DVD
+let dd=0.741,dl=532;function dSetD(v){dd=v;snd('sClick');dDraw()}function dSetL(v){dl=v;snd('sClick');dDraw()}$('dL').oninput=dDraw;
+function dDraw(){const L=+$('dL').value,C=$('dC'),g=C.getContext('2d'),W=C.width,H=C.height;$('dLV').textContent=L.toFixed(2);
+g.fillStyle='#0d0b1e';g.fillRect(0,0,W,H);const s=dl*1e-3/dd;const wx=60,cx=wx+L/2*700,cy=H/2,col=wl(dl);
+g.fillStyle='#ECEFF1';g.fillRect(wx-14,10,14,H-20);g.fillStyle='#fff';g.font='700 16px Almarai';g.textAlign='center';g.fillText('الجدار',wx-7,H-2);
+const grd=g.createRadialGradient(cx,cy,5,cx,cy,40);grd.addColorStop(0,'#eee');grd.addColorStop(.5,'#c9b8ff');grd.addColorStop(1,'#88f');g.fillStyle=grd;g.beginPath();g.ellipse(cx+10,cy,12,48,0,0,7);g.fill();
+let txt='';if(s>=1){txt='لا تتكوّن رتبة أولى: λ/d > 1'}else{const th=Math.asin(s),x=L*Math.tan(th);[-1,0,1].forEach(m=>{const y=cy-m*x/L*(cx-wx);g.strokeStyle=css(col,.85);g.lineWidth=2;g.beginPath();g.moveTo(cx,cy);g.lineTo(wx,y);g.stroke();g.fillStyle=css(col);g.beginPath();g.arc(wx-7,y,8,0,7);g.fill()});
+txt=`θ = ${(th*180/Math.PI).toFixed(1)}° ، x = L tanθ = ${x.toFixed(2)} m  ←  d = λ / sinθ = ${(dl*1e-9/Math.sin(th)).toExponential(2)} m`}
+g.strokeStyle=css(col);g.lineWidth=3;g.beginPath();g.moveTo(W-20,40);g.lineTo(cx+12,cy);g.stroke();g.fillStyle='#455A64';g.fillRect(W-60,20,50,30);
+$('dO').innerHTML=`<span class="ltr">${txt}</span>`}
+
+// 6 Rayleigh
+['rD','rL','rX'].forEach(i=>$(i).oninput=rDraw);
+function rDraw(){const D=+$('rD').value,lam=+$('rL').value,X=+$('rX').value*1e10,L=7.98e16,C=$('rC'),g=C.getContext('2d'),W=C.width,H=C.height;$('rDV').textContent=D.toFixed(2);$('rLV').textContent=lam;$('rXV').textContent=(+$('rX').value).toFixed(1);
+const xmin=1.22*lam*1e-9*L/D;const R0=55;const sep=R0*X/xmin;const im=g.createImageData(W,H);const A=r=>{const x=r*Math.PI/R0;return x<1e-6?1:Math.pow(Math.sin(x)/x,2)};
+for(let y=0;y<H;y++)for(let x=0;x<W;x++){const k=Math.min(1,Math.pow(A(Math.hypot(x-W/2+sep/2,y-H/2))+A(Math.hypot(x-W/2-sep/2,y-H/2)),.6));const o=(y*W+x)*4;const c=wl(lam);im.data[o]=255*k*(.4+.6*c[0]);im.data[o+1]=255*k*(.4+.6*c[1]);im.data[o+2]=255*k*(.4+.6*c[2]);im.data[o+3]=255}
+g.putImageData(im,0,0);const st=X>xmin*1.08?'✔ متميّزان':X>=xmin*.92?'⚖ عند حد التمييز':'✖ غير متميّزين';
+$('rO').innerHTML=`أقل مسافة للتمييز: <span class="ltr">x = 1.22λL/D = ${xmin.toExponential(2)} m</span> — ${st}`}
+
+{const h=location.hash.slice(1);const k=labs.findIndex(l=>l.id===h);go(k<0?0:k)}
+setM(0);sDraw();sAnim();gDraw();pDraw();dDraw();rDraw();
+</script>
+</body></html>

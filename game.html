@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>لعبة: مغامرة الطيف الخفي | الحيود</title>
+<link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#2B2A6B;--vio:#6A3FB5;--hot:#C2185B;--gold:#A8741A;--teal:#1F7A80;--ok:#2E8B57;--no:#C0392B}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;font-family:Almarai,sans-serif;color:#fff;background:#120f2e url(img/grating.jpg) center/cover fixed}
+body::before{content:"";position:fixed;inset:0;background:linear-gradient(180deg,rgba(18,15,46,.55),rgba(18,15,46,.9));z-index:0}
+.scr{position:relative;z-index:1;display:none;min-height:100vh;padding:16px;max-width:760px;margin:auto;flex-direction:column;justify-content:center}
+.scr.on{display:flex;animation:fi .4s}@keyframes fi{from{opacity:0;transform:translateY(12px)}}
+.glass{background:rgba(30,26,80,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.18);border-radius:22px;padding:18px}
+h1{font-size:clamp(28px,7vw,46px);margin:6px 0;text-align:center;text-shadow:0 3px 16px rgba(194,24,91,.6)}
+.sub{text-align:center;opacity:.92;line-height:1.8}
+.logo{display:block;margin:0 auto 6px;height:62px;background:#fff;border-radius:12px;padding:4px}
+input.nm{width:100%;font:inherit;font-size:20px;padding:12px;border-radius:14px;border:2px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;text-align:center;margin:12px 0}
+.btn{display:block;width:100%;font:inherit;font-weight:800;font-size:20px;border:0;border-radius:16px;padding:14px;color:#fff;cursor:pointer;margin-top:10px;background:linear-gradient(135deg,#C2185B,#F2B01E);box-shadow:0 6px 20px rgba(194,24,91,.45)}
+.btn.s{background:linear-gradient(135deg,#1F7A80,#6A3FB5);box-shadow:none}
+.lv{display:grid;gap:12px;margin-top:12px}
+.lvb{display:flex;align-items:center;gap:12px;font:inherit;color:#fff;text-align:right;border:2px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);border-radius:18px;padding:12px;cursor:pointer}
+.lvb .ic{font-size:38px}.lvb b{font-size:19px;display:block}.lvb small{opacity:.85}.lvb .st{margin-right:auto;font-size:20px;letter-spacing:2px}
+.lvb.lock{opacity:.45;pointer-events:none}
+#hud{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:800;font-size:17px;margin-bottom:10px}
+#bar{height:10px;border-radius:9px;background:rgba(255,255,255,.18);overflow:hidden;margin-bottom:12px}#bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#F2B01E,#C2185B);transition:width .25s linear}
+#qt{font-size:clamp(19px,4.6vw,24px);line-height:1.8;font-weight:800;margin:6px 0 12px}
+.ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
+.op{display:block;width:100%;font:inherit;font-weight:700;font-size:18px;text-align:right;color:#fff;border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);border-radius:14px;padding:13px;margin:8px 0;cursor:pointer;transition:.15s}
+.op:active{transform:scale(.98)}.op.ok{background:var(--ok);border-color:#fff}.op.no{background:var(--no);border-color:#fff;animation:sh .35s}
+@keyframes sh{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.num{display:flex;gap:8px}.num input{flex:1;font:inherit;font-size:22px;padding:12px;border-radius:14px;border:2px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;text-align:center}
+#fb{display:none;margin-top:10px;padding:12px;border-radius:14px;line-height:1.8;background:rgba(46,139,87,.3);border-right:5px solid #7CFFB2}
+#fb.bad{background:rgba(192,57,43,.3);border-color:#FF9A8A}
+.pill{background:rgba(255,255,255,.14);padding:5px 12px;border-radius:999px}
+#toast{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%) scale(.7);font-size:44px;font-weight:800;opacity:0;transition:.35s;z-index:9;pointer-events:none;text-shadow:0 3px 16px rgba(0,0,0,.6)}
+#toast.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.cert{background:#fff;color:var(--navy);border-radius:22px;padding:20px;text-align:center;border:6px double #A8741A}
+.cert h2{margin:4px 0;color:var(--hot);font-size:28px}.cert .big{font-size:clamp(20px,6vw,34px);letter-spacing:2px}.cert{width:100%}
+.foot{position:relative;z-index:1;text-align:center;font-weight:800;color:#FFB3CF;padding:10px}
+canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:8}
+</style></head><body>
+<canvas id="fx"></canvas>
+<div id="toast"></div>
+
+<section class="scr on" id="s0"><div class="glass">
+<img class="logo" src="img/moe.png" alt="وزارة التعليم">
+<h1>🌈 مغامرة الطيف الخفي</h1>
+<p class="sub">لعبة درس الحيود • فيزياء 3 • الدرس 7-2<br>اجتازي ثلاث بوابات، واجمعي النجوم، وافتحي سرّ الطيف!</p>
+<input class="nm" id="nm" placeholder="اكتبي اسمك هنا ✎" maxlength="30">
+<button class="btn" onclick="toMap()">ابدئي المغامرة ▶</button>
+<p class="sub" style="font-size:14px;margin-top:10px">لكل سؤال 30 ثانية • ثلاثة قلوب ❤ في كل بوابة • نقاط إضافية للسرعة والإجابات المتتالية</p>
+</div></section>
+
+<section class="scr" id="s1"><div class="glass">
+<h1 style="font-size:28px">🗺 خريطة البوابات</h1><p class="sub" id="hi"></p>
+<div class="lv" id="lv"></div>
+<button class="btn s" onclick="finish()">🏆 شهادتي</button>
+</div></section>
+
+<section class="scr" id="s2"><div class="glass">
+<div id="hud"><span class="pill" id="hL"></span><span class="pill" id="hH"></span><span class="pill" id="hS"></span></div>
+<div id="bar"><i id="bi"></i></div>
+<div style="opacity:.8;font-size:15px" id="qn"></div>
+<div id="qt"></div><div id="qa"></div><div id="fb"></div>
+<button class="btn" id="nx" style="display:none" onclick="next()">التالي ◀</button>
+</div></section>
+
+<section class="scr" id="s3"><div class="cert" id="cert"></div>
+<button class="btn" onclick="toMap()">🗺 العودة للخريطة</button>
+<button class="btn s" onclick="resetAll()">↻ العب من جديد</button></section>
+
+<div class="foot">صُمّم بحب ♥ د. أفنان الطلحي</div>
+
+<audio id="aOk" src="snd/applause.mp3" preload="auto"></audio><audio id="aNo" src="snd/knock.mp3" preload="auto"></audio>
+<audio id="aCl" src="snd/drop.mp3" preload="auto"></audio><audio id="aTk" src="snd/tick.mp3" preload="auto"></audio><audio id="aWh" src="snd/whoosh.mp3" preload="auto"></audio><audio id="aBl" src="snd/bell.mp3" preload="auto"></audio>
+<script>
+const $=i=>document.getElementById(i);
+const play=(id,v=.7)=>{try{const a=$(id).cloneNode();a.volume=v;a.play().catch(()=>{})}catch(e){}};
+const E=t=>`<span class="ltr">${t}</span>`;
+const LV=[
+{ic:'〰',t:'بوابة الشق المفرد',d:'الحيود وعرض الهدب المركزي',Q:[
+{q:'الحيود هو:',o:['انعكاس الضوء عن المرآة','انتشار الضوء وانحناؤه عند مروره خلال شق ضيق أو حول حافة','امتصاص الضوء في الوسط'],a:1,e:'الحيود انتشار الضوء بعيدًا عن مساره المستقيم عند الفتحات الضيقة والحواف.'},
+{q:'يتّضح الحيود عندما يكون عرض الشق:',o:['أكبر من الطول الموجي بملايين المرات','قريبًا من الطول الموجي (10 إلى 100 ضعف)','صفرًا'],a:1,e:'عندما تكون الفتحة أكبر كثيرًا من λ يتكوّن ظل حاد ولا يظهر الحيود بوضوح.'},
+{q:'الهدب المركزي في نمط حيود الشق المفرد هو أضيق الأهداب.',tf:1,a:1,e:'خطأ؛ الهدب المركزي أعرض الأهداب وأسطعها.'},
+{q:`ضوء ${E('λ = 600 nm')} على شق ${E('w = 0.12 mm')} والشاشة على بعد ${E('L = 1.0 m')}. عرض الهدب المركزي 2x₁ بالملّيمتر =`,n:10,tol:.04,e:E('2x₁ = 2λL/w = 2(6.0×10⁻⁷)(1.0)/(1.2×10⁻⁴) = 1.0×10⁻² m = 10 mm')},
+{q:'إذا ضُيّق الشق إلى نصف عرضه، فإن عرض الهدب المركزي:',o:['يقل إلى النصف','يتضاعف','لا يتغير'],a:1,e:'2x₁ يتناسب عكسيًّا مع w.'},
+{q:'يتكوّن الهدب المعتم الأول عندما يكون فرق المسار بين مويجة طرف الشق ومويجة منتصفه:',o:['λ','λ/2','2λ'],a:1,e:'فرق مسار λ/2 يعني تداخلًا هدّامًا.'}]},
+{ic:'💿',t:'بوابة المحزوز',d:'محزوز الحيود والمطياف والقرص المدمج',Q:[
+{q:'محزوز الحيود أداة مكوّنة من:',o:['شق واحد عريض','عدد كبير من الشقوق المتقاربة جدًّا','عدسة محدّبة'],a:1,e:'قد يحتوي المحزوز 10,000 شق لكل سنتيمتر.'},
+{q:`محزوز فيه 5000 شق لكل cm. المسافة d بين الشقوق بالميكرومتر (µm) =`,n:2,tol:.03,e:E('d = 1 cm / 5000 = 2.0×10⁻⁴ cm = 2.0×10⁻⁶ m = 2.0 µm')},
+{q:`محزوز ${E('d = 2.0×10⁻⁶ m')} وضوء ${E('λ = 500 nm')}. زاوية الهدب الأول θ بالدرجات ≈`,n:14.5,tol:.04,e:E('sinθ = λ/d = 0.25 ← θ = 14.5°')},
+{q:'أي الألوان ينحرف بزاوية أكبر في محزوز الحيود؟',o:['البنفسجي','الأخضر','الأحمر'],a:2,e:'الأحمر طوله الموجي أكبر فتكون sinθ = λ/d أكبر.'},
+{q:'ألوان قوس المطر على القرص المدمج سببها أصباغ ملوّنة على سطحه.',tf:1,a:1,e:'خطأ؛ القرص يعمل عمل محزوز حيود انعكاس.'},
+{q:'في المطياف نحسب الطول الموجي من العلاقة:',o:[E('λ = xd/L'),E('λ = d sinθ'),E('λ = 2x₁L/w')],a:1,e:'نقيس الزاوية θ ثم نحسب λ = d sinθ.'}]},
+{ic:'🔭',t:'بوابة ريليه',d:'قوة التمييز ومعيار ريليه',Q:[
+{q:'يحدّ الحيود من قدرة التلسكوب على:',o:['تكبير الأجسام','التمييز بين جسمين متقاربين جدًّا','جمع الضوء الأحمر فقط'],a:1,e:'صورة كل نجم تنتشر بقعة وحلقات فتتداخل الصورتان.'},
+{q:'وفق معيار ريليه، لزيادة قوة تمييز التلسكوب:',o:['نصغّر قطر الفتحة','نكبّر قطر الفتحة','نستخدم طولًا موجيًّا أطول'],a:1,e:E('x = 1.22λL/D')+' : كلما زاد D صغرت المسافة اللازمة للتمييز.'},
+{q:`معادلة معيار ريليه هي:`,o:[E('x = 1.22λL/D'),E('λ = d sinθ'),E('2x₁ = 2λL/w')],a:0,e:'المسافة بين الجسمين عند حد التمييز.'},
+{q:'صور تلسكوب هابل أدق من التلسكوبات الأرضية الكبيرة لأنه فوق الغلاف الجوي.',tf:1,a:0,e:'صح؛ الغلاف الجوي يسبب تلألؤ النجوم ويمنع الوصول إلى حد الحيود.'},
+{q:'قطر بؤبؤ العين في الضوء الساطع تقريبًا:',o:['3 mm','3 cm','0.3 µm'],a:0,e:'نحو 3 mm، لذلك يحدّ الحيود قدرة العين على التمييز.'},
+{q:'إذا سقط مركز صورة نجم على الحلقة المعتمة الأولى لصورة نجم آخر، فالصورتان:',o:['غير مرئيتين','عند حد التمييز','متطابقتان تمامًا'],a:1,e:'هذا نص معيار ريليه.'}]}];
+let S=JSON.parse(localStorage.getItem('difGame')||'null')||{name:'',best:[0,0,0],stars:[0,0,0]};
+const save=()=>{try{localStorage.setItem('difGame',JSON.stringify(S))}catch(e){}};
+function show(i){document.querySelectorAll('.scr').forEach((s,j)=>s.classList.toggle('on',s.id==='s'+i));scrollTo(0,0)}
+if(S.name)$('nm').value=S.name;
+function toMap(){const n=$('nm').value.trim();if(n)S.name=n;save();play('aWh',.5);
+$('hi').textContent=(S.name?'مرحبًا يا '+S.name+' 🌟 ':'')+'اختاري بوابة:';
+$('lv').innerHTML=LV.map((l,i)=>{const lock=i>0&&S.stars[i-1]===0;return `<button class="lvb${lock?' lock':''}" onclick="startLv(${i})"><span class="ic">${lock?'🔒':l.ic}</span><span><b>${i+1}. ${l.t}</b><small>${l.d}</small></span><span class="st">${'⭐'.repeat(S.stars[i])}${'☆'.repeat(3-S.stars[i])}</span></button>`}).join('');show(1)}
+let L,qi,score,hearts,streak,timer,tl,locked,order;
+function startLv(i){L=i;qi=0;score=0;hearts=3;streak=0;order=LV[i].Q.map((_,k)=>k).sort(()=>Math.random()-.5);play('aBl',.6);show(2);ask()}
+function hud(){$('hL').textContent=LV[L].ic+' '+LV[L].t;$('hH').textContent='❤'.repeat(hearts)+'🖤'.repeat(3-hearts);$('hS').textContent='⭐ '+score}
+function ask(){const q=LV[L].Q[order[qi]];locked=false;hud();$('qn').textContent='السؤال '+(qi+1)+' من '+LV[L].Q.length;$('qt').innerHTML=q.q;$('fb').style.display='none';$('nx').style.display='none';
+if(q.n!==undefined){$('qa').innerHTML=`<div class="num"><input id="ni" type="number" inputmode="decimal" step="any" placeholder="الإجابة"><button class="btn" style="width:auto;margin:0" onclick="chkN()">✔</button></div>`}
+else{const opts=q.tf?['✓ صح','✗ خطأ']:q.o;$('qa').innerHTML=opts.map((o,k)=>`<button class="op" onclick="chk(${k},this)">${q.tf?'':'أبج'[k]+') '}${o}</button>`).join('')}
+tl=30;$('bi').style.width='100%';clearInterval(timer);timer=setInterval(()=>{tl--;$('bi').style.width=(tl/30*100)+'%';if(tl<=5&&tl>0)play('aTk',.4);if(tl<=0){clearInterval(timer);res(false,null,'⏰ انتهى الوقت!')}},1000)}
+function chk(k,b){if(locked)return;const q=LV[L].Q[order[qi]];const ok=k===q.a;b.classList.add(ok?'ok':'no');if(!ok)$('qa').children[q.a].classList.add('ok');res(ok)}
+function chkN(){if(locked)return;const q=LV[L].Q[order[qi]],v=parseFloat($('ni').value);if(isNaN(v))return;res(Math.abs(v-q.n)<=Math.abs(q.n)*q.tol)}
+function res(ok,_,msg){locked=true;clearInterval(timer);const q=LV[L].Q[order[qi]];
+if(ok){streak++;const pts=10+Math.max(0,tl)+(streak>=3?10:0);score+=pts;toast('+'+pts+(streak>=3?' 🔥':''));play('aOk',.6);burst()}else{streak=0;hearts--;play('aNo',.7)}
+hud();$('fb').className=ok?'':'bad';$('fb').innerHTML=(msg?msg+'<br>':'')+(ok?'🎉 أحسنتِ! ':'💡 ')+q.e;$('fb').style.display='block';$('nx').style.display='block';
+$('nx').textContent=(hearts<=0||qi+1>=LV[L].Q.length)?'النتيجة 🏁':'التالي ◀'}
+function next(){play('aCl',.5);if(hearts<=0||qi+1>=LV[L].Q.length){endLv();return}qi++;ask()}
+function endLv(){const max=LV[L].Q.length*40;const st=hearts<=0?0:score>=max*.6?3:score>=max*.4?2:1;S.stars[L]=Math.max(S.stars[L],st);S.best[L]=Math.max(S.best[L],score);save();
+if(st>=2){play('aOk',.8);for(let i=0;i<4;i++)setTimeout(burst,i*250)}
+toast(st?'⭐'.repeat(st):'حاولي مجددًا 💪');setTimeout(toMap,1300)}
+function finish(){const tot=S.best.reduce((a,b)=>a+b,0),st=S.stars.reduce((a,b)=>a+b,0);
+$('cert').innerHTML=`<img src="img/moe.png" style="height:56px"><h2>شهادة إنجاز 🏆</h2><p>تشهد مغامرة الطيف الخفي أن البطلة</p><div style="font-size:30px;font-weight:800;color:#6A3FB5;margin:6px 0">${S.name||'............'}</div>
+<p>اجتازت بوابات درس الحيود (فيزياء 3 • الدرس 7-2)</p><div class="big">${'⭐'.repeat(st)}${'☆'.repeat(9-st)}</div><p style="font-size:22px;font-weight:800">مجموع النقاط: ${tot}</p>
+<p style="color:#C2185B;font-weight:800">${st>=8?'عالمة الحيود الأولى! 🌟':st>=5?'رائعة! واصلي التألق ✨':'بداية جميلة، أعيدي البوابات لجمع نجوم أكثر 💪'}</p><p style="font-size:14px">صُمّم بحب ♥ د. أفنان الطلحي</p>`;show(3);if(st>=5){play('aOk',.8);for(let i=0;i<6;i++)setTimeout(burst,i*200)}}
+function resetAll(){S={name:S.name,best:[0,0,0],stars:[0,0,0]};save();toMap()}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),900)}
+// rainbow confetti
+const fx=$('fx'),g=fx.getContext('2d');let P=[];function rs(){fx.width=innerWidth;fx.height=innerHeight}rs();addEventListener('resize',rs);
+function burst(){for(let i=0;i<70;i++)P.push({x:innerWidth/2,y:innerHeight*.4,vx:(Math.random()-.5)*12,vy:-Math.random()*12-3,h:Math.random()*300,l:60})}
+(function loop(){g.clearRect(0,0,fx.width,fx.height);P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.35;p.l--;g.fillStyle=`hsl(${p.h},95%,60%)`;g.fillRect(p.x,p.y,7,11)});P=P.filter(p=>p.l>0);requestAnimationFrame(loop)})();
+</script>
+</body></html>
