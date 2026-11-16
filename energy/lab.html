@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>المختبر الافتراضي | الطاقة</title>
+<link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#2B2A6B;--gold:#A8741A;--teal:#1F7A80;--cream:#F3ECFB;--hot:#C2185B;--vio:#6A3FB5}
+*{box-sizing:border-box}
+body{margin:0;font-family:Almarai,sans-serif;color:var(--navy);min-height:100vh;background:#223 url(img/bg-lab.jpg) right center/cover fixed no-repeat}
+header{position:relative;min-height:150px;display:flex;align-items:flex-end}
+header::before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(43,42,107,.88),rgba(43,42,107,.15))}
+.hin{position:relative;padding:18px 20px;color:#fff;width:100%;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.hin h1{margin:0;font-size:clamp(22px,4vw,34px)}.hin p{margin:6px 0 0;opacity:.92}
+.logos img{height:58px;background:#fff;border-radius:10px;padding:4px}
+nav{display:flex;gap:8px;overflow-x:auto;padding:12px;background:rgba(255,255,255,.72);backdrop-filter:blur(6px);position:sticky;top:0;z-index:5;border-radius:14px;margin-top:8px}
+nav button{flex:0 0 auto;border:2px solid var(--navy);background:#fff;color:var(--navy);font:inherit;font-weight:700;padding:9px 14px;border-radius:999px;cursor:pointer}
+nav button.on{background:var(--navy);color:#fff}
+main{max-width:1100px;margin:auto;padding:16px}
+@media(min-width:1000px){.wrapL{width:62vw;max-width:1000px;margin-left:2vw!important;margin-right:auto!important}}
+.lab{display:none}.lab.on{display:block;animation:fi .4s}@keyframes fi{from{opacity:0;transform:translateY(8px)}}
+.card{background:rgba(255,255,255,.78);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:16px;box-shadow:0 4px 14px rgba(43,42,107,.1);margin-bottom:14px}
+h2{margin:0 0 6px;font-size:24px}
+.q{background:rgba(243,236,251,.9);border-right:5px solid var(--vio);padding:10px 12px;border-radius:10px;margin:8px 0;line-height:1.8}
+.row{display:flex;gap:14px;flex-wrap:wrap}.col{flex:1 1 300px}
+canvas{direction:ltr;width:100%;background:rgba(250,250,255,.9);border-radius:12px;border:1px solid #d7d2ea;display:block}
+canvas.dark{background:#0d0b1e}
+label{display:block;font-weight:700;margin:10px 0 4px}
+input[type=range]{width:100%;accent-color:var(--vio)}
+select,input[type=number]{font:inherit;padding:6px;border-radius:8px;border:1px solid #a9a3c8;width:100%}
+.btn{border:0;background:var(--teal);color:#fff;font:inherit;font-weight:700;padding:10px 16px;border-radius:10px;cursor:pointer;margin:6px 0 0 6px}
+.btn.gold{background:var(--gold)}.btn.hot{background:var(--hot)}.btn.vio{background:var(--vio)}
+.out{font-size:18px;font-weight:800;color:var(--teal);margin-top:8px;line-height:1.8}
+table{border-collapse:collapse;width:100%;margin-top:8px}td,th{border:1px solid #cfc8e6;padding:6px;text-align:center}th{background:var(--navy);color:#fff}
+.reveal{display:none;background:#E7F5EF;border-right:5px solid #2E8B57;padding:10px;border-radius:10px;margin-top:6px;line-height:1.9}
+.tag{display:inline-block;background:var(--vio);color:#fff;border-radius:999px;padding:3px 12px;font-size:13px;margin-bottom:6px}
+.ltr{direction:ltr;unicode-bidi:embed;display:inline-block}
+.chips button{border:2px solid var(--navy);background:#fff;font:inherit;padding:6px 10px;border-radius:10px;margin:3px;cursor:pointer}
+.chips button.on{background:var(--navy);color:#fff}
+.chips button.ok{background:#2E8B57;color:#fff;border-color:#2E8B57}.chips button.no{background:#c0392b;color:#fff;border-color:#c0392b}
+.warn{background:#FFF3E0;border-right:5px solid #E65100;padding:8px 12px;border-radius:10px;margin:8px 0}
+footer{text-align:center;padding:12px;font-size:14px;background:rgba(255,255,255,.75);margin:0 16px 16px;border-radius:12px}
+</style>
+</head>
+<body>
+<header><div class="hin"><div><h1>🔬 المختبر الافتراضي: الأشكال المتعددة للطاقة</h1><p>فيزياء 2 • الفصل 5: الطاقة وحفظها • الدرس 5-1 • د. أفنان الطلحي</p></div><div class="logos"><img src="img/moe.png" alt="وزارة التعليم"></div></div></header>
+<nav id="nav" class="wrapL"></nav>
+<main class="wrapL">
+
+<section class="lab" id="ke" data-t="① حاسبة الطاقة الحركية">
+<div class="card"><span class="tag">تجربة 1</span><h2>الطاقة الحركية: أثر الكتلة والسرعة</h2>
+<div class="q">غيّري كتلة العربة وسرعتها، وراقبي الطاقة الحركية KE = ½mv². ماذا يحدث عند مضاعفة السرعة؟</div>
+<canvas id="kC" class="dark" width="900" height="300"></canvas>
+<div class="row"><div class="col"><label>الكتلة m = <b id="kMV">1000</b> kg</label><input type="range" id="kM" min="100" max="2000" step="100" value="1000"></div>
+<div class="col"><label>السرعة v = <b id="kVV">10</b> m/s</label><input type="range" id="kV" min="0" max="20" step="1" value="10"></div></div>
+<div class="out" id="kO"></div>
+<button class="btn" onclick="kRec()">＋ أضيفي للجدول</button>
+<table><thead><tr><th>m (kg)</th><th>v (m/s)</th><th>v² (m²/s²)</th><th>KE (J)</th></tr></thead><tbody id="kTb"></tbody></table>
+<button class="btn gold" onclick="rv('r1')">▶ ماذا تلاحظين؟</button>
+<div class="reveal" id="r1">تتناسب الطاقة الحركية طرديًّا مع الكتلة ومع مربع السرعة؛ فمضاعفة الكتلة تضاعف KE مرتين، ومضاعفة السرعة تجعلها أربعة أضعاف.</div></div>
+</section>
+
+<section class="lab" id="wk" data-t="② الشغل–الطاقة">
+<div class="card"><span class="tag">تجربة 2</span><h2>نظرية الشغل–الطاقة: قذف والتقاط</h2>
+<div class="q">كرة كتلتها 0.15 kg. اختاري اتجاه القوة ومقدارها والمسافة، ثم اضغطي «ابدئي» وراقبي مخطط الأعمدة: KE قبل + W = KE بعد.</div>
+<canvas id="wC" class="dark" width="900" height="330"></canvas>
+<div class="row"><div class="col"><div class="chips" id="wDir"><button onclick="wSetD(1)">⚾ قذف: القوة مع الحركة</button><button onclick="wSetD(-1)">🧤 التقاط: القوة عكس الحركة</button></div>
+<label>السرعة الابتدائية v_i = <b id="wVV">10</b> m/s</label><input type="range" id="wV" min="0" max="20" step="1" value="10"></div>
+<div class="col"><label>القوة F = <b id="wFV">5.0</b> N</label><input type="range" id="wF" min="0" max="20" step="0.5" value="5">
+<label>المسافة d = <b id="wDV">0.50</b> m</label><input type="range" id="wD" min="0.1" max="1.5" step="0.05" value="0.5"></div></div>
+<button class="btn vio" onclick="wGo()">▶ ابدئي</button>
+<div class="out" id="wO"></div>
+<button class="btn gold" onclick="rv('r2')">▶ القاعدة</button>
+<div class="reveal" id="r2"><span class="ltr">W = Fd</span> ، و <span class="ltr">KE_f = KE_i + W</span>. إذا كانت القوة عكس الحركة يكون الشغل سالبًا، وإذا كان أكبر من الطاقة الابتدائية تتوقف الكرة قبل نهاية المسافة.</div></div>
+</section>
+
+<section class="lab" id="pe" data-t="③ طاقة الوضع">
+<div class="card"><span class="tag">تجربة 3</span><h2>طاقة الوضع الجاذبية ومستوى الإسناد</h2>
+<div class="q">ارفعي الكتاب من الطاولة إلى الرف، واختاري مستوى الإسناد. لاحظي: هل تتغير قيمة PE؟ وهل يتغير ΔPE؟ (المسألة 6)</div>
+<canvas id="pC" class="dark" width="900" height="380"></canvas>
+<div class="row"><div class="col"><div class="chips" id="pRef"><button onclick="pSetR(0)">الإسناد: الأرض</button><button onclick="pSetR(0.8)">الإسناد: الطاولة</button><button onclick="pSetR(2.1)">الإسناد: الرف</button></div>
+<label>الكتلة m = <b id="pMV">2.2</b> kg</label><input type="range" id="pM" min="0.5" max="5" step="0.1" value="2.2"></div>
+<div class="col"><label>موضع الكتاب h = <b id="pHV">2.10</b> m</label><input type="range" id="pH" min="0" max="2.4" step="0.05" value="2.1"></div></div>
+<div class="out" id="pO"></div>
+<button class="btn gold" onclick="rv('r3')">▶ النتيجة</button>
+<div class="reveal" id="r3"><span class="ltr">PE = mgh</span> تتغير قيمتها بتغيير مستوى الإسناد (وقد تكون سالبة)، لكن التغير بين الطاولة والرف يبقى <span class="ltr">ΔPE = (2.2)(9.80)(2.10 − 0.80) = 28 J</span> مهما كان مستوى الإسناد.</div></div>
+</section>
+
+<section class="lab" id="toss" data-t="④ الكرة المقذوفة">
+<div class="card"><span class="tag">تجربة 4</span><h2>تحولات الطاقة في كرة مقذوفة رأسيًّا</h2>
+<div class="q">اختاري سرعة القذف واضغطي «اقذفي». راقبي أعمدة KE و PE والمجموع أثناء الصعود والهبوط (الشكل 5-6).</div>
+<div class="row"><div class="col"><canvas id="tC" class="dark" width="440" height="420"></canvas></div>
+<div class="col"><canvas id="tB" class="dark" width="440" height="300"></canvas>
+<label>سرعة القذف v₀ = <b id="tVV">8.0</b> m/s</label><input type="range" id="tV" min="2" max="12" step="0.5" value="8">
+<label>كتلة الكرة m = <b id="tMV">0.60</b> kg</label><input type="range" id="tM" min="0.1" max="2" step="0.05" value="0.6">
+<button class="btn vio" onclick="tGo()">🏀 اقذفي</button><div class="out" id="tO"></div></div></div>
+<button class="btn gold" onclick="rv('r4')">▶ ماذا تلاحظين؟</button>
+<div class="reveal" id="r4">أثناء الصعود تقل KE وتزداد PE، وفي أقصى ارتفاع <span class="ltr">h = v₀²/2g</span> تكون الطاقة كلها طاقة وضع، ثم تتحول ثانية إلى حركية. ويبقى المجموع KE + PE ثابتًا لعدم بذل شغل من قوة خارجية.</div></div>
+</section>
+
+<section class="lab" id="bow" data-t="⑤ القوس والمرونية">
+<div class="card"><span class="tag">تجربة 5</span><h2>طاقة الوضع المرونية في وتر القوس</h2>
+<div class="q">اسحبي الوتر مسافة x ثم أطلقي السهم (كتلته 0.025 kg). الطاقة المختزنة في الوتر تتحول إلى طاقة حركية للسهم. (نموذج: قوة الوتر تزداد خطيًّا حتى 150 N عند سحب 0.5 m)</div>
+<canvas id="bC" class="dark" width="900" height="330"></canvas>
+<label>مسافة السحب x = <b id="bXV">0.40</b> m</label><input type="range" id="bX" min="0.05" max="0.5" step="0.01" value="0.4">
+<button class="btn vio" onclick="bFire()">🏹 أطلقي</button>
+<div class="out" id="bO"></div>
+<button class="btn gold" onclick="rv('r5')">▶ ماذا تلاحظين؟</button>
+<div class="reveal" id="r5">الشغل المبذول في السحب يُختزن طاقة وضع مرونية (المساحة تحت منحنى القوة–المسافة)، وعند الإفلات تتحول إلى طاقة حركية للسهم: <span class="ltr">½mv² = E_مرونية</span>. مضاعفة مسافة السحب تجعل الطاقة أربعة أضعاف في هذا النموذج.</div></div>
+</section>
+
+<section class="lab" id="bounce" data-t="⑥ ارتداد كرة السلة">
+<div class="card"><span class="tag">تجربة 6</span><h2>التجربة الاستهلالية: ارتداد كرة السلة</h2>
+<div class="q">أسقطي الكرة من ارتفاعات مختلفة، وسجّلي ارتفاع الارتداد، ثم استخدمي أفضل خط لتتوقعي الارتداد من ارتفاع 10.0 m. (ص 130)</div>
+<div class="row"><div class="col"><canvas id="dC" class="dark" width="440" height="420"></canvas></div>
+<div class="col"><label>ارتفاع الإسقاط x = <b id="dHV">1.50</b> m</label><input type="range" id="dH" min="0.3" max="2.5" step="0.1" value="1.5">
+<button class="btn vio" onclick="dGo()">🏀 أسقطي</button> <button class="btn" onclick="dRec()">＋ سجّلي</button>
+<canvas id="dG" class="dark" width="440" height="230" style="margin-top:8px"></canvas>
+<table><thead><tr><th>x (m)</th><th>y (m)</th><th>y / x</th></tr></thead><tbody id="dTb"></tbody></table>
+<label>توقّعك للارتداد من 10.0 m (m):</label><input type="number" id="dIn" placeholder="مثال: 6.0"><button class="btn vio" onclick="dChk()">✔ تحققي</button><div class="out" id="dO"></div></div></div>
+<button class="btn gold" onclick="rv('r6')">▶ التفسير</button>
+<div class="reveal" id="r6">ترتد الكرة إلى نحو 64% من ارتفاع سقوطها (<span class="ltr">y ≈ 0.64 x</span>)، فمن 10.0 m ترتد نحو 6.4 m. ولا تعود إلى الارتفاع نفسه لأن جزءًا من الطاقة يتحول إلى حرارة وصوت وتشوّه عند الاصطدام.</div></div>
+</section>
+
+</main>
+<footer>المختبر الافتراضي • فيزياء 2 • الدرس 5-1 الأشكال المتعددة للطاقة<div style="margin-top:6px;font-size:18px;font-weight:800;color:#C2185B">صُمّم بحب ♥ د. أفنان الطلحي</div></footer>
+<audio id="sClick" src="snd/drop.mp3" preload="auto"></audio><audio id="sOk" src="snd/applause.mp3" preload="auto"></audio><audio id="sNo" src="snd/knock.mp3" preload="auto"></audio>
+<script>
+const $=i=>document.getElementById(i);const G=9.8;
+const snd=n=>{try{const a=$(n).cloneNode();a.volume=.6;a.play().catch(()=>{})}catch(e){}};
+function rv(id){const e=$(id);e.style.display=e.style.display==='block'?'none':'block';snd('sClick')}
+const labs=[...document.querySelectorAll('.lab')];
+$('nav').innerHTML=labs.map((l,i)=>`<button onclick="go(${i})">${l.dataset.t}</button>`).join('');
+function go(i){labs.forEach((l,j)=>l.classList.toggle('on',i===j));[...$('nav').children].forEach((b,j)=>b.classList.toggle('on',i===j));snd('sClick');try{history.replaceState(null,'','#'+labs[i].id)}catch(e){}}
+const KEc='#FFB74D',PEc='#64B5F6',WP='#81C784',WN='#E57373',TOT='#B39DDB';
+const fmt=v=>Math.abs(v)>=1e7?v.toExponential(2):(Math.abs(v)>=100?v.toFixed(0):v.toFixed(1));
+function bars(g,x0,base,list,scale,w=60,gap=30){list.forEach((b,i)=>{const x=x0+i*(w+gap),h=b.v*scale;g.fillStyle=b.c;if(h>=0)g.fillRect(x,base-h,w,h);else g.fillRect(x,base,w,-h);if(b.dash){g.strokeStyle=b.c;g.setLineDash([5,4]);g.strokeRect(x,base-h,w,h);g.setLineDash([])}
+g.fillStyle='#fff';g.font='700 14px Almarai';g.textAlign='center';g.fillText(b.l,x+w/2,base+(h>=0?20:-h+20));g.font='12px Almarai';g.fillStyle=b.c;g.fillText(fmt(b.v)+' J',x+w/2,h>=0?base-h-6:base-h+16)});g.strokeStyle='#fff';g.beginPath();g.moveTo(x0-10,base);g.lineTo(x0+list.length*(w+gap),base);g.stroke()}
+function car(g,x,y,s,c='#E53935'){g.fillStyle=c;g.fillRect(x,y-22*s,110*s,26*s);g.fillRect(x+25*s,y-44*s,55*s,24*s);g.fillStyle='#212121';[22,88].forEach(d=>{g.beginPath();g.arc(x+d*s,y+6*s,12*s,0,7);g.fill()})}
+
+// 1 KE
+let kx=0,krow=[];['kM','kV'].forEach(i=>$(i).oninput=kDraw);
+function kDraw(){const m=+$('kM').value,v=+$('kV').value;$('kMV').textContent=m;$('kVV').textContent=v;const ke=.5*m*v*v;
+$('kO').innerHTML=`<span class="ltr">KE = ½mv² = ½(${m})(${v})² = ${fmt(ke)} J</span>`}
+function kAnim(){if(labs[0].classList.contains('on')){const C=$('kC'),g=C.getContext('2d'),m=+$('kM').value,v=+$('kV').value,ke=.5*m*v*v;
+g.fillStyle='#0d0b1e';g.fillRect(0,0,900,300);g.fillStyle='#546E7A';g.fillRect(0,220,560,14);kx=(kx+v*.35)%640;const s=.6+.4*m/1000;car(g,kx-100,212,Math.min(s,1.6));
+const W=300,h=Math.min(240,ke/4e5*240);g.fillStyle=KEc;g.fillRect(620,260-h,90,h);g.strokeStyle='#fff';g.strokeRect(620,20,90,240);g.fillStyle='#fff';g.font='700 18px Almarai';g.textAlign='center';g.fillText('KE',665,285);
+g.fillStyle=KEc;g.fillText(fmt(ke)+' J',800,140)}requestAnimationFrame(kAnim)}
+function kRec(){const m=+$('kM').value,v=+$('kV').value;krow.push(`<tr><td>${m}</td><td>${v}</td><td>${v*v}</td><td>${fmt(.5*m*v*v)}</td></tr>`);$('kTb').innerHTML=krow.join('');snd('sClick')}
+
+// 2 work-energy
+let wDir=1,wT=-1;function wSetD(d){wDir=d;[...$('wDir').children].forEach((b,j)=>b.classList.toggle('on',(d===1)===(j===0)));snd('sClick');wT=-1;wDraw()}
+['wV','wF','wD'].forEach(i=>$(i).oninput=()=>{wT=-1;wDraw()});
+function wCalc(){const m=.15,vi=+$('wV').value,F=+$('wF').value,d=+$('wD').value;const ki=.5*m*vi*vi;let W=wDir*F*d,kf=ki+W,stop=false;if(kf<0){kf=0;W=-ki;stop=true}return{m,vi,F,d,ki,W,kf,stop,vf:Math.sqrt(2*kf/m)}}
+function wGo(){wT=0;snd('sClick')}
+function wDraw(){const r=wCalc();$('wVV').textContent=r.vi;$('wFV').textContent=r.F.toFixed(1);$('wDV').textContent=r.d.toFixed(2);
+const C=$('wC'),g=C.getContext('2d');g.fillStyle='#0d0b1e';g.fillRect(0,0,900,330);const p=wT<0?0:Math.min(1,wT);
+const x0=60,x1=480,bx=x0+(x1-x0)*p;g.strokeStyle='#4A4680';g.beginPath();g.moveTo(30,200);g.lineTo(520,200);g.stroke();
+g.fillStyle='#FF7043';g.beginPath();g.arc(bx,180,18,0,7);g.fill();g.strokeStyle=wDir>0?WP:WN;g.lineWidth=4;g.beginPath();const ax=wDir>0?bx-80:bx+80;g.moveTo(ax,140);g.lineTo(wDir>0?bx-25:bx+25,140);g.stroke();g.lineWidth=1;
+g.fillStyle=wDir>0?WP:WN;g.font='700 16px Almarai';g.textAlign='center';g.fillText('F',ax,128);g.fillStyle='#80DEEA';g.fillText('d = '+r.d.toFixed(2)+' m',270,240);
+const mx=Math.max(r.ki,r.kf,Math.abs(r.W),1);bars(g,600,170,[{l:'KE قبل',v:r.ki,c:KEc},{l:'W',v:r.W,c:r.W>=0?WP:WN},{l:'KE بعد',v:wT<0?0:r.ki+(r.kf-r.ki)*p,c:KEc}],120/mx);
+$('wO').innerHTML=`<span class="ltr">KE_i = ½(0.15)(${r.vi})² = ${r.ki.toFixed(2)} J ، W = ${wDir>0?'+':'−'}Fd = ${r.W.toFixed(2)} J ← KE_f = ${r.kf.toFixed(2)} J ، v_f = ${r.vf.toFixed(1)} m/s</span>`+(r.stop?'<br>⛔ الشغل السالب أكبر من الطاقة الحركية: تتوقف الكرة قبل نهاية المسافة':'')}
+function wAnim(){if(wT>=0&&wT<1){wT+=.012;wDraw()}requestAnimationFrame(wAnim)}
+
+// 3 PE
+let pRefH=0;function pSetR(h){pRefH=h;[...$('pRef').children].forEach((b,j)=>b.classList.toggle('on',[0,.8,2.1][j]===h));snd('sClick');pDraw()}
+['pM','pH'].forEach(i=>$(i).oninput=pDraw);
+function pDraw(){const m=+$('pM').value,h=+$('pH').value;$('pMV').textContent=m.toFixed(1);$('pHV').textContent=h.toFixed(2);const C=$('pC'),g=C.getContext('2d');g.fillStyle='#0d0b1e';g.fillRect(0,0,900,380);
+const Y=v=>350-v*130;g.fillStyle='#B0BEC5';g.fillRect(20,Y(0),520,4);g.fillStyle='#8D6E63';g.fillRect(60,Y(.8),180,10);g.fillRect(70,Y(.8),10,Y(0)-Y(.8));g.fillRect(220,Y(.8),10,Y(0)-Y(.8));
+g.fillRect(320,Y(2.1),200,8);g.fillStyle='#fff';g.font='14px Almarai';g.textAlign='center';g.fillText('الطاولة 0.80 m',150,Y(.8)+28);g.fillText('الرف 2.10 m',420,Y(2.1)-10);
+g.strokeStyle='#FFD54F';g.setLineDash([8,6]);g.beginPath();g.moveTo(20,Y(pRefH));g.lineTo(560,Y(pRefH));g.stroke();g.setLineDash([]);g.fillStyle='#FFD54F';g.textAlign='right';g.fillText('PE = 0',555,Y(pRefH)-6);
+g.fillStyle='#1E88E5';g.fillRect(260,Y(h)-26,44,26);g.fillStyle='#fff';g.fillText('📘',300,Y(h)-6);
+const pe=m*G*(h-pRefH),pT=m*G*(.8-pRefH),pS=m*G*(2.1-pRefH);bars(g,620,200,[{l:'PE',v:pe,c:pe<0?WN:PEc}],1.4,90);
+$('pO').innerHTML=`<span class="ltr">PE = mgh = (${m.toFixed(1)})(9.80)(${(h-pRefH).toFixed(2)}) = ${pe.toFixed(1)} J</span><br>على الطاولة: <span class="ltr">${pT.toFixed(1)} J</span> ، على الرف: <span class="ltr">${pS.toFixed(1)} J</span> ← <span class="ltr">ΔPE = ${(pS-pT).toFixed(1)} J</span> (لا يتغير بتغيير الإسناد)`}
+
+// 4 toss
+let tT=-1;$('tV').oninput=()=>{$('tVV').textContent=(+$('tV').value).toFixed(1);tT=-1;tDraw()};$('tM').oninput=()=>{$('tMV').textContent=(+$('tM').value).toFixed(2);tDraw()};
+function tGo(){tT=0;snd('sClick')}
+function tDraw(){const v0=+$('tV').value,m=+$('tM').value,H=v0*v0/(2*G),T=2*v0/G;const t=tT<0?0:tT*T;const y=Math.max(0,v0*t-.5*G*t*t),v=v0-G*t;
+const C=$('tC'),g=C.getContext('2d');g.fillStyle='#0d0b1e';g.fillRect(0,0,440,420);const sc=340/7.4,Y=h=>390-h*sc;g.fillStyle='#B0BEC5';g.fillRect(20,Y(0),400,4);
+g.strokeStyle='#4A4680';g.setLineDash([5,5]);g.beginPath();g.moveTo(40,Y(H));g.lineTo(400,Y(H));g.stroke();g.setLineDash([]);g.fillStyle='#80DEEA';g.font='14px Almarai';g.textAlign='left';g.fillText('h_max = '+H.toFixed(2)+' m',250,Y(H)-6);
+g.fillStyle='#FF7043';g.beginPath();g.arc(200,Y(y)-16,16,0,7);g.fill();
+const ke=.5*m*v*v,pe=m*G*y,tot=.5*m*v0*v0;const B=$('tB'),b=B.getContext('2d');b.fillStyle='#0d0b1e';b.fillRect(0,0,440,300);bars(b,70,250,[{l:'KE',v:ke,c:KEc},{l:'PE',v:pe,c:PEc},{l:'KE+PE',v:tot,c:TOT,dash:1}],200/Math.max(tot,.01),70,40);
+$('tO').innerHTML=`<span class="ltr">h = ${y.toFixed(2)} m ، v = ${Math.abs(v).toFixed(2)} m/s ، KE + PE = ${tot.toFixed(1)} J</span>`}
+function tAnim(){if(tT>=0&&tT<1){tT=Math.min(1,tT+.006);tDraw()}requestAnimationFrame(tAnim)}
+
+// 5 bow
+let bT=-1;$('bX').oninput=()=>{bT=-1;bDraw()};function bFire(){bT=0;snd('sClick')}
+function bDraw(){const x=+$('bX').value;$('bXV').textContent=x.toFixed(2);const k=150/.5,E=.5*k*x*x,v=Math.sqrt(2*E/.025);
+const C=$('bC'),g=C.getContext('2d');g.fillStyle='#0d0b1e';g.fillRect(0,0,900,330);const cx=200,cy=165,R=130;
+g.strokeStyle='#A1887F';g.lineWidth=8;g.beginPath();g.arc(cx+60,cy,R,Math.PI*.62,Math.PI*1.38);g.stroke();g.lineWidth=1;
+const tx=cx+60+R*Math.cos(Math.PI*.62),ty1=cy-R*Math.sin(Math.PI*.62),ty2=cy+R*Math.sin(Math.PI*.62);const pull=bT>=0?0:x*220;
+g.strokeStyle='#fff';g.lineWidth=2;g.beginPath();g.moveTo(tx,ty1);g.lineTo(tx-pull,cy);g.lineTo(tx,ty2);g.stroke();g.lineWidth=1;
+const ax=bT>=0?tx+bT*560:tx-pull;g.strokeStyle='#8D6E63';g.lineWidth=4;g.beginPath();g.moveTo(ax,cy);g.lineTo(ax+170,cy);g.stroke();g.lineWidth=1;g.fillStyle='#9E9E9E';g.beginPath();g.moveTo(ax+185,cy);g.lineTo(ax+168,cy-8);g.lineTo(ax+168,cy+8);g.fill();
+bars(g,690,270,[{l:'مرونية',v:bT>=0?0:E,c:WP},{l:'KE السهم',v:bT>=0?E:0,c:KEc}],180/37.5,60,30);
+$('bO').innerHTML=`<span class="ltr">E_مرونية = ½ k x² = ½(300)(${x.toFixed(2)})² = ${E.toFixed(1)} J</span> ← بعد الإطلاق <span class="ltr">v = √(2E/m) = ${v.toFixed(0)} m/s</span>`}
+function bAnim(){if(bT>=0&&bT<1){bT+=.02;bDraw()}requestAnimationFrame(bAnim)}
+
+// 6 bounce
+const eR=.64;let dT=-1,drow=[];$('dH').oninput=()=>{$('dHV').textContent=(+$('dH').value).toFixed(2);dT=-1;dDraw()};
+function dGo(){dT=0;snd('sClick')}
+function dDraw(){const x=+$('dH').value,y=eR*x;const C=$('dC'),g=C.getContext('2d');g.fillStyle='#0d0b1e';g.fillRect(0,0,440,420);const sc=150,Y=h=>400-h*sc;
+g.fillStyle='#A1887F';g.fillRect(300,Y(2.5),24,2.5*sc);g.fillStyle='#fff';g.font='12px Almarai';g.textAlign='left';for(let k=0;k<=25;k+=5)g.fillText((k/10).toFixed(1),330,Y(k/10)+4);
+g.fillStyle='#B0BEC5';g.fillRect(10,Y(0),420,4);let h=x;if(dT>=0){const p=dT;h=p<.5?x*(1-Math.pow(p/.5,2)):y*(1-Math.pow((1-p)/.5,2))}
+g.fillStyle='#FF7043';g.beginPath();g.arc(220,Y(h)-18,18,0,7);g.fill();g.strokeStyle='#3E2723';g.beginPath();g.moveTo(202,Y(h)-18);g.lineTo(238,Y(h)-18);g.stroke();
+g.strokeStyle='#FFD54F';g.setLineDash([4,4]);g.beginPath();g.moveTo(150,Y(x));g.lineTo(300,Y(x));g.stroke();if(dT>=1){g.strokeStyle='#80DEEA';g.beginPath();g.moveTo(150,Y(y));g.lineTo(300,Y(y));g.stroke()}g.setLineDash([]);
+dGraph()}
+function dAnim(){if(dT>=0&&dT<1){dT=Math.min(1,dT+.012);dDraw()}requestAnimationFrame(dAnim)}
+let dPts=[];function dRec(){if(dT<1){$('dO').textContent='💡 أسقطي الكرة أولًا ثم سجّلي';return}const x=+$('dH').value,y=+(eR*x).toFixed(2);dPts.push([x,y]);drow.push(`<tr><td>${x.toFixed(2)}</td><td>${y.toFixed(2)}</td><td>${(y/x).toFixed(2)}</td></tr>`);$('dTb').innerHTML=drow.join('');snd('sClick');dGraph()}
+function dGraph(){const C=$('dG'),g=C.getContext('2d');g.fillStyle='#0d0b1e';g.fillRect(0,0,440,230);const X=v=>40+v*150,Y=v=>200-v*150;g.strokeStyle='#fff';g.beginPath();g.moveTo(40,10);g.lineTo(40,200);g.lineTo(430,200);g.stroke();
+g.fillStyle='#fff';g.font='12px Almarai';g.fillText('x (m)',400,220);g.fillText('y (m)',10,14);dPts.forEach(([a,b])=>{g.fillStyle='#FFD54F';g.beginPath();g.arc(X(a),Y(b),5,0,7);g.fill()});
+if(dPts.length>=2){g.strokeStyle='#FF7043';g.beginPath();g.moveTo(X(0),Y(0));g.lineTo(X(2.6),Y(2.6*eR));g.stroke()}}
+function dChk(){const v=+$('dIn').value,ok=Math.abs(v-6.4)<=.4;$('dO').innerHTML=ok?'🎉 أحسنتِ! نحو 6.4 m':'💡 مدّي أفضل خط: y ≈ 0.64x';snd(ok?'sOk':'sNo')}
+
+{const h=location.hash.slice(1);const k=labs.findIndex(l=>l.id===h);go(k<0?0:k)}
+wSetD(1);kDraw();kAnim();wAnim();pSetR(0);tDraw();tAnim();bDraw();bAnim();dDraw();dAnim();
+</script>
+</body></html>
