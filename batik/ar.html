@@ -101,13 +101,15 @@ let gyro=false,q0=null;const qd=new THREE.Quaternion(),eu=new THREE.Euler(),zee=
 function onOri(e){if(e.alpha==null)return;gyro=true;const a=THREE.MathUtils.degToRad(e.alpha),b=THREE.MathUtils.degToRad(e.beta),g=THREE.MathUtils.degToRad(e.gamma),o=THREE.MathUtils.degToRad(screen.orientation?screen.orientation.angle:(window.orientation||0));
 eu.set(b,a,-g,'YXZ');qd.setFromEuler(eu);qd.multiply(q1);qd.multiply(new THREE.Quaternion().setFromAxisAngle(zee,-o));if(!q0){q0=qd.clone().invert();}}
 function enableGyro(){if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){DeviceOrientationEvent.requestPermission().then(r=>{if(r==='granted')addEventListener('deviceorientation',onOri)}).catch(()=>{})}else addEventListener('deviceorientation',onOri)}
-function recenter(){q0=null;rotY=0;rotX=0;zoom=1;sfx('whoosh',.5)}
+function recenter(){q0=null;rotY=0;rotX=.5;zoom=1;sfx('whoosh',.5)}
 
 // ---------- touch rotate / pinch ----------
 let rotY=0,rotX=0,zoom=1,drag=null,pinch=null;
-cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};document.getElementById('hint').style.opacity=0});
-addEventListener('pointermove',e=>{if(!drag||pinch)return;rotY+=(e.clientX-drag.x)*.01;rotX=Math.max(-.6,Math.min(.6,rotX+(e.clientY-drag.y)*.006));drag={x:e.clientX,y:e.clientY}});
-addEventListener('pointerup',()=>drag=null);
+const RC=new THREE.Raycaster(),NDC=new THREE.Vector2();let penOn=false,penUsed=false;
+function hitCloth(e){if(!built||!built.cloth||!built.pen)return null;NDC.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);RC.setFromCamera(NDC,cam);const h=RC.intersectObject(built.cloth);if(!h.length)return null;return built.cloth.parent.worldToLocal(h[0].point.clone())}
+cv.addEventListener('pointerdown',e=>{document.getElementById('hint').style.opacity=0;const p=hitCloth(e);penUsed=!!p;if(p){penOn=true;built.pen(p,true);return}drag={x:e.clientX,y:e.clientY}});
+addEventListener('pointermove',e=>{if(penOn){const p=hitCloth(e);if(p)built.pen(p,false);return}if(!drag||pinch)return;rotY+=(e.clientX-drag.x)*.01;rotX=Math.max(-.6,Math.min(1.1,rotX+(e.clientY-drag.y)*.006));drag={x:e.clientX,y:e.clientY}});
+addEventListener('pointerup',()=>{drag=null;if(penOn&&built&&built.penUp)built.penUp();penOn=false});
 cv.addEventListener('touchmove',e=>{if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);if(pinch)zoom=Math.max(.5,Math.min(2.2,zoom*d/pinch));pinch=d}},{passive:true});
 cv.addEventListener('touchend',()=>pinch=null);
 cv.addEventListener('wheel',e=>{zoom=Math.max(.5,Math.min(2.2,zoom*(e.deltaY>0?.92:1.08)))},{passive:true});
@@ -157,28 +159,37 @@ let bt={brush:0,mold:'carrot',temp:50,src:'e',step:0,prod:0,draw:true};
 const STEPS=['① نقل التصميم على القماش','② تثبيت القماش على الإطار','③ تجهيز الشمع المنصهر','④ تحديد التصميم بالشمع','⑤ التلوين بالصبغة','⑥ التجفيف','⑦ إزالة الشمع بالكي','⑧ المنتج النهائي ✨'];
 function flowerPath(g,cx,cy,r){g.beginPath();for(let a=0;a<=6.3;a+=.04){const rr=r*(.62+.38*Math.cos(5*a));g.lineTo(cx+rr*Math.cos(a),cy+rr*Math.sin(a))}g.closePath()}
 const SC=[
-{n:'✒ قلم الشمع',t:'قلم الشمع (التجانتنج)',p:'وعاء نحاسي صغير يُملأ بالشمع المنصهر، يخرج منه الشمع عبر مصبّ رفيع، ونمسكه من مقبض خشبي. يُستخدم للنقاط والخطوط وتحديد المساحات (شكل 88).',
- amb:null,ctrl:'<button class="ib g" onclick="bt.draw=!bt.draw;sfx(\'drop\',.5)">✒ ارسمي / توقفي</button><button class="ib h" onclick="built.tx.clear();built.u=0;sfx(\'whoosh\',.5)">↺ قماش جديد</button>',
+{n:'✒ قلم الشمع',t:'قلم الشمع (التجانتنج)',still:true,p:'ارسمي بإصبعك على القماش كأنكِ تمسكين قلم الشمع! وعاء نحاسي يُملأ بالشمع المنصهر، يخرج منه عبر مصبّ رفيع، ونمسكه من مقبض خشبي. يُستخدم للنقاط والخطوط وتحديد المساحات (شكل 88).',
+ amb:null,ctrl:'<button class="ib h" onclick="built.tx.clear();sfx(\'whoosh\',.5)">↺ قماش جديد</button><button class="ib" style="background:#7A3BA6" onclick="built.dye()">🎨 اصبغي</button><button class="ib g" onclick="built.unwax()">♨ أزيلي الشمع</button>',
  q:['يُستخدم قلم الشمع (التجانتنج) في:',['تعبئة الأرضية الكبيرة','النقاط والخطوط وتحديد المساحات','إزالة الشمع'],1],
- build(g){bt.draw=true;table(g);this.tx=ctex(TW,TH);clothPlane(g,this.tx);this.tool=tjantingModel();this.tool.scale.setScalar(1.5);g.add(this.tool);this.u=0;this.last=null;
-  this.gl=glow('#FFE7A3',.18);g.add(this.gl);
-  lbl(this.tool,'وعاء الشمع',-.05,.42,0,'#A8741A',.75);lbl(this.tool,'المصبّ الرفيع',-.25,.02,0,'#C2185B',.8);lbl(this.tool,'المقبض الخشبي',.75,.62,0,'#1F7A80',.85);setCtrl(this.ctrl)},
- update(dt,t){if(bt.draw){this.u+=dt*.35;if(this.u>6.3){this.u=0;this.last=null;setTimeout(()=>this.tx.clear(),900)}}
-  const r=.3*(.62+.38*Math.cos(5*this.u)),x=r*Math.cos(this.u),z=r*Math.sin(this.u);this.tool.position.set(x,-.43,z);this.gl.position.set(x,-.48,z);this.gl.material.opacity=bt.draw?.6+.3*Math.sin(t*9):0;
-  if(bt.draw&&this.u>0){const p=toC(x,z),g=this.tx.g;g.strokeStyle=WAXC;g.lineWidth=4;g.lineCap='round';if(this.last){g.beginPath();g.moveTo(this.last[0],this.last[1]);g.lineTo(p[0],p[1]);g.stroke();this.tx.up()}this.last=p}}},
-{n:'🖌 الفرش',t:'الفرش: صغيرة وكبيرة',p:'الفرشاة الصغيرة لعمل النقاط والخطوط وتعبئة المساحات الصغيرة والزوايا الضيقة، أما الفرشاة الكبيرة فتُستخدم للمساحات الكبيرة مثل تعبئة أرضية التصميم (شكل 89).',
- amb:null,ctrl:'<button class="ib" onclick="bt.brush=0;sfx(\'drop\',.5)">🖌 فرشاة صغيرة</button><button class="ib g" onclick="bt.brush=1;sfx(\'drop\',.5)">🖌 فرشاة كبيرة</button><button class="ib h" onclick="built.tx.clear();sfx(\'whoosh\',.5)">↺ قماش جديد</button>',
+ build(g){table(g);this.tx=ctex(TW,TH);this.wax=document.createElement('canvas');this.wax.width=TW;this.wax.height=TH;this.cloth=clothPlane(g,this.tx);this.tool=tjantingModel();this.tool.scale.setScalar(1.5);this.tool.position.set(.35,-.3,.2);g.add(this.tool);this.last=null;
+  this.gl=glow('#FFE7A3',.2);g.add(this.gl);this.gl.material.opacity=0;this.base=this.tx.c;
+  this.tl=[lbl(this.tool,'وعاء الشمع',-.05,.42,0,'#A8741A',.75),lbl(this.tool,'المصبّ الرفيع',-.25,.02,0,'#C2185B',.8),lbl(this.tool,'المقبض الخشبي',.75,.62,0,'#1F7A80',.85)];
+  this.hint=lbl(g,'✍ ارسمي بإصبعك على القماش',0,.55,0,'#C2185B',1.4);setCtrl(this.ctrl)},
+ pen(p,start){this.tool.position.set(p.x,-.43,p.z);this.gl.position.set(p.x,-.48,p.z);this.gl.material.opacity=.8;this.hint.visible=false;this.tl.forEach(l=>l.visible=false);
+  const c=toC(p.x,p.z);[this.tx.g,this.wax.getContext('2d')].forEach((g,i)=>{g.strokeStyle=i?'#fff':WAXC;g.fillStyle=g.strokeStyle;g.lineWidth=4;g.lineCap='round';g.lineJoin='round';
+   if(start||!this.last){g.beginPath();g.arc(c[0],c[1],2.5,0,7);g.fill()}else{g.beginPath();g.moveTo(this.last[0],this.last[1]);g.lineTo(c[0],c[1]);g.stroke()}});
+  this.last=c;this.tx.up();if(start)sfx('drop',.3)},
+ penUp(){this.last=null;this.gl.material.opacity=0;this.tool.position.y=-.3;this.tl.forEach(l=>l.visible=true)},
+ dye(){const g=this.tx.g,t=document.createElement('canvas');t.width=TW;t.height=TH;const tg=t.getContext('2d');tg.fillStyle='#7A3BA6';tg.fillRect(0,0,TW,TH);tg.globalCompositeOperation='destination-out';tg.drawImage(this.wax,0,0);
+  g.globalCompositeOperation='multiply';g.drawImage(t,0,0);g.globalCompositeOperation='source-over';this.tx.up();sfx('drop',.6);toast('🎨 الشمع حجز اللون!')},
+ unwax(){const g=this.tx.g;g.save();g.globalCompositeOperation='source-atop';const t=document.createElement('canvas');t.width=TW;t.height=TH;const tg=t.getContext('2d');tg.fillStyle=CREAM;tg.fillRect(0,0,TW,TH);tg.globalCompositeOperation='destination-in';tg.drawImage(this.wax,0,0);g.drawImage(t,0,0);g.restore();
+  this.wax.getContext('2d').clearRect(0,0,TW,TH);this.tx.up();sfx('applause',.6);toast('✨ ظهر تصميمك!')},
+ update(dt,t){if(!penOn)this.tool.position.y=-.3+.03*Math.sin(t*2)}},
+{n:'🖌 الفرش',t:'الفرش: صغيرة وكبيرة',still:true,p:'اختاري الفرشاة وارسمي بإصبعك على القماش: الصغيرة للنقاط والخطوط والزوايا الضيقة، والكبيرة لتعبئة المساحات الكبيرة مثل أرضية التصميم (شكل 89).',
+ amb:null,ctrl:'<button class="ib" onclick="bt.brush=0;built.sel()">🖌 فرشاة صغيرة</button><button class="ib g" onclick="bt.brush=1;built.sel()">🖌 فرشاة كبيرة</button><button class="ib h" onclick="built.tx.clear();built.fill();sfx(\'whoosh\',.5)">↺ قماش جديد</button>',
  q:['الفرشاة الكبيرة مناسبة لـ:',['الزوايا الضيقة','النقاط الصغيرة','تعبئة أرضية التصميم'],2],
- build(g){bt.brush=0;table(g);this.tx=ctex(TW,TH);const o=this.tx.g;o.fillStyle='#F7DC6F';o.fillRect(0,0,TW,TH);this.tx.up();clothPlane(g,this.tx);
-  this.b=[brushModel(false),brushModel(true)];this.b.forEach((b,i)=>{b.position.set(i?.6:-.6,-.49,.3);g.add(b)});
-  this.l=[lbl(g,'فرشاة صغيرة: نقاط وزوايا',-.6,.45,.3,'#1F7A80',1.2),lbl(g,'فرشاة كبيرة: مساحات',.6,.45,.3,'#A8741A',1.2)];this.k=0;setCtrl(this.ctrl)},
- update(dt,t){const i=bt.brush,b=this.b[i],o=this.b[1-i];this.k+=dt;o.position.y+=(-.2-o.position.y)*.1;o.position.z+=(.55-o.position.z)*.1;
-  let x,z;if(i===0){const s=(t*.6)%1;x=-.6+s*1.2;z=-.3+Math.floor(t*.6%4)*.18}else{const s=(t*.5)%1;x=-.65+s*1.3;z=-.35+.25*Math.sin(t*3)}
-  b.position.x+=(x-b.position.x)*.25;b.position.z+=(z-b.position.z)*.25;b.position.y+=(-.49-b.position.y)*.25;b.rotation.z=-.3;
-  const p=toC(b.position.x,b.position.z),g=this.tx.g;g.fillStyle=g.strokeStyle=WAXC;
-  if(i===0){if(Math.sin(t*14)>.85){g.beginPath();g.arc(p[0],p[1],4,0,7);g.fill();this.tx.up()}}else{g.globalAlpha=.6;g.beginPath();g.arc(p[0],p[1],22,0,7);g.fill();g.globalAlpha=1;this.tx.up()}
-  this.l[i].material.opacity=1;this.l[1-i].material.opacity=.4}},
-{n:'🥕 قوالب البيئة',t:'قوالب باتيك من البيئة',p:'القالب إما جاهز بتصميم معين أو يُجهّز وفق التصميم. ومن البيئة حولنا: شريحة الجزر المحفورة، والبامية بنجمتها الطبيعية، والشوكة، والقالب الخشبي. نغمسه في الشمع المنصهر ثم نضغطه على القماش (شكل 90–92).',
+ build(g){bt.brush=0;table(g);this.tx=ctex(TW,TH);this.fill();this.cloth=clothPlane(g,this.tx);
+  this.b=[brushModel(false),brushModel(true)];this.b.forEach((b,i)=>{b.position.set(i?.65:-.65,-.3,.45);g.add(b)});
+  this.l=[lbl(g,'فرشاة صغيرة: نقاط وزوايا',-.55,.55,0,'#1F7A80',1.2),lbl(g,'فرشاة كبيرة: مساحات',.55,.55,0,'#A8741A',1.2)];this.last=null;this.sel();setCtrl(this.ctrl)},
+ fill(){const o=this.tx.g;o.fillStyle='#F7DC6F';o.fillRect(0,0,TW,TH);this.tx.up()},
+ sel(){const i=bt.brush;this.l[i].material.opacity=1;this.l[1-i].material.opacity=.35;this.b[1-i].position.set(i?-.65:.65,-.3,.45);sfx('drop',.5)},
+ pen(p,start){const i=bt.brush,b=this.b[i];b.position.set(p.x,-.49,p.z);b.rotation.z=-.3;const c=toC(p.x,p.z),g=this.tx.g;g.strokeStyle=g.fillStyle=WAXC;g.lineCap='round';
+  if(i===0){g.lineWidth=6;g.globalAlpha=1}else{g.lineWidth=40;g.globalAlpha=.7}
+  if(start||!this.last){g.beginPath();g.arc(c[0],c[1],g.lineWidth/2,0,7);g.fill()}else{g.beginPath();g.moveTo(this.last[0],this.last[1]);g.lineTo(c[0],c[1]);g.stroke()}g.globalAlpha=1;this.last=c;this.tx.up();if(start)sfx('drop',.3)},
+ penUp(){this.last=null;this.b[bt.brush].position.y=-.3},
+ update(dt,t){}},
+{n:'🥕 قوالب البيئة',t:'قوالب باتيك من البيئة',still:true,p:'اختاري القالب ثم انقري على القماش لتطبعي به! القالب إما جاهز بتصميم معين أو يُجهّز وفق التصميم. ومن البيئة حولنا: شريحة الجزر المحفورة، والبامية بنجمتها الطبيعية، والشوكة، والقالب الخشبي. نغمسه في الشمع المنصهر ثم نضغطه على القماش (شكل 90–92).',
  amb:null,ctrl:'<button class="ib h" onclick="bt.mold=\'carrot\'">🥕 جزر</button><button class="ib" onclick="bt.mold=\'okra\'">🌿 بامية</button><button class="ib" style="background:#607D8B" onclick="bt.mold=\'fork\'">🍴 شوكة</button><button class="ib g" onclick="bt.mold=\'block\'">🪵 خشب</button><button class="ib" style="background:#7A3BA6" onclick="built.dyed=!built.dyed;built.paint();sfx(\'drop\',.6)">🎨 اصبغي / أزيلي</button>',
  q:['أي خامة من البيئة تعطي نجمة طبيعية دون حفر؟',['الشوكة','البامية','الخشب'],1],
  build(g){bt.mold='carrot';table(g);this.tx=ctex(TW,TH);clothPlane(g,this.tx);this.prints=[];this.dyed=false;this.M={};
@@ -192,14 +203,17 @@ const SC=[
    if(k==='fork'){const h=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,.45,10),M(0x95A5A6,{metalness:.8}));h.position.y=.25;s.add(h)}
    if(k==='block'){const h=new THREE.Mesh(new THREE.BoxGeometry(.1,.2,.1),M(0x6B4423));h.position.y=.16;s.add(h)}
    s.position.set(-.75+i*.5,-.2,.62);g.add(s);this.M[k]=s});
-  this.nm=lbl(g,'',0,.75,0,'#C2185B',1.2);this.ph=0;this.n=0;setCtrl(this.ctrl)},
+  this.cloth=this.tx&&g.children.find(o=>o.isMesh&&o.geometry.type==='PlaneGeometry');this.nm=lbl(g,'',0,.75,0,'#C2185B',1.2);this.ph=0;this.n=0;setCtrl(this.ctrl)},
  paint(){const g=this.tx.g;this.tx.clear();if(this.dyed){g.fillStyle='#7A3BA6';g.fillRect(0,0,TW,TH);crackle(g,TW,TH,'#4E2270',90)}this.prints.forEach(([k,x,y])=>{printShape(g,k,x,y,1.2);if(this.dyed){g.globalCompositeOperation='source-atop';g.globalCompositeOperation='source-over'}});
   if(this.dyed){this.prints.forEach(([k,x,y])=>{g.save();g.fillStyle=g.strokeStyle=CREAM;printShape(g,k,x,y,1.2);g.restore()})}this.tx.up()},
+ pen(p,start){if(!start||this.dyed)return;this.tgt=[p.x,p.z];this.anim=0;},
  update(dt,t){const nmT={carrot:'🥕 شريحة جزر ← زهرة',okra:'🌿 بامية ← نجمة',fork:'🍴 شوكة ← خطوط',block:'🪵 قالب خشبي ← زخرفة'}[bt.mold];if(this.nm.userData.t!==nmT)this.nm.userData.set(nmT);
   Object.entries(this.M).forEach(([k,s],i)=>{if(k!==bt.mold){s.position.x+=(-.75+i*.5-s.position.x)*.1;s.position.z+=(.62-s.position.z)*.1;s.position.y+=(-.2-s.position.y)*.1;s.rotation.x=0}});
-  const s=this.M[bt.mold];this.ph+=dt*1.1;const cyc=this.ph%1;const slot=Math.floor(this.ph)%12;const tx=-.6+(slot%4)*.4,tz=-.32+Math.floor(slot/4)*.3;
-  s.position.x+=(tx-s.position.x)*.2;s.position.z+=(tz-s.position.z)*.2;s.rotation.x=Math.PI;s.position.y=-.43+Math.abs(Math.sin(cyc*Math.PI))*.35;
-  if(cyc<this.lastc&&!this.dyed){const p=toC(tx,tz);this.prints.push([bt.mold,p[0],p[1]]);if(this.prints.length>12)this.prints.shift();this.paint();sfx('drop',.25)}this.lastc=cyc}},
+  const s=this.M[bt.mold];s.rotation.x=Math.PI;
+  if(this.tgt){this.anim+=dt*2.2;const [tx,tz]=this.tgt;s.position.x+=(tx-s.position.x)*.35;s.position.z+=(tz-s.position.z)*.35;s.position.y=-.43+Math.abs(Math.cos(Math.min(this.anim,1)*Math.PI))*.3;
+   if(this.anim>=.5&&!this.done){this.done=true;const c=toC(tx,tz);this.prints.push([bt.mold,c[0],c[1]]);this.paint();sfx('drop',.4)}
+   if(this.anim>=1){this.tgt=null;this.done=false}}
+  else{s.position.y+=(-.12-s.position.y)*.1}}},
 {n:'🕯 الشمع والأمان',t:'تجهيز الشمع المنصهر بأمان',p:'نذيب الشمع حتى الانصهار التام: البارد يعرقل تسربه بين الألياف، والساخن جدًّا يتدفق بسرعة ويتلف التصميم. نستخدم مصدرًا كهربائيًّا لأنه أكثر حماية، ونضع مطفأة حريق قريبة.',
  amb:null,ctrl:'<label>حرارة الشمع</label><input type="range" min="0" max="100" value="50" oninput="bt.temp=+this.value"><button class="ib" onclick="bt.src=\'e\';sfx(\'drop\',.5)">🔌 كهربائي</button><button class="ib h" onclick="bt.src=\'s\';sfx(\'knock\',.6)">🔥 موقد مباشر</button>',
  q:['لماذا نذيب الشمع بمصدر كهربائي؟',['لأنه أسرع فقط','لأنه يغيّر لون الشمع','لأنه أكثر حماية'],2],
@@ -250,7 +264,7 @@ const SC=[
   const a=this.sg.attributes.position.array;for(let i=0;i<a.length;i+=3){a[i+2]=.12*Math.sin(this.base[i]*3+t*2)}this.sg.attributes.position.needsUpdate=true;this.sg.computeVertexNormals()}}];
 
 let cur=0,built=null;
-function load(i){cur=i;while(holder.children.length)holder.remove(holder.children[0]);const s=SC[i];built=Object.create(s);const inner=new THREE.Group();holder.add(inner);holder.scale.setScalar(1);holder.rotation.set(0,0,0);built.build(inner);
+function load(i){cur=i;rotX=.5;rotY=0;while(holder.children.length)holder.remove(holder.children[0]);const s=SC[i];built=Object.create(s);const inner=new THREE.Group();holder.add(inner);holder.scale.setScalar(1);holder.rotation.set(0,0,0);built.build(inner);
 inner.updateMatrixWorld(true);const bx=new THREE.Box3();inner.traverse(o=>{if(o.isMesh&&o.visible!==false){o.geometry.computeBoundingBox();const b=o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld);bx.union(b)}});
 if(!bx.isEmpty()){const c=new THREE.Vector3();bx.getCenter(c);holder.worldToLocal(c);inner.position.set(-c.x,-c.y+.1,-c.z)}
 document.getElementById('iT').textContent=s.t;document.getElementById('iP').textContent=s.p;document.getElementById('info').classList.remove('min');
@@ -270,7 +284,7 @@ if(video.videoWidth){const vr=video.videoWidth/video.videoHeight,cr=c.width/c.he
 g.drawImage(cv,0,0);g.fillStyle='rgba(61,31,92,.85)';g.fillRect(0,c.height-70,c.width,70);g.fillStyle='#fff';g.font='700 30px Almarai';g.textAlign='center';g.direction='rtl';g.fillText(SC[cur].t+' • التربية الفنية • أ. نوف الشريف',c.width/2,c.height-25);
 const u=c.toDataURL('image/png');document.getElementById('shotImg').src=u;document.getElementById('dl').href=u;document.getElementById('shot').style.display='flex';sfx('drop',.7)}
 function toggleUI(){const c=document.body.classList.toggle('clean');document.getElementById('eye').textContent=c?'🙈':'👁';sfx('drop',.4);if(c)toast('اضغطي 🙈 لإظهار الإطارات')}
-let lastTap=0;cv.addEventListener('pointerup',e=>{const n=Date.now();if(n-lastTap<300)toggleUI();lastTap=n});
+let lastTap=0;cv.addEventListener('pointerup',e=>{if(penUsed){lastTap=0;return}const n=Date.now();if(n-lastTap<300)toggleUI();lastTap=n});
 let follow=false;function toggleFollow(){follow=!follow;q0=null;document.getElementById('flw').textContent=follow?'🧭':'📌';toast(follow?'🧭 يتحرك مع اتجاه الجوال':'📌 النموذج ثابت في المنتصف');sfx('drop',.4)}
 // loop
 const clock=new THREE.Clock();
