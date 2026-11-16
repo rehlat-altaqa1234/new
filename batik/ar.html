@@ -41,6 +41,9 @@ html,body{margin:0;height:100%;overflow:hidden;background:#1a0f26;font-family:Al
 body.clean #top,body.clean #info,body.clean #bottom,body.clean #side,body.clean #hint{opacity:0;pointer-events:none;transition:opacity .3s}
 #top,#info,#bottom,#side{transition:opacity .3s}
 body.clean #eye{opacity:.45}
+#eye2{position:fixed;left:50%;transform:translateX(-50%);top:calc(62px + env(safe-area-inset-top));z-index:7;font:inherit;font-weight:800;font-size:15px;color:#fff;border:2px solid #fff;border-radius:999px;padding:8px 16px;background:linear-gradient(135deg,#C2185B,#E0A526);box-shadow:0 4px 14px rgba(0,0,0,.4);cursor:pointer}
+body.clean #eye2{display:none}
+#info{top:calc(112px + env(safe-area-inset-top))!important}
 #top{left:66px!important}
 </style></head><body>
 <div id="bgFallback"></div>
@@ -56,6 +59,7 @@ body.clean #eye{opacity:.45}
 <div id="perm"><div class="box glass"><div class="big">📷</div><h3>اسمحي بالوصول إلى الكاميرا</h3><p style="line-height:1.8">لعرض النماذج فوق ما حولك. إن ظهرت رسالة الإذن اضغطي «سماح».</p><button class="ib h" onclick="startCam(true)">تشغيل الكاميرا</button> <button class="ib" onclick="document.getElementById('perm').style.display='none'">المتابعة بدون كاميرا</button></div></div>
 <div id="toast"></div>
 <button id="eye" onclick="toggleUI()" title="إخفاء الإطارات">👁</button>
+<button id="eye2" onclick="toggleUI()">👁 إخفاء الإطارات</button>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 // ---------- camera: request immediately ----------
