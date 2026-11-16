@@ -45,6 +45,13 @@ body.clean #eye{opacity:.45}
 body.clean #eye2{display:none}
 #info{top:calc(112px + env(safe-area-inset-top))!important}
 #top{left:66px!important}
+</style><link rel="stylesheet" href="guide.css"><style>
+#guide{left:auto!important;right:8px;width:clamp(80px,11vw,140px);bottom:clamp(125px,19vh,175px)}
+#bub{left:auto!important;right:calc(clamp(80px,11vw,140px) + 6px);bottom:calc(clamp(125px,19vh,175px) + clamp(120px,18vw,230px));border-radius:18px 18px 4px 18px}
+@media(max-width:700px){#guide{width:66px;bottom:150px}#bub{right:70px;bottom:270px;max-width:55vw}}
+body.clean #guide,body.clean #bub{opacity:0}
+#info{border:1.5px solid rgba(212,164,55,.6)!important}
+.ib{border-radius:999px!important;box-shadow:0 4px 12px rgba(0,0,0,.3)}
 </style></head><body>
 <div id="bgFallback"></div>
 <video id="cam" playsinline muted autoplay></video>
@@ -297,4 +304,7 @@ if(built)built.update.call(built,dt,t);R.render(scene,cam);requestAnimationFrame
 document.fonts.load('800 52px Almarai').finally(()=>{const h=location.hash.match(/^#s(\d)$/);load(h&&+h[1]<SC.length?+h[1]:0);loop()});
 setTimeout(()=>document.getElementById('hint').style.opacity=0,6000);
 </script>
-</body></html>
+<script src="guide.js"></script><script>
+(function(){const T=['ارسمي بإصبعك على القماش ✒','اختاري الفرشاة وارسمي 🖌','انقري على القماش لتطبعي بالقالب 🥕','حرّكي مؤشر الحرارة وانتبهي للأمان ⚠','اضغطي «الخطوة التالية» ⏭','اختاري المنتج… هدية لأمي 💜'];
+const _l=window.load;window.load=function(i){_l.apply(this,arguments);say(T[i]||'','jump')}})();
+</script></body></html>

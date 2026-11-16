@@ -56,7 +56,17 @@ canvas.cloth{background:#F6EDD8;touch-action:none;cursor:crosshair}
 .flow{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;min-height:44px;background:rgba(255,255,255,.6);border-radius:12px;padding:6px}
 .flow span{background:var(--navy);color:#fff;border-radius:10px;padding:6px 10px;font-weight:700}
 </style>
-</head>
+<link rel="stylesheet" href="guide.css"><style>
+header{background:linear-gradient(135deg,rgba(61,31,92,.95),rgba(122,59,166,.88) 60%,rgba(31,140,140,.85))!important;border-bottom:4px solid #D4A437}
+.card{background:linear-gradient(160deg,rgba(255,255,255,.92),rgba(255,255,255,.78))!important;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1.5px solid rgba(212,164,55,.55)!important;border-radius:22px!important;box-shadow:0 16px 40px rgba(61,31,92,.22)!important}
+.card h2{color:#3D1F5C}.card .tag{background:linear-gradient(135deg,#D4A437,#F2C76E)!important;color:#3D1F5C!important}
+#nav button{border-radius:999px!important;border:2px solid rgba(212,164,55,.6)!important}
+#nav button.on{background:linear-gradient(135deg,#7A3BA6,#C2185B)!important;color:#fff!important}
+.btn{border-radius:14px!important;box-shadow:0 4px 12px rgba(61,31,92,.25)}
+canvas.cloth{border-radius:16px;box-shadow:inset 0 0 0 6px #9C6B3E,0 10px 26px rgba(61,31,92,.25)}
+.dye{transition:transform .15s}.dye:hover{transform:scale(1.15)}
+@media(min-width:900px){main{padding-left:190px}}
+</style></head>
 <body>
 <header><div class="hin"><div><h1>🎨 مرسم الشمع السحري: تقنيات فن الباتيك</h1><p>التربية الفنية • مجال الطباعة • الموضوع الثاني • أ. نوف الشريف</p></div><div class="logos"><img src="img/moe.png" alt="وزارة التعليم"></div></div></header>
 <nav id="nav" class="wrapL"></nav>
@@ -265,4 +275,9 @@ function oTap(e,k){if(e.classList.contains('ok'))return;if(k===oI){e.classList.a
 {const h=location.hash.slice(1);const k=labs.findIndex(l=>l.id===h);go(k<0?0:k)}
 tDraw();mDraw();oStart(0);
 </script>
-</body></html>
+<script src="guide.js"></script><script>
+(function(){const TIP={temp:'حرّكي مؤشر الحرارة… متى يصير الشمع منصهرًا تمامًا؟ 🌡',draw:'ارسمي بالشمع، ثم اصبغي، ثم أزيلي الشمع… وشوفي السحر ✨',brush:'الصغيرة للتفاصيل والكبيرة للمساحات 🖌',stamp:'اختاري قالبًا من البيئة وانقري على القماش 🥕',multi:'جرّبي ترتيب الألوان… من الفاتح إلى الغامق 🎨',order:'رتّبي الخطوات كما في الكتاب 📖'};
+const _g=window.go;window.go=function(i){_g.apply(this,arguments);say(TIP[labs[i].id]||'هيا نجرّب!','jump')};
+const _o=window.snd;window.snd=function(n){_o.apply(this,arguments);if(n==='sOk')say(pick(['أحسنتِ يا فنانة! 🎉','رائع! عمل جميل ✨','برافو! 👏']),'jump')};
+setTimeout(()=>say('أهلًا بكِ في مرسم الشمع السحري! أنا لمى 👋 اختاري تجربة وابدئي','jump'),600)})();
+</script></body></html>
