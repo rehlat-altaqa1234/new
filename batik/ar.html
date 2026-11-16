@@ -51,8 +51,8 @@ body.clean #eye2{display:none}
 <canvas id="gl"></canvas>
 <div id="top" class="glass"><img src="img/moe.png" alt=""><h1>🔍 الواقع المعزز: أدوات الباتيك وعناصره</h1><span style="width:34px"></span></div>
 <div id="info" class="glass" onclick="this.classList.toggle('min')"><h2 id="iT"></h2><p id="iP"></p></div>
-<div id="side"><button onclick="openQuiz()" title="سؤال">❓</button><button onclick="snap()" title="التقاط">📸</button><button onclick="recenter()" title="توسيط">🎯</button><button onclick="toggleSnd()" id="sndB" title="الصوت">🔊</button></div>
-<div id="hint">👁 لإخفاء الإطارات (أو انقري مرتين) • اسحبي لتدوير النموذج • قرّبي بإصبعين • حرّكي الجوال حولك</div>
+<div id="side"><button id="flw" onclick="toggleFollow()" title="تثبيت في المنتصف">📌</button><button onclick="openQuiz()" title="سؤال">❓</button><button onclick="snap()" title="التقاط">📸</button><button onclick="recenter()" title="توسيط">🎯</button><button onclick="toggleSnd()" id="sndB" title="الصوت">🔊</button></div>
+<div id="hint">👁 لإخفاء الإطارات (أو انقري مرتين) • اسحبي لتدوير النموذج • قرّبي بإصبعين • 📌 النموذج ثابت في المنتصف</div>
 <div id="bottom"><div id="ctrl" class="glass"></div><div id="chips" class="glass"></div><div style="text-align:center;font-size:13px;font-weight:800;margin-top:4px;text-shadow:0 1px 6px rgba(0,0,0,.8)">إعداد المعلمة: أ. نوف الشريف</div></div>
 <div id="quiz"><div class="box glass"><h3 id="qq"></h3><div id="qo"></div><div id="qfb"></div><button class="ib g" onclick="closeQ()" style="margin-top:10px">إغلاق</button></div></div>
 <div id="shot"><div class="box glass"><img id="shotImg" alt=""><p>اضغطي مطولًا على الصورة لحفظها، أو:</p><a id="dl" class="ib h" style="display:inline-block;text-decoration:none" download="ar-energy.png">⬇ حفظ الصورة</a> <button class="ib" onclick="document.getElementById('shot').style.display='none'">إغلاق</button></div></div>
@@ -271,10 +271,11 @@ g.drawImage(cv,0,0);g.fillStyle='rgba(61,31,92,.85)';g.fillRect(0,c.height-70,c.
 const u=c.toDataURL('image/png');document.getElementById('shotImg').src=u;document.getElementById('dl').href=u;document.getElementById('shot').style.display='flex';sfx('drop',.7)}
 function toggleUI(){const c=document.body.classList.toggle('clean');document.getElementById('eye').textContent=c?'🙈':'👁';sfx('drop',.4);if(c)toast('اضغطي 🙈 لإظهار الإطارات')}
 let lastTap=0;cv.addEventListener('pointerup',e=>{const n=Date.now();if(n-lastTap<300)toggleUI();lastTap=n});
+let follow=false;function toggleFollow(){follow=!follow;q0=null;document.getElementById('flw').textContent=follow?'🧭':'📌';toast(follow?'🧭 يتحرك مع اتجاه الجوال':'📌 النموذج ثابت في المنتصف');sfx('drop',.4)}
 // loop
 const clock=new THREE.Clock();
 function loop(){const dt=Math.min(.05,clock.getDelta()),t=clock.elapsedTime;
-if(gyro&&q0){cam.quaternion.copy(q0).multiply(qd)}else{cam.quaternion.set(0,0,0,1)}
+if(follow&&gyro&&q0){cam.quaternion.copy(q0).multiply(qd)}else{cam.quaternion.set(0,0,0,1)}
 pop=Math.min(1,pop+dt*2.2);const e=1-Math.pow(1-pop,3)*(1-pop*0)+Math.sin(pop*Math.PI)*.08;
 var asp=innerWidth/innerHeight;window.base=asp<1?.4+asp*.4:1;anchor.position.y=asp<1?.08:-.02;holder.scale.setScalar(Math.max(.01,e)*zoom*base);disc.scale.setScalar(base);disc.position.y=ring.position.y=-.75*base;holder.rotation.y+=((rotY+((drag||SC[cur].still)?0:t*.15))-holder.rotation.y)*.2;holder.rotation.x+=(rotX-holder.rotation.x)*.2;
 ring.material.opacity=.5+.3*Math.sin(t*3);ring.scale.setScalar((1+.03*Math.sin(t*3))*base);
