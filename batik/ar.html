@@ -240,7 +240,9 @@ const SC=[
   const a=this.sg.attributes.position.array;for(let i=0;i<a.length;i+=3){a[i+2]=.12*Math.sin(this.base[i]*3+t*2)}this.sg.attributes.position.needsUpdate=true;this.sg.computeVertexNormals()}}];
 
 let cur=0,built=null;
-function load(i){cur=i;while(holder.children.length)holder.remove(holder.children[0]);const s=SC[i];built=Object.create(s);built.build(holder);
+function load(i){cur=i;while(holder.children.length)holder.remove(holder.children[0]);const s=SC[i];built=Object.create(s);const inner=new THREE.Group();holder.add(inner);holder.scale.setScalar(1);holder.rotation.set(0,0,0);built.build(inner);
+inner.updateMatrixWorld(true);const bx=new THREE.Box3();inner.traverse(o=>{if(o.isMesh&&o.visible!==false){o.geometry.computeBoundingBox();const b=o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld);bx.union(b)}});
+if(!bx.isEmpty()){const c=new THREE.Vector3();bx.getCenter(c);holder.worldToLocal(c);inner.position.set(-c.x,-c.y+.1,-c.z)}
 document.getElementById('iT').textContent=s.t;document.getElementById('iP').textContent=s.p;document.getElementById('info').classList.remove('min');
 document.querySelectorAll('#chips button').forEach((b,j)=>b.classList.toggle('on',j===i));holder.scale.setScalar(.01);pop=0;sfx('whoosh',.55);ambient(s.amb);try{history.replaceState(null,'','#s'+i)}catch(e){}}
 let pop=1;
@@ -262,7 +264,7 @@ const clock=new THREE.Clock();
 function loop(){const dt=Math.min(.05,clock.getDelta()),t=clock.elapsedTime;
 if(gyro&&q0){cam.quaternion.copy(q0).multiply(qd)}else{cam.quaternion.set(0,0,0,1)}
 pop=Math.min(1,pop+dt*2.2);const e=1-Math.pow(1-pop,3)*(1-pop*0)+Math.sin(pop*Math.PI)*.08;
-var asp=innerWidth/innerHeight;window.base=asp<1?.38+asp*.42:1;anchor.position.y=asp<1?-.35:-.15;holder.scale.setScalar(Math.max(.01,e)*zoom*base);disc.scale.setScalar(base);disc.position.y=ring.position.y=-1.05*base;holder.rotation.y+=((rotY+((drag||SC[cur].still)?0:t*.15))-holder.rotation.y)*.2;holder.rotation.x+=(rotX-holder.rotation.x)*.2;
+var asp=innerWidth/innerHeight;window.base=asp<1?.4+asp*.4:1;anchor.position.y=asp<1?.08:-.02;holder.scale.setScalar(Math.max(.01,e)*zoom*base);disc.scale.setScalar(base);disc.position.y=ring.position.y=-.75*base;holder.rotation.y+=((rotY+((drag||SC[cur].still)?0:t*.15))-holder.rotation.y)*.2;holder.rotation.x+=(rotX-holder.rotation.x)*.2;
 ring.material.opacity=.5+.3*Math.sin(t*3);ring.scale.setScalar((1+.03*Math.sin(t*3))*base);
 if(built)built.update.call(built,dt,t);R.render(scene,cam);requestAnimationFrame(loop)}
 document.fonts.load('800 52px Almarai').finally(()=>{const h=location.hash.match(/^#s(\d)$/);load(h&&+h[1]<SC.length?+h[1]:0);loop()});
