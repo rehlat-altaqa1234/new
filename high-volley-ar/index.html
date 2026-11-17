@@ -108,7 +108,7 @@ function fitView(){const asp=innerWidth/innerHeight;cam.aspect=asp;
  cam.fov=asp<1?Math.min(85,2*THREE.MathUtils.radToDeg(Math.atan(Math.tan(THREE.MathUtils.degToRad(27))/asp))):55;
  cam.updateProjectionMatrix();R.setSize(innerWidth,innerHeight);
  if(window.rk){const d=1.25,h=Math.tan(THREE.MathUtils.degToRad(cam.fov/2))*d;rk.position.set(0,-h*(asp>1?.5:.72),-d);rk.scale.setScalar(Math.min(.8,h*.7))}}
-addEventListener('resize',()=>setTimeout(fitView,60));addEventListener('orientationchange',()=>setTimeout(fitView,300));
+addEventListener('resize',()=>setTimeout(fitView,60));addEventListener('orientationchange',()=>setTimeout(()=>{fitView();q0=null;world.rotation.y=0},300));
 const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.45,metalness:.05},o));
 function canvasTex(w,h,fn){const c=document.createElement('canvas');c.width=w;c.height=h;fn(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t}
 function label(txt,bg='#1f2a6b',fg='#fff',w=1.2){
@@ -122,7 +122,7 @@ let q0=null;const qd=new THREE.Quaternion(),eu=new THREE.Euler(),zee=new THREE.V
 function onOri(e){if(e.alpha==null)return;gyro=true;const a=THREE.MathUtils.degToRad(e.alpha),b=THREE.MathUtils.degToRad(e.beta),g=THREE.MathUtils.degToRad(e.gamma),o=THREE.MathUtils.degToRad(screen.orientation?screen.orientation.angle:(window.orientation||0));
  eu.set(b,a,-g,'YXZ');qd.setFromEuler(eu);qd.multiply(q1);qd.multiply(new THREE.Quaternion().setFromAxisAngle(zee,-o));if(!q0){const y=new THREE.Euler().setFromQuaternion(qd,'YXZ');q0=new THREE.Quaternion().setFromEuler(new THREE.Euler(0,y.y,0,'YXZ')).invert()}}
 function enableGyro(){if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){DeviceOrientationEvent.requestPermission().then(r=>{if(r==='granted')addEventListener('deviceorientation',onOri)}).catch(()=>{})}else addEventListener('deviceorientation',onOri)}
-function recenter(){q0=null;rotY=0;sfx('whoosh',.4)}
+let autoC=true;function recenter(){q0=null;rotY=0;world.rotation.y=0;sfx('whoosh',.4);toast('تم التوسيط')}
 let rotY=0,drag=null;
 // ---------- world ----------
 const world=new THREE.Group();scene.add(world);
@@ -266,7 +266,7 @@ setMode('play');running=false;
 const clock=new THREE.Clock();
 function loop(){requestAnimationFrame(loop);const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
  if(gyro&&q0){cam.quaternion.copy(q0).multiply(qd)}else{cam.quaternion.setFromEuler(new THREE.Euler(-.05,0,0))}
- world.rotation.y=mode=='play'?0:0;
+ if(autoC){const ce=new THREE.Euler().setFromQuaternion(cam.quaternion,'YXZ');let dy=ce.y-world.rotation.y;dy=Math.atan2(Math.sin(dy),Math.cos(dy));world.rotation.y+=dy*Math.min(1,dt*3)}
  if(mode!='play'){stepsG.rotation.y=rotY*.5;lookG.rotation.y=0;bigR.rotation.y=rotY+t*.3;bigB.rotation.y=rotY+t*.5;bigB.rotation.x=t*.2}
  // hoop pulse
  hoopRing.scale.setScalar(1+Math.sin(t*4)*.04);hoop.lookAt(cam.getWorldPosition(new THREE.Vector3()));
