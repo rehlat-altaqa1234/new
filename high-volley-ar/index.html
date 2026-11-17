@@ -40,6 +40,16 @@ html,body{height:100%;overflow:hidden;background:#d9f5e9;font-family:Almarai,san
 #toast{position:fixed;top:42%;left:50%;transform:translate(-50%,-50%) scale(.6);z-index:5;font-size:34px;font-weight:800;opacity:0;transition:.3s;pointer-events:none;color:#fff;-webkit-text-stroke:2px var(--navy);paint-order:stroke fill;text-shadow:0 4px 0 var(--navy);white-space:nowrap}
 #toast.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
 #shot img{width:100%;border-radius:12px;border:3px solid var(--navy)}
+@media (orientation:landscape) and (max-height:560px){
+#top{padding:3px 8px}#top img{height:26px}#top h1{font-size:14px}#top .tch{font-size:10px}
+#hud{top:calc(48px + env(safe-area-inset-top))}#hud span{font-size:13px;padding:2px 10px}
+#tip{top:calc(48px + env(safe-area-inset-top));left:auto;right:8px;width:min(330px,40vw);font-size:12.5px;padding:5px 8px}
+#hud{left:12px;transform:none}
+#bottom{left:50%;right:auto;transform:translateX(-50%);width:min(560px,92vw)}
+#chips{padding:5px;gap:6px}#ctrl{padding:5px;margin-bottom:5px}.chip,.ib{font-size:12.5px;padding:6px 11px}
+#side{gap:7px}#side button{width:38px;height:38px}#side svg{width:20px;height:20px}
+.ov .box{max-height:94vh;overflow:auto;padding:12px}#intro img.hero,#end img.hero{aspect-ratio:16/6}
+}
 </style></head><body>
 <div id="bgFallback"></div>
 <video id="cam" playsinline muted autoplay></video>
@@ -94,7 +104,11 @@ const R=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true,preserveDra
 R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(innerWidth,innerHeight);R.outputEncoding=THREE.sRGBEncoding;
 const scene=new THREE.Scene();const cam=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.05,100);scene.add(cam);
 scene.add(new THREE.HemisphereLight(0xffffff,0x88aa99,1));const dl=new THREE.DirectionalLight(0xffffff,.8);dl.position.set(2,5,3);scene.add(dl);
-addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();R.setSize(innerWidth,innerHeight)});
+function fitView(){const asp=innerWidth/innerHeight;cam.aspect=asp;
+ cam.fov=asp<1?Math.min(85,2*THREE.MathUtils.radToDeg(Math.atan(Math.tan(THREE.MathUtils.degToRad(27))/asp))):55;
+ cam.updateProjectionMatrix();R.setSize(innerWidth,innerHeight);
+ if(window.rk){const d=1.25,h=Math.tan(THREE.MathUtils.degToRad(cam.fov/2))*d;rk.position.set(0,-h*(asp>1?.5:.72),-d);rk.scale.setScalar(Math.min(.8,h*.7))}}
+addEventListener('resize',()=>setTimeout(fitView,60));addEventListener('orientationchange',()=>setTimeout(fitView,300));
 const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.45,metalness:.05},o));
 function canvasTex(w,h,fn){const c=document.createElement('canvas');c.width=w;c.height=h;fn(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t}
 function label(txt,bg='#1f2a6b',fg='#fff',w=1.2){
@@ -141,7 +155,7 @@ function makeRacket(s=1){const g=new THREE.Group();
  const grip=new THREE.Mesh(new THREE.CylinderGeometry(.022*s,.02*s,.2*s,14),M(0x1f2a6b));grip.position.y=-.42*s;g.add(grip);
  return g}
 // first-person racket attached to camera
-const myRacket=makeRacket(1.1);const rk=new THREE.Group();rk.add(myRacket);myRacket.position.y=.33;rk.position.set(.44,-.62,-1.25);rk.scale.setScalar(.8);cam.add(rk);
+const myRacket=makeRacket(1.1);const rk=new THREE.Group();rk.add(myRacket);myRacket.position.y=.33;window.rk=rk;fitView();cam.add(rk);
 let swing=0;
 // ---------- modes ----------
 let mode='play';
@@ -257,7 +271,7 @@ function loop(){requestAnimationFrame(loop);const dt=Math.min(clock.getDelta(),.
  // hoop pulse
  hoopRing.scale.setScalar(1+Math.sin(t*4)*.04);hoop.lookAt(cam.getWorldPosition(new THREE.Vector3()));
  // racket swing
- if(swing>0){swing=Math.max(0,swing-dt*3.5)}const sw=Math.sin((1-swing)*Math.PI)*(swing>0?1:0);rk.rotation.x=-sw*1.1;rk.rotation.z=sw*.3;
+ if(swing>0){swing=Math.max(0,swing-dt*3.5)}const sw=Math.sin((1-swing)*Math.PI)*(swing>0?1:0);rk.rotation.x=-sw*1.1;rk.rotation.z=0;
  // play
  if(mode=='play'&&running){spawnT-=dt;if(spawnT<=0&&queue.length){spawn();spawnT=2.1}
   balls.forEach(b=>{if(b.state=='fly'||b.state=='low'){b.t+=dt/b.dur;b.m.position.copy(ballPos(b,b.t));b.m.rotation.x+=dt*8;if(b.state=='low')b.m.material.opacity=Math.max(.3,1-(b.t-.6));if(b.t>1.6)b.state='gone'}
