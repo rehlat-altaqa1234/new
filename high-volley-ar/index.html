@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<link rel="icon" href="logo.png"><title>الواقع المعزز | الضربة الطائرة العالية</title>
+<style>
+@font-face{font-family:Almarai;src:url(fonts/almarai.ttf);font-weight:400}
+@font-face{font-family:Almarai;src:url(fonts/almarai-bold.ttf);font-weight:800}
+:root{--navy:#1f2a6b;--pink:#ff9ec7;--yel:#ffd84d;--mint:#9be0c4;--lav:#c8b6ff;--sky:#8fd3ff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#d9f5e9;font-family:Almarai,sans-serif;color:var(--navy);touch-action:none}
+#cam{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+#bgFallback{position:fixed;inset:0;background:url(bg.jpg) center/cover;z-index:0}
+#gl{position:fixed;inset:0;z-index:1}
+.glass{background:rgba(255,255,255,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:3px solid var(--navy);border-radius:20px;box-shadow:0 4px 0 var(--navy)}
+#top{position:fixed;top:calc(8px + env(safe-area-inset-top));left:8px;right:8px;z-index:3;display:flex;align-items:center;gap:8px;padding:5px 10px}
+#top img{height:34px}
+#top h1{flex:1;font-size:clamp(13px,3.6vw,18px);text-align:center;font-weight:800}
+#top .tch{font-size:11px;font-weight:800;background:var(--pink);border:2px solid var(--navy);border-radius:12px;padding:2px 8px;text-align:center;line-height:1.4}
+#hud{position:fixed;top:calc(62px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:3;display:flex;gap:8px}
+#hud span{padding:4px 12px;font-weight:800;font-size:15px}
+#tip{position:fixed;top:calc(106px + env(safe-area-inset-top));left:8px;right:8px;z-index:3;text-align:center;font-weight:800;font-size:clamp(13px,3.6vw,16px);padding:8px 10px;line-height:1.6}
+#bottom{position:fixed;bottom:calc(8px + env(safe-area-inset-bottom));left:8px;right:8px;z-index:3}
+#ctrl{display:none;gap:8px;justify-content:center;padding:8px;margin-bottom:8px}
+#chips{display:flex;gap:8px;justify-content:center;padding:8px;flex-wrap:wrap}
+.chip,.ib{font:inherit;font-weight:800;font-size:14px;color:var(--navy);border:3px solid var(--navy);background:#fff;padding:8px 14px;border-radius:999px;cursor:pointer;box-shadow:0 3px 0 var(--navy)}
+.chip.on{background:var(--yel)}
+.ib.p{background:var(--pink)}.ib.m{background:var(--mint)}
+#side{position:fixed;left:10px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:10px}
+#side button{width:46px;height:46px;border-radius:50%;border:3px solid var(--navy);background:rgba(255,255,255,.75);cursor:pointer;display:grid;place-items:center;box-shadow:0 3px 0 var(--navy)}
+#side svg{width:24px;height:24px}
+.ov{position:fixed;inset:0;z-index:6;display:none;align-items:center;justify-content:center;background:rgba(31,42,107,.25);padding:16px}
+.ov .box{width:min(460px,100%);padding:18px;text-align:center;background:rgba(255,255,255,.88)}
+.ov h3{font-size:18px;line-height:1.7;margin-bottom:10px}
+.ov p{font-size:14px;line-height:1.8;margin-bottom:10px}
+.qo{display:block;width:100%;font:inherit;font-weight:800;font-size:15px;margin:7px 0;padding:10px;border-radius:16px;border:3px solid var(--navy);background:#fff;color:var(--navy);cursor:pointer;box-shadow:0 3px 0 var(--navy)}
+.qo.ok{background:#c9f7dc;border-color:#1c8a52}.qo.no{background:#ffd6d6}
+#qfb{min-height:22px;margin:6px 0;font-weight:800;line-height:1.7;font-size:14px}
+.stars svg{width:38px;height:38px;margin:2px}
+#intro img.hero{width:100%;border-radius:16px;border:3px solid var(--navy);margin-bottom:10px;aspect-ratio:16/8;object-fit:cover}
+#toast{position:fixed;top:42%;left:50%;transform:translate(-50%,-50%) scale(.6);z-index:5;font-size:34px;font-weight:800;opacity:0;transition:.3s;pointer-events:none;color:#fff;-webkit-text-stroke:2px var(--navy);paint-order:stroke fill;text-shadow:0 4px 0 var(--navy);white-space:nowrap}
+#toast.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#shot img{width:100%;border-radius:12px;border:3px solid var(--navy)}
+</style></head><body>
+<div id="bgFallback"></div>
+<video id="cam" playsinline muted autoplay></video>
+<canvas id="gl"></canvas>
+<div id="top" class="glass"><img src="logo.png" alt="وزارة التعليم"><h1>الواقع المعزز: الضربة الطائرة العالية</h1><div class="tch">أ. رائدة الشريف<br><span style="font-weight:400">التربية البدنية</span></div></div>
+<div id="hud"><span class="glass" id="sc">النقاط: ٠</span><span class="glass" id="bl">الكرات: ٠ / ١٠</span></div>
+<div id="tip" class="glass"></div>
+<div id="side">
+ <button onclick="openQuiz()" title="سؤال"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#ffd84d" stroke="#1f2a6b" stroke-width="2"/><path d="M9.2 9a3 3 0 1 1 4.3 2.7c-.9.5-1.5 1-1.5 2.1" fill="none" stroke="#1f2a6b" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.3" fill="#1f2a6b"/></svg></button>
+ <button onclick="snap()" title="صورة"><svg viewBox="0 0 24 24"><rect x="2.5" y="6.5" width="19" height="13" rx="3" fill="#8fd3ff" stroke="#1f2a6b" stroke-width="2"/><circle cx="12" cy="13" r="3.6" fill="#fff" stroke="#1f2a6b" stroke-width="2"/><path d="M8 6.5l1.5-2.5h5L16 6.5" fill="none" stroke="#1f2a6b" stroke-width="2"/></svg></button>
+ <button onclick="recenter()" title="توسيط"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#fff" stroke="#1f2a6b" stroke-width="2"/><circle cx="12" cy="12" r="4.5" fill="#ff9ec7" stroke="#1f2a6b" stroke-width="2"/></svg></button>
+ <button onclick="toggleSnd()" title="الصوت" id="sndB"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#9be0c4" stroke="#1f2a6b" stroke-width="2" stroke-linejoin="round"/><path id="sndW" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="#1f2a6b" stroke-width="2" stroke-linecap="round"/></svg></button>
+</div>
+<div id="bottom"><div id="ctrl" class="glass"></div>
+ <div id="chips" class="glass">
+  <button class="chip on" data-m="play">العبي واضربي</button>
+  <button class="chip" data-m="steps">خطوات الضربة</button>
+  <button class="chip" data-m="look">المضرب والكرة</button>
+ </div></div>
+<div id="intro" class="ov" style="display:flex"><div class="box glass">
+ <img class="hero" src="hi5.jpg" alt="">
+ <h3>هيا نلعب بالواقع المعزز!</h3>
+ <p>ستظهر الشبكة والكرات في المكان من حولك. اضغطي على الكرة <b>العالية</b> وهي داخل <b>الدائرة الذهبية</b> لتضربيها ضربة طائرة عالية.</p>
+ <button class="ib p" onclick="begin()">ابدئي وافتحي الكاميرا</button>
+</div></div>
+<div id="quiz" class="ov"><div class="box glass"><h3 id="qq"></h3><div id="qo"></div><div id="qfb"></div><button class="ib m" onclick="closeOv('quiz')">إغلاق</button></div></div>
+<div id="end" class="ov"><div class="box glass"><img class="hero" src="hi5.jpg" alt="" style="width:100%;border-radius:16px;border:3px solid #1f2a6b;aspect-ratio:16/8;object-fit:cover"><h3 id="endT"></h3><div class="stars" id="endS"></div><p id="endP"></p><button class="ib p" onclick="closeOv('end');startRound()">العبي مرة أخرى</button> <button class="ib m" onclick="closeOv('end');openQuiz()">سؤال</button></div></div>
+<div id="shot" class="ov"><div class="box glass"><img id="shotImg" alt=""><p>اضغطي مطولًا على الصورة لحفظها</p><button class="ib m" onclick="closeOv('shot')">إغلاق</button></div></div>
+<div id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const AR=n=>String(n).replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
+// ---------- camera ----------
+const video=$('cam');
+async function startCam(){
+ try{if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw 0;
+  const st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false});
+  video.srcObject=st;await video.play().catch(()=>{});$('bgFallback').style.display='none';
+ }catch(e){toast('تعمل اللعبة بدون كاميرا')}
+}
+// ---------- sounds (human only) ----------
+const SND={};['correct','wrong','win','tap','whoosh'].forEach(n=>{SND[n]=new Audio('snd/'+n+'.mp3')});
+let sndOn=true;
+function sfx(n,v=.7){if(!sndOn)return;try{const a=SND[n].cloneNode();a.volume=v;a.play().catch(()=>{})}catch(e){}}
+function toggleSnd(){sndOn=!sndOn;$('sndW').style.display=sndOn?'':'none'}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),1100)}
+function closeOv(id){$(id).style.display='none'}
+// ---------- three ----------
+const cv=$('gl');
+const R=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true,preserveDrawingBuffer:true});
+R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(innerWidth,innerHeight);R.outputEncoding=THREE.sRGBEncoding;
+const scene=new THREE.Scene();const cam=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,.05,100);scene.add(cam);
+scene.add(new THREE.HemisphereLight(0xffffff,0x88aa99,1));const dl=new THREE.DirectionalLight(0xffffff,.8);dl.position.set(2,5,3);scene.add(dl);
+addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();R.setSize(innerWidth,innerHeight)});
+const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.45,metalness:.05},o));
+function canvasTex(w,h,fn){const c=document.createElement('canvas');c.width=w;c.height=h;fn(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t}
+function label(txt,bg='#1f2a6b',fg='#fff',w=1.2){
+ const c=document.createElement('canvas');c.width=640;c.height=150;const g=c.getContext('2d');
+ const draw=t=>{g.clearRect(0,0,640,150);g.fillStyle=bg;g.strokeStyle='#fff';g.lineWidth=8;g.beginPath();g.roundRect?g.roundRect(8,8,624,134,60):g.rect(8,8,624,134);g.fill();g.stroke();
+  g.fillStyle=fg;let fs=58;do{g.font='800 '+fs+'px Almarai';fs-=2}while(g.measureText(t).width>570&&fs>24);g.textAlign='center';g.textBaseline='middle';g.direction='rtl';g.fillText(t,320,80)};
+ draw(txt);const tex=new THREE.CanvasTexture(c);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false}));
+ s.scale.set(w,w*150/640,1);s.renderOrder=9;s.userData.set=t=>{draw(t);tex.needsUpdate=true};return s}
+// ---------- gyro ----------
+let q0=null;const qd=new THREE.Quaternion(),eu=new THREE.Euler(),zee=new THREE.Vector3(0,0,1),q1=new THREE.Quaternion(-Math.sqrt(.5),0,0,Math.sqrt(.5));let gyro=false;
+function onOri(e){if(e.alpha==null)return;gyro=true;const a=THREE.MathUtils.degToRad(e.alpha),b=THREE.MathUtils.degToRad(e.beta),g=THREE.MathUtils.degToRad(e.gamma),o=THREE.MathUtils.degToRad(screen.orientation?screen.orientation.angle:(window.orientation||0));
+ eu.set(b,a,-g,'YXZ');qd.setFromEuler(eu);qd.multiply(q1);qd.multiply(new THREE.Quaternion().setFromAxisAngle(zee,-o));if(!q0){const y=new THREE.Euler().setFromQuaternion(qd,'YXZ');q0=new THREE.Quaternion().setFromEuler(new THREE.Euler(0,y.y,0,'YXZ')).invert()}}
+function enableGyro(){if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){DeviceOrientationEvent.requestPermission().then(r=>{if(r==='granted')addEventListener('deviceorientation',onOri)}).catch(()=>{})}else addEventListener('deviceorientation',onOri)}
+function recenter(){q0=null;rotY=0;sfx('whoosh',.4)}
+let rotY=0,drag=null;
+// ---------- world ----------
+const world=new THREE.Group();scene.add(world);
+const FLOOR=-1.35;
+// court
+const court=new THREE.Mesh(new THREE.PlaneGeometry(5,9),new THREE.MeshBasicMaterial({transparent:true,opacity:.85,map:canvasTex(256,460,(g,w,h)=>{g.fillStyle='#7fd4b0';g.fillRect(0,0,w,h);g.strokeStyle='#fff';g.lineWidth=6;g.strokeRect(10,10,w-20,h-20);g.beginPath();g.moveTo(10,h/2);g.lineTo(w-10,h/2);g.moveTo(w/2,h*.25);g.lineTo(w/2,h*.75);g.moveTo(40,h*.25);g.lineTo(w-40,h*.25);g.moveTo(40,h*.75);g.lineTo(w-40,h*.75);g.stroke()})}));
+court.rotation.x=-Math.PI/2;court.position.set(0,FLOOR,-6.8);world.add(court);
+// net
+const netG=new THREE.Group();netG.position.set(0,FLOOR,-6.8);world.add(netG);
+[-2.3,2.3].forEach(x=>{const p=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,1.1,16),M(0x1f2a6b));p.position.set(x,.55,0);netG.add(p);const k=new THREE.Mesh(new THREE.SphereGeometry(.08,16,12),M(0xffd84d));k.position.set(x,1.12,0);netG.add(k)});
+const netTex=canvasTex(512,128,(g,w,h)=>{g.clearRect(0,0,w,h);g.strokeStyle='rgba(31,42,107,.75)';g.lineWidth=2;for(let x=0;x<w;x+=12){g.beginPath();g.moveTo(x,0);g.lineTo(x,h);g.stroke()}for(let y=0;y<h;y+=12){g.beginPath();g.moveTo(0,y);g.lineTo(w,y);g.stroke()}});
+const net=new THREE.Mesh(new THREE.PlaneGeometry(4.6,.7),new THREE.MeshBasicMaterial({map:netTex,transparent:true,side:2}));net.position.set(0,.65,0);netG.add(net);
+const band=new THREE.Mesh(new THREE.BoxGeometry(4.6,.07,.03),M(0xffffff));band.position.set(0,1.0,0);netG.add(band);
+const netL=label('الشبكة','#ff9ec7','#1f2a6b',.9);netL.position.set(1.6,1.45,0);netG.add(netL);
+// golden high-zone hoop
+const ZONE=new THREE.Vector3(0,.3,-3.4);
+const hoop=new THREE.Group();hoop.position.copy(ZONE);world.add(hoop);
+const hoopRing=new THREE.Mesh(new THREE.TorusGeometry(.4,.035,12,48),M(0xffd84d,{emissive:0xffb000,emissiveIntensity:.5}));hoop.add(hoopRing);
+const hoopFill=new THREE.Mesh(new THREE.CircleGeometry(.4,40),new THREE.MeshBasicMaterial({color:0xfff2a8,transparent:true,opacity:.18,side:2}));hoop.add(hoopFill);
+const hoopL=label('منطقة الضربة العالية','#ffd84d','#1f2a6b',1.15);hoopL.position.set(0,.6,0);hoop.add(hoopL);
+// ball texture
+const ballTex=canvasTex(256,128,(g,w,h)=>{g.fillStyle='#d8f25a';g.fillRect(0,0,w,h);g.strokeStyle='#fff';g.lineWidth=9;g.beginPath();for(let x=0;x<=w;x+=4){const y=h/2+Math.sin(x/w*Math.PI*4)*h*.28;x?g.lineTo(x,y):g.moveTo(x,y)}g.stroke()});
+const ballMat=M(0xffffff,{map:ballTex,roughness:.8});
+function makeBall(r=.11){return new THREE.Mesh(new THREE.SphereGeometry(r,28,20),ballMat)}
+// racket
+function makeRacket(s=1){const g=new THREE.Group();
+ const head=new THREE.Mesh(new THREE.TorusGeometry(.17*s,.018*s,10,40),M(0xff5fa2));head.scale.set(1,1.25,1);g.add(head);
+ const str=new THREE.Mesh(new THREE.CircleGeometry(.17*s,32),new THREE.MeshBasicMaterial({transparent:true,side:2,map:canvasTex(128,128,(c,w,h)=>{c.clearRect(0,0,w,h);c.strokeStyle='rgba(255,255,255,.95)';c.lineWidth=3;for(let i=8;i<w;i+=12){c.beginPath();c.moveTo(i,0);c.lineTo(i,h);c.stroke();c.beginPath();c.moveTo(0,i);c.lineTo(w,i);c.stroke()}})}));str.scale.set(1,1.25,1);g.add(str);
+ const neck=new THREE.Mesh(new THREE.CylinderGeometry(.014*s,.014*s,.12*s,10),M(0xff5fa2));neck.position.y=-.27*s;g.add(neck);
+ const grip=new THREE.Mesh(new THREE.CylinderGeometry(.022*s,.02*s,.2*s,14),M(0x1f2a6b));grip.position.y=-.42*s;g.add(grip);
+ return g}
+// first-person racket attached to camera
+const myRacket=makeRacket(1.1);const rk=new THREE.Group();rk.add(myRacket);myRacket.position.y=.33;rk.position.set(.44,-.62,-1.25);rk.scale.setScalar(.8);cam.add(rk);
+let swing=0;
+// ---------- modes ----------
+let mode='play';
+const playG=new THREE.Group(),stepsG=new THREE.Group(),lookG=new THREE.Group();world.add(playG,stepsG,lookG);
+function setMode(m){mode=m;document.querySelectorAll('.chip').forEach(b=>b.classList.toggle('on',b.dataset.m==m));
+ playG.visible=hoop.visible=rk.visible=(m=='play');stepsG.visible=(m=='steps');lookG.visible=(m=='look');netG.visible=court.visible=(m!='look');
+ $('hud').style.display=m=='play'?'flex':'none';$('ctrl').style.display='none';
+ if(m=='play'){tip('اضغطي على الكرة العالية وهي داخل الدائرة الذهبية!');startRound()}
+ if(m=='steps'){showStep(0)}
+ if(m=='look'){tip('اسحبي بإصبعك لتدوير المضرب والكرة وتعرّفي عليهما');buildCtrl('')}
+ sfx('tap',.5)}
+document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+function tip(t){$('tip').textContent=t}
+function buildCtrl(h){$('ctrl').innerHTML=h;$('ctrl').style.display=h?'flex':'none'}
+// ---------- play mode ----------
+let balls=[],score=0,thrown=0,ROUND=10,spawnT=0,running=false,queue=[];
+function startRound(){balls.forEach(b=>playG.remove(b.m));balls=[];score=0;thrown=0;spawnT=1;running=true;
+ queue=[];for(let i=0;i<ROUND;i++)queue.push(i<7);queue.sort(()=>Math.random()-.5);hud()}
+function hud(){$('sc').textContent='النقاط: '+AR(score);$('bl').textContent='الكرات: '+AR(thrown)+' / '+AR(ROUND)}
+function spawn(){const high=queue.shift();thrown++;hud();
+ const m=makeBall();playG.add(m);const sx=(Math.random()-.5)*2.4;
+ const b={m,high,t:0,dur:2.4,p0:new THREE.Vector3(sx,FLOOR+1.1,-10.5),p1:high?ZONE.clone().add(new THREE.Vector3((Math.random()-.5)*.25,0,0)):new THREE.Vector3((Math.random()-.5)*1.2,FLOOR+.35,-3.4),peak:high?1.7:.9,state:'fly'};
+ b.p2=b.p1.clone().add(new THREE.Vector3(0,high?.15:-.4,3.2));balls.push(b);sfx('whoosh',.25)}
+function ballPos(b,t){// t 0..1 : from p0 to p1 with arc ; >1 continue to p2
+ if(t<=1){const p=b.p0.clone().lerp(b.p1,t);p.y+=Math.sin(t*Math.PI)*b.peak*(1-t*.35);return p}
+ const u=t-1;return b.p1.clone().lerp(b.p2,u)}
+const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
+function tapPlay(x,y){
+ swing=1;sfx('tap',.35);
+ let best=null,bd=1e9;
+ balls.forEach(b=>{if(b.state!='fly')return;const p=b.m.getWorldPosition(new THREE.Vector3()).project(cam);if(p.z>1)return;const sx=(p.x+1)/2*innerWidth,sy=(1-p.y)/2*innerHeight;const d=Math.hypot(sx-x,sy-y);if(d<bd){bd=d;best=b}});
+ if(!best||bd>Math.max(80,innerWidth*.14))return;
+ const wp=best.m.position;const inZone=wp.distanceTo(ZONE)<.8;
+ if(best.high&&inZone){best.state='hit';best.t=0;best.from=wp.clone();score++;hud();toast('ضربة رائعة!');sfx('correct',.75);burst(wp)}
+ else if(best.high){toast('اضربيها داخل الدائرة!');sfx('wrong',.45)}
+ else{best.state='low';toast('هذه كرة منخفضة!');sfx('wrong',.45);best.m.material=best.m.material.clone();best.m.material.transparent=true}
+}
+// sparkles
+const sparks=[];
+function burst(p){for(let i=0;i<22;i++){const s=new THREE.Mesh(new THREE.OctahedronGeometry(.035),new THREE.MeshBasicMaterial({color:[0xff9ec7,0xffd84d,0x9be0c4,0xc8b6ff,0x8fd3ff][i%5],transparent:true}));s.position.copy(p);s.userData.v=new THREE.Vector3((Math.random()-.5)*2.6,Math.random()*2.4,(Math.random()-.5)*2.6);s.userData.l=1;world.add(s);sparks.push(s)}}
+function endRound(){running=false;const st=Math.round(score/7*5);
+ $('endT').textContent='أحسنتِ يا بطلة! ضربتِ '+AR(score)+' من '+AR(7)+' كرات عالية';
+ $('endS').innerHTML=Array.from({length:5},(_,k)=>`<svg viewBox="0 0 40 40"><path d="M20 3l5 11 12 1-9 8 3 12-11-7-11 7 3-12-9-8 12-1z" fill="${k<st?'#ffd84d':'#eee'}" stroke="#1f2a6b" stroke-width="2.5" stroke-linejoin="round"/></svg>`).join('');
+ $('endP').textContent=score>=6?'أنتِ بطلة الضربة الطائرة العالية!':'تذكّري: اضربي الكرة وهي عالية، واتركي الكرات المنخفضة';
+ $('end').style.display='flex';sfx('win',.8)}
+// ---------- steps mode ----------
+const STEPS=[
+ {t:'١- سحب الذراع للخلف والمضرب عالٍ',d:'نسحب الذراع الحاملة للمضرب للخلف قليلًا وإلى الجانب، ويكون المضرب عاليًا.',arm:.55,ball:[.26,2.25,-1.7],step:0},
+ {t:'٢- خطوة للأمام ودفع المضرب',d:'نأخذ خطوة بالقدم للأمام مع دفع المضرب للأسفل باتجاه الكرة.',arm:-.25,ball:[.26,2.0,-.95],step:1},
+ {t:'٣- مقابلة الكرة مع ثبات الرسغ',d:'تقابل شبكة المضرب الكرة ونوجّهها إلى ملعب المنافس مع المحافظة على ثبات الرسغ.',arm:-.7,ball:[.26,1.78,-.62],step:1},
+ {t:'٤- متابعة الحركة نحو الشبكة',d:'نتابع حركة الضرب على امتداد الذراع الضاربة نحو الشبكة.',arm:-1.7,ball:[.26,.9,-3.6],step:1}];
+// simple cute player made of shapes
+const player=new THREE.Group();player.position.set(.25,FLOOR,-4.6);player.rotation.y=Math.PI*.72;stepsG.add(player);
+const navy=M(0x1f2a6b),skin=M(0xf6c9a8),white=M(0xffffff),hair=M(0x6b3d1e);
+const body=new THREE.Mesh(new THREE.CylinderGeometry(.2,.24,.6,20),navy);body.position.y=.95;player.add(body);
+[-.1,.1].forEach((x,i)=>{const l=new THREE.Mesh(new THREE.CylinderGeometry(.075,.07,.62,14),navy);l.position.set(x,.36,0);l.name='leg'+i;player.add(l);const sh=new THREE.Mesh(new THREE.SphereGeometry(.09,14,10),white);sh.scale.set(1,.7,1.4);sh.position.set(x,.05,.03);sh.name='shoe'+i;player.add(sh);
+ [-.05,.05].forEach(o=>{const s=new THREE.Mesh(new THREE.BoxGeometry(.012,.6,.012),white);s.position.set(x+o*1.3,.36,.07);player.add(s)})});
+const head=new THREE.Mesh(new THREE.SphereGeometry(.24,24,18),skin);head.position.y=1.5;player.add(head);
+const hr=new THREE.Mesh(new THREE.SphereGeometry(.26,24,18,0,Math.PI*2,0,Math.PI*.55),hair);hr.position.y=1.53;hr.rotation.x=.25;player.add(hr);
+const tail=new THREE.Mesh(new THREE.SphereGeometry(.13,16,12),hair);tail.scale.set(1,1.6,1);tail.position.set(0,1.42,.24);player.add(tail);
+const bow=new THREE.Mesh(new THREE.TorusGeometry(.07,.03,8,16),navy);bow.position.set(0,1.66,.2);player.add(bow);
+[-.08,.08].forEach(x=>{const e=new THREE.Mesh(new THREE.SphereGeometry(.035,12,10),M(0x3b2314));e.position.set(x,1.52,-.21);player.add(e);const c=new THREE.Mesh(new THREE.SphereGeometry(.03,10,8),M(0xff9ec7));c.position.set(x*1.6,1.44,-.19);player.add(c)});
+const smile=new THREE.Mesh(new THREE.TorusGeometry(.05,.012,8,16,Math.PI),M(0xd9446a));smile.position.set(0,1.43,-.225);smile.rotation.z=Math.PI;player.add(smile);
+const armL=new THREE.Mesh(new THREE.CylinderGeometry(.055,.05,.5,12),navy);armL.position.set(-.27,1.0,0);armL.rotation.z=-.3;player.add(armL);
+const shoulder=new THREE.Group();shoulder.position.set(.26,1.18,0);player.add(shoulder);
+const armR=new THREE.Mesh(new THREE.CylinderGeometry(.055,.05,.5,12),navy);armR.position.y=.25;shoulder.add(armR);
+const pr=makeRacket(1.2);pr.position.y=.75;shoulder.add(pr);
+const sBall=makeBall(.1);player.add(sBall);
+const stepL=label('','#ffd84d','#1f2a6b',1.6);stepL.position.set(0,FLOOR+2.35,-4.6);stepsG.add(stepL);
+let cur=0,armT=.55,armNow=.55,ballT=new THREE.Vector3(.26,2.25,-1.7),stepNow=0,stepT=0;
+function showStep(i){cur=(i+4)%4;const s=STEPS[cur];armT=s.arm;stepT=s.step;ballT.set(...s.ball);
+ stepL.userData.set(s.t);tip(s.d);
+ buildCtrl(`<button class="ib m" onclick="showStep(cur-1)">السابقة</button><button class="ib p" onclick="playSteps()">شغّلي الحركة</button><button class="ib m" onclick="showStep(cur+1)">التالية</button>`);sfx('whoosh',.3)}
+let auto=null;function playSteps(){clearInterval(auto);let k=0;showStep(0);auto=setInterval(()=>{k++;if(k>3){clearInterval(auto);sfx('correct',.6);toast('أحسنتِ!');return}showStep(k)},1600)}
+// ---------- look mode ----------
+const bigR=makeRacket(2);bigR.position.set(-.5,FLOOR+1.35,-3.8);lookG.add(bigR);
+const bigB=makeBall(.24);bigB.position.set(.6,FLOOR+1.2,-3.8);lookG.add(bigB);
+const lr=label('المضرب','#ff9ec7','#1f2a6b',.9);lr.position.set(-.5,FLOOR+2.3,-3.8);lookG.add(lr);
+const lb=label('كرة التنس','#9be0c4','#1f2a6b',.9);lb.position.set(.6,FLOOR+1.65,-3.8);lookG.add(lb);
+const ls=label('شبكة المضرب','#c8b6ff','#1f2a6b',.95);ls.position.set(-.5,FLOOR+.45,-3.8);lookG.add(ls);
+// ---------- input ----------
+let down=null;
+cv.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY,t:Date.now()};drag={x:e.clientX}});
+addEventListener('pointermove',e=>{if(!drag)return;if(mode!='play'){rotY+=(e.clientX-drag.x)*.008}drag={x:e.clientX}});
+addEventListener('pointerup',e=>{if(down&&mode=='play'&&Math.hypot(e.clientX-down.x,e.clientY-down.y)<20)tapPlay(e.clientX,e.clientY);down=null;drag=null});
+// ---------- quiz ----------
+const Q=[["الضربة الطائرة العالية من مهارات لعبة...",["التنس","كرة القدم","السباحة"],0],
+["في الضربة الطائرة العالية يكون المضرب...",["عاليًا","على الأرض","خلف الظهر"],0],
+["عند مقابلة الكرة نحافظ على ثبات...",["الرسغ","الرأس","الركبة"],0],
+["بعد الضرب نتابع حركة الذراع نحو...",["الشبكة","الأرض","الخلف"],0],
+["الخطوة تكون بالقدم...",["للأمام","للخلف","لا نتحرك"],0],
+["لماذا تحب اللاعبة الضربة العالية؟",["لأنها نقطة شبه مؤكدة","لأنها أبطأ ضربة","لأنها بلا مضرب"],0]];
+let qi=0;
+function openQuiz(){const q=Q[qi%Q.length];qi++;$('qq').textContent=q[0];$('qfb').textContent='';
+ const o=q[1].map((t,k)=>({t,k})).sort(()=>Math.random()-.5);
+ $('qo').innerHTML='';o.forEach(x=>{const b=document.createElement('button');b.className='qo';b.textContent=x.t;b.onclick=()=>{if($('qo').dataset.l=='1')return;$('qo').dataset.l='1';
+  if(x.k==q[2]){b.classList.add('ok');$('qfb').textContent='إجابة رائعة يا بطلة!';sfx('correct',.7)}else{b.classList.add('no');[...$('qo').children].find(c=>c.textContent==q[1][q[2]]).classList.add('ok');$('qfb').textContent='الإجابة الصحيحة: '+q[1][q[2]];sfx('wrong',.5)}};$('qo').appendChild(b)});
+ $('qo').dataset.l='0';$('quiz').style.display='flex'}
+// ---------- snapshot ----------
+function snap(){const c=document.createElement('canvas');c.width=cv.width;c.height=cv.height;const g=c.getContext('2d');
+ if(video.videoWidth){const vr=video.videoWidth/video.videoHeight,cr=c.width/c.height;let sw=video.videoWidth,sh=video.videoHeight,sx=0,sy=0;if(vr>cr){sw=sh*cr;sx=(video.videoWidth-sw)/2}else{sh=sw/cr;sy=(video.videoHeight-sh)/2}g.drawImage(video,sx,sy,sw,sh,0,0,c.width,c.height)}else{g.fillStyle='#d9f5e9';g.fillRect(0,0,c.width,c.height)}
+ R.render(scene,cam);g.drawImage(cv,0,0);$('shotImg').src=c.toDataURL('image/jpeg',.9);$('shot').style.display='flex';sfx('tap',.6)}
+// ---------- start ----------
+function begin(){closeOv('intro');startCam();enableGyro();document.fonts.load('800 20px Almarai').then(()=>{[netL,hoopL,lr,lb,ls].forEach(l=>{});setMode('play')});sfx('tap',.5)}
+document.fonts.load('800 20px Almarai').then(()=>{netL.userData.set('الشبكة');hoopL.userData.set('منطقة الضربة العالية');lr.userData.set('المضرب');lb.userData.set('كرة التنس');ls.userData.set('شبكة المضرب')});
+setMode('play');running=false;
+// ---------- loop ----------
+const clock=new THREE.Clock();
+function loop(){requestAnimationFrame(loop);const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
+ if(gyro&&q0){cam.quaternion.copy(q0).multiply(qd)}else{cam.quaternion.setFromEuler(new THREE.Euler(-.05,0,0))}
+ world.rotation.y=mode=='play'?0:0;
+ if(mode!='play'){stepsG.rotation.y=rotY*.5;lookG.rotation.y=0;bigR.rotation.y=rotY+t*.3;bigB.rotation.y=rotY+t*.5;bigB.rotation.x=t*.2}
+ // hoop pulse
+ hoopRing.scale.setScalar(1+Math.sin(t*4)*.04);hoop.lookAt(cam.getWorldPosition(new THREE.Vector3()));
+ // racket swing
+ if(swing>0){swing=Math.max(0,swing-dt*3.5)}const sw=Math.sin((1-swing)*Math.PI)*(swing>0?1:0);rk.rotation.x=-sw*1.1;rk.rotation.z=sw*.3;
+ // play
+ if(mode=='play'&&running){spawnT-=dt;if(spawnT<=0&&queue.length){spawn();spawnT=2.1}
+  balls.forEach(b=>{if(b.state=='fly'||b.state=='low'){b.t+=dt/b.dur;b.m.position.copy(ballPos(b,b.t));b.m.rotation.x+=dt*8;if(b.state=='low')b.m.material.opacity=Math.max(.3,1-(b.t-.6));if(b.t>1.6)b.state='gone'}
+   else if(b.state=='hit'){b.t+=dt;const p=b.from.clone().lerp(new THREE.Vector3(b.from.x*.4,FLOOR,-9.5),b.t/.7);p.y+=Math.sin(Math.min(1,b.t/.7)*Math.PI)*.4;b.m.position.copy(p);b.m.rotation.x-=dt*14;if(b.t>.9)b.state='gone'}});
+  balls=balls.filter(b=>{if(b.state=='gone'){playG.remove(b.m);return false}return true});
+  if(!queue.length&&!balls.length){endRound()}}
+ // sparks
+ for(let i=sparks.length-1;i>=0;i--){const s=sparks[i];s.userData.v.y-=dt*4;s.position.addScaledVector(s.userData.v,dt);s.rotation.x+=dt*6;s.userData.l-=dt*1.2;s.material.opacity=Math.max(0,s.userData.l);if(s.userData.l<=0){world.remove(s);sparks.splice(i,1)}}
+ // steps anim
+ if(mode=='steps'){armNow+=(armT-armNow)*Math.min(1,dt*5);shoulder.rotation.x=armNow;
+  stepNow+=(stepT-stepNow)*Math.min(1,dt*5);player.getObjectByName('leg0').position.z=-stepNow*.22;player.getObjectByName('shoe0').position.z=.03-stepNow*.22;
+  sBall.position.lerp(ballT,Math.min(1,dt*(cur==3?2.2:4)));sBall.rotation.x+=dt*3}
+ R.render(scene,cam)}
+loop();
+</script>
+</body></html>
