@@ -12,15 +12,19 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden;font-family:Almarai,sans-serif;color:var(--t);background:linear-gradient(160deg,#e6f3ea,#f7f3e6)}
 button{font-family:inherit;cursor:pointer}
+#bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:#e6f3ea}
+#bg .b{position:absolute;inset:-12px;background-size:cover;background-position:center;opacity:0;transition:opacity 1.2s;filter:blur(2px) saturate(1.05)}
+#bg .b.on{opacity:1}
+#bg:after{content:"";position:absolute;inset:0;background:rgba(255,255,255,.12)}
 #cam{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none}
 #gl{position:fixed;inset:0;z-index:1;touch-action:none}
 .bar{position:fixed;top:0;left:0;right:0;z-index:5;background:rgba(46,107,71,.94);color:#fff;font-size:13px;text-align:center;padding:calc(7px + env(safe-area-inset-top,0px)) 8px 7px;font-weight:700}
 .tabs{position:fixed;top:calc(38px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:6px;background:rgba(255,255,255,.9);padding:5px;border-radius:30px;box-shadow:0 4px 14px rgba(0,0,0,.15)}
 .tabs button{border:none;border-radius:24px;padding:8px 13px;font-weight:700;font-size:14px;white-space:nowrap;background:transparent;color:var(--t)}
 .tabs button.on{background:var(--g);color:#fff}
-.tools{position:fixed;top:calc(96px + env(safe-area-inset-top,0px));left:10px;z-index:5;display:flex;flex-direction:column;gap:8px}
+.tools{position:fixed;top:calc(46px + env(safe-area-inset-top,0px));left:10px;z-index:5;display:flex;flex-direction:column;gap:8px}
 .tools button{width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,.92);font-size:19px;box-shadow:0 3px 10px rgba(0,0,0,.18)}
-.filters{position:fixed;top:calc(96px + env(safe-area-inset-top,0px));right:10px;z-index:5;display:none;flex-direction:column;gap:6px}
+.filters{position:fixed;top:calc(46px + env(safe-area-inset-top,0px));right:10px;z-index:5;display:none;flex-direction:column;gap:6px}
 .filters button{border:none;border-radius:16px;padding:7px 12px;font-weight:800;font-size:13px;box-shadow:0 3px 8px rgba(0,0,0,.15)}
 .actions{position:fixed;bottom:calc(40px + env(safe-area-inset-bottom,0px));left:10px;right:10px;z-index:5;display:flex;gap:8px;flex-wrap:wrap;pointer-events:none}
 .actions button{pointer-events:auto;border:none;border-radius:26px;padding:12px 16px;font-weight:800;font-size:15px;color:#fff;background:var(--g);box-shadow:0 4px 0 #1b4a30}
@@ -122,19 +126,21 @@ canvas#cf{position:fixed;inset:0;pointer-events:none;z-index:40}
 #pt .fl{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;background:rgba(30,43,34,.55);border-radius:7px;direction:rtl}
 #pt{transition:top .4s}
 body.carded #pt{top:38%}
+@media (orientation:landscape){body.carded #pt{top:31%}body.carded .card{max-width:470px;padding:9px 12px;bottom:calc(84px + env(safe-area-inset-bottom,0px))}body.carded .card .info p{font-size:13px;line-height:1.55}body.carded .card .key{width:78px}body.carded .card .key .s{font-size:30px}}
 @media (orientation:portrait){#pt{top:41%}.filters{left:64px;right:10px;flex-direction:row;flex-wrap:wrap;justify-content:center}.filters button{padding:6px 11px;font-size:12.5px}}
 </style>
 </head>
 <body>
+<div id="bg"><div class="b on" style="background-image:url(bg1.webp)"></div><div class="b" style="background-image:url(bg2.webp)"></div><div class="b" style="background-image:url(bg3.webp)"></div><div class="b" style="background-image:url(bg4.webp)"></div></div>
 <video id="cam" playsinline muted autoplay></video>
 <canvas id="gl"></canvas>
 <div id="ptWrap"><div id="pt"></div></div>
 <canvas id="cf"></canvas>
 <div class="bar">العلوم • ثالث متوسط • الفصل 4 • مقدمة في الجدول الدوري ⚛️</div>
-<div class="tabs"><button id="t-around" onclick="setScene('around')">عناصر من حولنا</button><button id="t-table" onclick="setScene('table')">الجدول ثلاثي الأبعاد</button></div>
 <div class="tools">
  <button title="إعادة الوضع" onclick="resetView()">↺</button>
- <button title="تبديل الكاميرا" onclick="flipCam()">🔄</button>
+ <button title="تغيير الخلفية" onclick="nextBg()">🖼️</button>
+ <button title="الكاميرا" onclick="toggleCam()">📷</button>
  <button title="إخفاء المرشدة" onclick="toggleGuide()">👧</button>
 </div>
 <div class="filters" id="filters">
@@ -145,7 +151,6 @@ body.carded #pt{top:38%}
  <button style="background:#f3dcc0" onclick="lift('transition')">الانتقالية</button>
  <button style="background:#fff" onclick="lift(null)">الكل</button>
 </div>
-<button class="camBtn" id="camBtn" onclick="startCam()">📷 افتحي الكاميرا</button>
 <div class="card" id="card">
  <div class="key" id="k"><div class="z" id="kz"></div><div class="s" id="ks"></div><div class="n" id="kn"></div><div class="m" id="km"></div></div>
  <div class="info"><h3><span id="c-title"></span><span class="tag" id="c-tag"></span></h3><p id="c-text"></p>
@@ -160,9 +165,8 @@ body.carded #pt{top:38%}
  <div class="hdr"><div>المملكة العربية السعودية<br>وزارة التعليم</div><img src="moe.png" alt="وزارة التعليم"></div>
  <div class="atomwrap"><div class="atom"><span class="nuc"></span><span class="orb"><i></i></span><span class="orb"><i></i></span><span class="orb"><i></i></span></div><div class="pt3" id="pt3"></div></div>
  <h1>مختبر الجدول الدوري ⚛️</h1>
- <p>اختاري المشهد، وستفتح الكاميرا لتظهر العناصر في غرفتكِ!</p>
- <button class="choice" onclick="enter('around')"><b>🧪 عناصر من حولنا</b><small>ثمانية عناصر ثلاثية الأبعاد • اقرئي مفتاح كل عنصر</small></button>
- <button class="choice" onclick="enter('table')"><b>🧱 الجدول الدوري ثلاثي الأبعاد</b><small>118 عنصرًا • الفلزات واللافلزات وأشباه الفلزات</small></button>
+ <p>جدول دوري ثلاثي الأبعاد تلمسينه وتدوّرينه وتكتشفين عناصره!</p>
+ <button class="choice" onclick="enter('table')"><b>🧱 ابدئي استكشاف الجدول الدوري</b><small>118 عنصرًا • الفلزات واللافلزات وأشباه الفلزات</small></button>
  <div class="by">المعلمة: د. أفنان الطلحي</div>
 </div></div>
 <div class="modal" id="m-quiz"><div class="box" id="quizBox"></div></div>
@@ -198,17 +202,21 @@ const jump = () => { guide.classList.remove('jump'); void guide.offsetWidth; gui
 window.toggleGuide = () => { guide.classList.toggle('hide'); bubble.classList.toggle('hide'); };
 
 /* ---------- camera ---------- */
-const video = document.getElementById('cam'), camBtn = document.getElementById('camBtn');
+const video = document.getElementById('cam');
 let facing = 'environment', stream = null;
 window.startCam = async () => {
   try{
     if (stream) stream.getTracks().forEach(t => t.stop());
     stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing}, width:{ideal:1280}, height:{ideal:720}}, audio:false});
-    video.srcObject = stream; await video.play(); video.style.display = 'block'; camBtn.style.display = 'none';
+    video.srcObject = stream; await video.play(); video.style.display = 'block';
     video.style.transform = facing === 'user' ? 'scaleX(-1)' : 'none';
-  }catch(e){ video.style.display = 'none'; camBtn.style.display = 'block'; }
+  }catch(e){ stream = null; video.style.display = 'none'; talk('تعذّر فتح الكاميرا، وستبقى الخلفية كما هي 🖼️'); }
 };
-window.flipCam = () => { facing = facing === 'environment' ? 'user' : 'environment'; startCam(); };
+window.toggleCam = () => { if (stream){ stream.getTracks().forEach(t => t.stop()); stream = null; video.style.display = 'none'; talk('عادت الخلفية 🖼️'); } else startCam(); };
+/* خلفيات متغيرة */
+const BGS = [...document.querySelectorAll('#bg .b')]; let bgi = 0;
+window.nextBg = () => { BGS[bgi].classList.remove('on'); bgi = (bgi + 1) % BGS.length; BGS[bgi].classList.add('on'); };
+setInterval(nextBg, 15000);
 
 /* ---------- textures ---------- */
 function tileTex(e, big){
@@ -238,7 +246,7 @@ const cam = new THREE.PerspectiveCamera(45, 1, .1, 200); cam.position.set(0, 1, 
 scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8a7a, 1.3));
 const dl = new THREE.DirectionalLight(0xffffff, 1.4); dl.position.set(3, 5, 6); scene.add(dl);
 const world = new THREE.Group(); scene.add(world);
-let current = 'around', tiles = [], selected = null, liftCat = null;
+let current = 'table', tiles = [], selected = null, liftCat = null;
 const SIDE = new THREE.MeshStandardMaterial({color:0xf3f6f2, roughness:.6});
 
 function buildAround(){
@@ -323,8 +331,6 @@ function build(){
 }
 window.setScene = s => {
   current = s;
-  document.getElementById('t-around').classList.toggle('on', s === 'around');
-  document.getElementById('t-table').classList.toggle('on', s === 'table');
   document.getElementById('filters').style.display = s === 'table' ? 'flex' : 'none';
   ptWrap.style.display = s === 'table' ? 'block' : 'none';
   canvas.style.display = s === 'table' ? 'none' : 'block';
@@ -378,7 +384,7 @@ function select(sym, speak = true){
   document.getElementById('c-tag').textContent = CAT_AR[e.cat];
   const txt = 'العدد الذري ' + e.z + ' • الكتلة الذرية ' + e.mass + ' • ' + STATE_AR[e.state] + ' • ' + where(e) + ' • ' + blockAr(e) + '. ' + (FACT[sym] || '');
   document.getElementById('c-text').textContent = txt;
-  curText = e.ar + '. ' + txt; document.getElementById('card').classList.add('on'); document.body.classList.toggle('carded', current === 'table' && innerWidth < innerHeight); talk(e.ar + ': ' + CAT_AR[e.cat] + ' عدده الذري ' + e.z, speak); jump();
+  curText = e.ar + '. ' + txt; document.getElementById('card').classList.add('on'); document.body.classList.add('carded'); talk(e.ar + ': ' + CAT_AR[e.cat] + ' عدده الذري ' + e.z, speak); jump();
 }
 window.hideCard = () => { document.getElementById('card').classList.remove('on'); document.body.classList.remove('carded'); selected = null; pt.querySelectorAll('.el.sel').forEach(d => d.classList.remove('sel')); };
 
@@ -394,10 +400,10 @@ function loop(){ requestAnimationFrame(loop); const t = clock.getElapsedTime();
 loop();
 
 /* ---------- start ---------- */
-window.enter = s => { document.getElementById('start').style.display = 'none'; startCam(); setScene(s); };
+window.enter = s => { document.getElementById('start').style.display = 'none'; setScene('table'); };
 document.fonts.load('800 20px Almarai').then(() => {
   const qs = new URLSearchParams(location.search).get('scene');
-  if (qs === 'around' || qs === 'table'){ document.getElementById('start').style.display = 'none'; startCam(); setScene(qs); }
+  if (qs){ document.getElementById('start').style.display = 'none'; setScene('table'); }
 });
 
 /* ---------- quiz ---------- */
