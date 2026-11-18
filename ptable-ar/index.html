@@ -66,6 +66,7 @@ button{font-family:inherit;cursor:pointer}
 @keyframes jump{30%{transform:translateY(-22px)}60%{transform:none}80%{transform:translateY(-6px)}}
 .foot{position:fixed;bottom:0;left:0;right:0;z-index:6;text-align:center;font-size:12px;padding:6px 6px calc(6px + var(--sb));font-weight:700}
 .hide{display:none!important}
+#back{position:fixed;left:50%;top:45%;transform:translate(-50%,-50%);z-index:7;border:none;border-radius:30px;padding:13px 22px;font-size:17px;font-weight:800;color:#fff;background:var(--g);box-shadow:0 5px 0 #1b4a30;display:none}
 body.clean #info,body.clean #toast,body.clean .panel,body.clean #guide{opacity:0!important;pointer-events:none!important;transform:translateY(20px)}
 #info,.panel{transition:opacity .35s,transform .35s}
 body.clean #eyeBtn{background:var(--y)}
@@ -120,6 +121,7 @@ canvas#cf{position:fixed;inset:0;pointer-events:none;z-index:40}
  <button class="glass" title="إخفاء الكلام" id="eyeBtn" onclick="toggleClean()">👁️</button>
 </div>
 <div id="toast" class="glass off"></div>
+<button id="back" onclick="recenter()">🎯 أرجعي الذرّة للوسط</button>
 
 <div id="info" class="glass">
  <div class="key" id="key"><div class="z" id="kz"></div><div class="s" id="ks"></div><div class="m" id="km"></div></div>
@@ -256,7 +258,7 @@ function onOri(ev){ if (ev.alpha == null) return; const d = Math.PI / 180, ori =
   devQ = q; if (!refQ) recenter(); }
 window.recenter = () => {
   rotX = .25; rotY = 0; scl = 1;
-  if (devQ){ const e = new THREE.Euler().setFromQuaternion(devQ, 'YXZ'); refQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, e.y, 0, 'YXZ')); }
+  if (devQ){ refQ = devQ.clone(); camQ.identity(); cam.quaternion.identity(); }
 };
 async function startMotion(){
   try{ if (typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) await DeviceOrientationEvent.requestPermission(); }catch(e){}
@@ -298,8 +300,10 @@ function loop(){
     atom.nuc.rotation.y = t * .5; atom.nuc.rotation.x = Math.sin(t * .7) * .3;
     atom.shells.forEach(s => s.els.forEach((m, i) => { const ang = s.off + t * s.sp + i * Math.PI * 2 / s.els.length; m.position.set(Math.cos(ang) * s.r, Math.sin(ang) * s.r, 0); }));
   }
+  if ((frame = (frame + 1) % 20) === 0){ const v = new THREE.Vector3(); anchor.getWorldPosition(v); v.project(cam); $('back').style.display = (v.z > 1 || Math.abs(v.x) > 1.05 || Math.abs(v.y) > 1.05) ? 'block' : 'none'; }
   renderer.render(scene, cam);
 }
+let frame = 0;
 
 /* ---------- وضع الاستكشاف ---------- */
 function infoText(e){
@@ -309,7 +313,7 @@ function infoText(e){
     ' • التوزيع: ' + sh.join('، ');
 }
 function explore(z, speak = true){
-  const e = byZ(z); showAtom(e.z, e.n, e.z);
+  recenter(); const e = byZ(z); showAtom(e.z, e.n, e.z);
   $('key').style.background = COL[e.cat]; $('kz').textContent = e.z; $('ks').textContent = e.sym; $('km').textContent = e.mass;
   $('kn').textContent = e.ar + ' ' + e.sym; $('kt').textContent = CAT_AR[e.cat];
   $('cp').textContent = e.z; $('cn').textContent = e.n; $('ce').textContent = e.z; $('kp').innerHTML = infoText(e);
@@ -322,7 +326,7 @@ window.pick = z => explore(z);
 
 /* ---------- ابني الذرّة ---------- */
 const TARGETS = shuffle([1, 2, 3, 6, 7, 8, 10, 11, 12, 13, 17, 18, 19, 20]); let ti = 0, B = {p:0, n:0, e:0}, built = 0;
-function newTarget(){ const e = byZ(TARGETS[ti % TARGETS.length]); B = {p:0, n:0, e:0};
+function newTarget(){ recenter(); const e = byZ(TARGETS[ti % TARGETS.length]); B = {p:0, n:0, e:0};
   $('bq').innerHTML = '🧱 ابني ذرّة <b>' + e.ar + ' ' + e.sym + '</b><br><small>العدد الذري ' + e.z + ' • الكتلة الذرية ' + e.mass + '</small>';
   refreshBuild(); talk('ابني ذرّة ' + e.ar + '. أضيفي البروتونات والنيوترونات والإلكترونات.'); }
 function refreshBuild(){
@@ -345,7 +349,7 @@ let GQ = [], gi = 0, gScore = 0, gMiss = false;
 function startGuess(){ GQ = shuffle(EL.slice(0, 18).map(e => e.z)).slice(0, 6); gi = 0; gScore = 0; renderGuess(); }
 function renderGuess(){
   if (gi >= GQ.length){ confetti(); $('gopts').innerHTML = ''; $('gq').innerHTML = '🏅 أحسنتِ! عرفتِ ' + gScore + ' من ' + GQ.length + ' من أول محاولة<br><button class="big" onclick="startGuess()">🔁 العبي مرة أخرى</button>'; $('gprog').textContent = ''; talk('أنتِ خبيرة ذرّات! 🏅'); return; }
-  const z = GQ[gi], e = byZ(z); gMiss = false; showAtom(e.z, e.n, e.z);
+  recenter(); const z = GQ[gi], e = byZ(z); gMiss = false; showAtom(e.z, e.n, e.z);
   $('gq').innerHTML = 'عُدّي البروتونات 🔴 أو الإلكترونات 🔵… ما هذا العنصر؟';
   const opts = shuffle([z, ...shuffle(EL.filter(x => x.z !== z && Math.abs(x.z - z) <= 4).map(x => x.z)).slice(0, 3)]);
   $('gopts').innerHTML = opts.map(o => '<button class="opt" data-z="' + o + '">' + byZ(o).ar + ' ' + byZ(o).sym + '</button>').join('');
