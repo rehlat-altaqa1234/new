@@ -63,10 +63,17 @@ button{font-family:inherit;cursor:pointer}
 @keyframes jump{30%{transform:translateY(-22px)}60%{transform:none}80%{transform:translateY(-6px)}}
 .foot{position:fixed;bottom:0;left:0;right:0;z-index:6;text-align:center;font-size:12px;padding:6px 6px calc(6px + var(--sb));font-weight:700}
 .hide{display:none!important}
+body.clean #info,body.clean #toast,body.clean .panel,body.clean #guide{opacity:0!important;pointer-events:none!important;transform:translateY(20px)}
+#info,.panel{transition:opacity .35s,transform .35s}
+body.clean #eyeBtn{background:var(--y)}
 /* البداية */
-#start{position:fixed;inset:0;z-index:20;background:radial-gradient(ellipse at 50% 35%,#3d7a55 0,#1f4a33 55%,#122c1f 100%);display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto}
-#start:before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:38px 38px;pointer-events:none}
-#start .in{position:relative;width:100%;max-width:520px;text-align:center;padding:18px;background:rgba(255,255,255,.14);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1.5px solid rgba(255,255,255,.45);border-radius:22px;color:#fff;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+#start{position:fixed;inset:0;z-index:20;background:#1f4a33;display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto}
+#start .sb{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.4s;animation:kb 16s ease-in-out infinite alternate}
+#start .sb.on{opacity:1}
+@keyframes kb{to{transform:scale(1.08)}}
+#start:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,44,31,.15),rgba(18,44,31,.55));pointer-events:none}
+#start .in{z-index:1}
+#start .in{position:relative;width:100%;max-width:520px;text-align:center;padding:18px;background:rgba(30,60,42,.45);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,.5);border-radius:22px;color:#fff;box-shadow:0 20px 50px rgba(0,0,0,.3)}
 #start .hdr{display:flex;justify-content:space-between;align-items:center;text-align:right;font-size:13px;font-weight:700;line-height:1.7}
 #start .hdr img{height:52px;filter:brightness(0) invert(1)}
 #start h1{font-size:27px;font-weight:800;margin:6px 0}
@@ -106,6 +113,7 @@ canvas#cf{position:fixed;inset:0;pointer-events:none;z-index:40}
  <button class="glass" title="أعيدي الذرّة أمامكِ" onclick="recenter()">🎯</button>
  <button class="glass" title="الكاميرا" onclick="toggleCam()">📷</button>
  <button class="glass" title="الصوت" id="sndBtn" onclick="toggleSnd()">🔊</button>
+ <button class="glass" title="إخفاء الكلام" id="eyeBtn" onclick="toggleClean()">👁️</button>
 </div>
 <div id="toast" class="glass off"></div>
 
@@ -141,7 +149,7 @@ canvas#cf{position:fixed;inset:0;pointer-events:none;z-index:40}
 <img id="guide" src="girl-r.webp" alt="">
 <div class="foot glass">المعلمة: د. أفنان الطلحي</div>
 
-<div id="start"><div class="in">
+<div id="start"><div class="sb on" style="background-image:url(bg1.webp)"></div><div class="sb" style="background-image:url(bg2.webp)"></div><div class="sb" style="background-image:url(bg3.webp)"></div><div class="sb" style="background-image:url(bg4.webp)"></div><div class="in">
  <div class="hdr"><div>المملكة العربية السعودية<br>وزارة التعليم</div><img src="moe.png" alt="وزارة التعليم"></div>
  <div class="atom"><span class="nuc"></span><span class="orb"><i></i></span><span class="orb"><i></i></span><span class="orb"><i></i></span></div>
  <h1>داخل الذرّة 🔬</h1>
@@ -172,7 +180,9 @@ if ('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged =
 const say = t => { if (!sound) return; try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t.replace(/[🔬⚛️🎯✨🌟💡🏅👏🔍]/gu, '،')); u.lang = 'ar-SA'; if (VOICE) u.voice = VOICE; u.rate = 1.25; speechSynthesis.speak(u); }catch(e){} };
 window.toggleSnd = () => { sound = !sound; $('sndBtn').textContent = sound ? '🔊' : '🔇'; if (!sound) try{ speechSynthesis.cancel(); }catch(e){} };
 let toastT = 0;
-const talk = (t, sp = true, ms = 5500) => { const el = $('toast'); el.textContent = t; el.classList.remove('off'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.add('off'), ms); if (sp) say(t); };
+window.toggleClean = () => { const c = document.body.classList.toggle('clean'); $('eyeBtn').textContent = c ? '💬' : '👁️'; if (c) $('toast').classList.add('off'); };
+$('toast').onclick = () => $('toast').classList.add('off');
+const talk = (t, sp = true, ms = 4500) => { const el = $('toast'); el.textContent = t; if (!document.body.classList.contains('clean')) el.classList.remove('off'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.add('off'), ms); if (sp) say(t); };
 const jump = () => { const g = $('guide'); g.classList.remove('jump'); void g.offsetWidth; g.classList.add('jump'); };
 
 /* ---------- الكاميرا ---------- */
@@ -270,7 +280,7 @@ function tap(e){
 /* ---------- الحلقة ---------- */
 const clock = new THREE.Clock();
 function resize(){ const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix();
-  if (w < h) anchor.position.set(0, .2, -12); else anchor.position.set(h < 520 ? -3.2 : -1.5, h < 520 ? -.6 : 0, -9.5); }
+  if (w < h) anchor.position.set(0, .9, -12.5); else anchor.position.set(h < 520 ? -3.2 : -1.5, h < 520 ? -.6 : 0, -9.5); }
 addEventListener('resize', resize); resize();
 function loop(){
   requestAnimationFrame(loop); const t = clock.getElapsedTime();
@@ -349,6 +359,7 @@ window.setMode = m => { mode = m; ['explore', 'build', 'guess'].forEach(x => $('
   if (m === 'explore') explore(6); else if (m === 'build') newTarget(); else startGuess(); };
 
 /* ---------- البداية ---------- */
+{ const SB = [...document.querySelectorAll('#start .sb')]; let si = 0; setInterval(() => { SB[si].classList.remove('on'); si = (si + 1) % SB.length; SB[si].classList.add('on'); }, 5000); }
 window.begin = async withCam => { $('start').style.display = 'none'; startMotion(); if (withCam) startCam(); else $('fallback').style.display = 'block';
   loop(); setMode('explore'); setTimeout(() => talk('المسي أي جزء من الذرّة لتعرفي اسمه، وحرّكي الجوال حولها، أو اختاري عنصرًا من الأسفل 🔍'), 6500); };
 if (new URLSearchParams(location.search).has('demo')) document.fonts.ready.then(() => begin(false));
