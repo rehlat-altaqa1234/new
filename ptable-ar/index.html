@@ -149,7 +149,7 @@ canvas#cf{position:fixed;inset:0;pointer-events:none;z-index:40}
 <img id="guide" src="girl-r.webp" alt="">
 <div class="foot glass">المعلمة: د. أفنان الطلحي</div>
 
-<div id="start"><div class="sb on" style="background-image:url(bg1.webp)"></div><div class="sb" style="background-image:url(bg2.webp)"></div><div class="sb" style="background-image:url(bg3.webp)"></div><div class="sb" style="background-image:url(bg4.webp)"></div><div class="in">
+<div id="start"><div class="sb on" style="background-image:url(bg8.webp)"></div><div class="sb" style="background-image:url(bg6.webp)"></div><div class="sb" style="background-image:url(bg7.webp)"></div><div class="sb" style="background-image:url(bg5.webp)"></div><div class="sb" style="background-image:url(bg1.webp)"></div><div class="sb" style="background-image:url(bg2.webp)"></div><div class="sb" style="background-image:url(bg3.webp)"></div><div class="sb" style="background-image:url(bg4.webp)"></div><div class="in">
  <div class="hdr"><div>المملكة العربية السعودية<br>وزارة التعليم</div><img src="moe.png" alt="وزارة التعليم"></div>
  <div class="atom"><span class="nuc"></span><span class="orb"><i></i></span><span class="orb"><i></i></span><span class="orb"><i></i></span></div>
  <h1>داخل الذرّة 🔬</h1>
@@ -359,7 +359,7 @@ window.setMode = m => { mode = m; ['explore', 'build', 'guess'].forEach(x => $('
   if (m === 'explore') explore(6); else if (m === 'build') newTarget(); else startGuess(); };
 
 /* ---------- البداية ---------- */
-{ const SB = [...document.querySelectorAll('#start .sb')]; let si = 0; setInterval(() => { SB[si].classList.remove('on'); si = (si + 1) % SB.length; SB[si].classList.add('on'); }, 5000); }
+{ const SB = [...document.querySelectorAll('#start .sb')]; let si = 0; setInterval(() => { SB[si].classList.remove('on'); si = (si + 1) % SB.length; SB[si].classList.add('on'); }, 4500); }
 window.begin = async withCam => { $('start').style.display = 'none'; startMotion(); if (withCam) startCam(); else $('fallback').style.display = 'block';
   loop(); setMode('explore'); setTimeout(() => talk('المسي أي جزء من الذرّة لتعرفي اسمه، وحرّكي الجوال حولها، أو اختاري عنصرًا من الأسفل 🔍'), 6500); };
 if (new URLSearchParams(location.search).has('demo')) document.fonts.ready.then(() => begin(false));
