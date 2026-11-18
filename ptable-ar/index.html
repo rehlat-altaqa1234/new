@@ -4,427 +4,359 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#2E6B47">
-<title>مختبر الجدول الدوري – واقع معزّز</title>
+<title>واقع معزّز – داخل الذرّة</title>
 <style>
 @font-face{font-family:Almarai;src:url(almarai.ttf);font-weight:400}
 @font-face{font-family:Almarai;src:url(almarai-bold.ttf);font-weight:700 800}
-:root{--g:#2E6B47;--g2:#4E8A5C;--t:#1E2B22;--y:#E0A83A;--r:#C83B3B;--met:#9DC9F0;--non:#F7D154;--mld:#A8D88A;--unk:#B9B9C3}
+:root{--g:#2E6B47;--g2:#4E8A5C;--t:#1E2B22;--y:#E0A83A;--r:#C83B3B;--met:#9DC9F0;--non:#F7D154;--mld:#A8D88A;--sa:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;font-family:Almarai,sans-serif;color:var(--t);background:linear-gradient(160deg,#e6f3ea,#f7f3e6)}
+html,body{height:100%;overflow:hidden;font-family:Almarai,sans-serif;color:var(--t);background:#1b2a22}
 button{font-family:inherit;cursor:pointer}
-#bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:#e6f3ea}
-#bg .b{position:absolute;inset:-12px;background-size:cover;background-position:center;opacity:0;transition:opacity 1.2s;filter:blur(2px) saturate(1.05)}
-#bg .b.on{opacity:1}
-#bg:after{content:"";position:absolute;inset:0;background:rgba(255,255,255,.12)}
-#cam{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:none}
-#gl{position:fixed;inset:0;z-index:1;touch-action:none}
-.bar{position:fixed;top:0;left:0;right:0;z-index:5;background:rgba(46,107,71,.94);color:#fff;font-size:13px;text-align:center;padding:calc(7px + env(safe-area-inset-top,0px)) 8px 7px;font-weight:700}
-.tabs{position:fixed;top:calc(38px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:6px;background:rgba(255,255,255,.9);padding:5px;border-radius:30px;box-shadow:0 4px 14px rgba(0,0,0,.15)}
-.tabs button{border:none;border-radius:24px;padding:8px 13px;font-weight:700;font-size:14px;white-space:nowrap;background:transparent;color:var(--t)}
-.tabs button.on{background:var(--g);color:#fff}
-.tools{position:fixed;top:calc(46px + env(safe-area-inset-top,0px));left:10px;z-index:5;display:flex;flex-direction:column;gap:8px}
-.tools button{width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,.92);font-size:19px;box-shadow:0 3px 10px rgba(0,0,0,.18)}
-.filters{position:fixed;top:calc(46px + env(safe-area-inset-top,0px));right:10px;z-index:5;display:none;flex-direction:column;gap:6px}
-.filters button{border:none;border-radius:16px;padding:7px 12px;font-weight:800;font-size:13px;box-shadow:0 3px 8px rgba(0,0,0,.15)}
-.actions{position:fixed;bottom:calc(40px + env(safe-area-inset-bottom,0px));left:10px;right:10px;z-index:5;display:flex;gap:8px;flex-wrap:wrap;pointer-events:none}
-.actions button{pointer-events:auto;border:none;border-radius:26px;padding:12px 16px;font-weight:800;font-size:15px;color:#fff;background:var(--g);box-shadow:0 4px 0 #1b4a30}
-.card{position:fixed;left:10px;right:10px;bottom:calc(98px + env(safe-area-inset-bottom,0px));z-index:6;max-width:520px;margin:auto;background:rgba(255,255,255,.97);border-radius:20px;padding:14px 16px;box-shadow:0 8px 24px rgba(0,0,0,.2);border:3px solid var(--g);display:none;animation:up .35s ease}
-.card.on{display:flex;gap:12px;align-items:stretch}
-.key{flex:none;width:96px;border-radius:12px;border:2px solid var(--t);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 4px;direction:ltr}
-.key .z{font-size:15px;font-weight:800}.key .s{font-size:38px;font-weight:800;line-height:1.1}.key .n{font-size:11px}.key .m{font-size:12px}
-.info{flex:1;min-width:0}
-.info h3{font-size:19px;margin-bottom:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.tag{font-size:12px;color:#fff;background:var(--g2);border-radius:12px;padding:2px 9px}
-.info p{font-size:14.5px;line-height:1.75}
-.row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
-.row button{border:none;border-radius:14px;padding:6px 12px;font-weight:700;background:#e9f4ec;color:var(--t)}
-@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1}}
-#guide{position:fixed;right:-6px;bottom:calc(28px + env(safe-area-inset-bottom,0px));height:30vh;max-height:280px;z-index:4;pointer-events:none;transform-origin:bottom center;animation:slide .8s ease}
+#cam{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+#fallback{position:fixed;inset:-10px;z-index:0;background:url(bg2.webp) center/cover;filter:blur(3px);display:none}
+#gl{position:fixed;inset:0;width:100vw;height:100vh;width:100%;height:100%;z-index:1;touch-action:none}
+.glass{background:rgba(255,255,255,.78);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.bar{position:fixed;top:0;left:0;right:0;z-index:6;background:rgba(46,107,71,.94);color:#fff;font-size:13px;text-align:center;padding:calc(7px + var(--sa)) 8px 7px;font-weight:700}
+.modes{position:fixed;top:calc(38px + var(--sa));left:50%;transform:translateX(-50%);z-index:6;display:flex;gap:4px;padding:4px;border-radius:30px;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+.modes button{border:none;border-radius:24px;padding:8px 12px;font-weight:800;font-size:13.5px;white-space:nowrap;background:transparent;color:var(--t)}
+.modes button.on{background:var(--g);color:#fff}
+.tools{position:fixed;top:calc(92px + var(--sa));left:10px;z-index:6;display:flex;flex-direction:column;gap:8px}
+.tools button{width:42px;height:42px;border-radius:50%;border:none;font-size:18px;box-shadow:0 3px 10px rgba(0,0,0,.2)}
+#toast{position:fixed;top:calc(92px + var(--sa));left:60px;right:10px;margin:auto;max-width:430px;z-index:7;border-radius:16px;padding:9px 13px;font-size:14px;font-weight:800;line-height:1.65;text-align:center;border:2.5px solid var(--y);box-shadow:0 6px 16px rgba(0,0,0,.2);transition:opacity .4s,transform .4s}
+#toast.off{opacity:0;transform:translateY(-10px);pointer-events:none}
+/* لوحة المعلومات */
+#info{position:fixed;left:10px;right:10px;bottom:calc(112px + var(--sb));z-index:5;max-width:470px;margin:auto;border-radius:20px;padding:10px 12px;border:3px solid var(--g);display:flex;gap:10px;align-items:stretch;box-shadow:0 8px 22px rgba(0,0,0,.22)}
+.key{flex:none;width:76px;border-radius:12px;border:2px solid var(--t);display:flex;flex-direction:column;align-items:center;justify-content:center;direction:ltr;padding:4px}
+.key .z{font-size:14px;font-weight:800}.key .s{font-size:32px;font-weight:800;line-height:1.1}.key .m{font-size:11.5px;font-weight:700}
+.det{flex:1;min-width:0}
+.det h3{font-size:17px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:5px}
+.tag{font-size:11.5px;color:#fff;background:var(--g2);border-radius:12px;padding:2px 8px}
+.cnt{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:5px}
+.cnt div{border-radius:10px;background:rgba(255,255,255,.75);text-align:center;padding:4px 2px;font-size:11px;font-weight:700}
+.cnt b{display:block;font-size:19px;font-weight:800}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:3px;vertical-align:middle}
+.det p{font-size:12.5px;font-weight:700;line-height:1.6}
+.det p em{font-style:normal;color:var(--g);font-weight:800}
+/* شريط العناصر */
+#strip{position:fixed;left:0;right:0;bottom:calc(30px + var(--sb));z-index:5;display:flex;gap:6px;overflow-x:auto;padding:8px 10px;scrollbar-width:none}
+#strip::-webkit-scrollbar{display:none}
+.chip{flex:none;width:58px;height:66px;border-radius:12px;border:2px solid rgba(30,43,34,.6);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;box-shadow:0 3px 0 rgba(30,43,34,.35);direction:ltr}
+.chip i{font-style:normal;font-size:11px}.chip b{font-size:22px;line-height:1.1}.chip u{text-decoration:none;font-size:9px;direction:rtl}
+.chip.on{outline:3px solid #fff;transform:translateY(-5px);box-shadow:0 6px 12px rgba(0,0,0,.35)}
+.metal{background:linear-gradient(160deg,#c9e3f8,#9DC9F0)}.nonmetal{background:linear-gradient(160deg,#fde89a,#F7D154)}.metalloid{background:linear-gradient(160deg,#cdeab8,#A8D88A)}
+/* لوحة البناء والتخمين */
+.panel{position:fixed;left:10px;right:10px;bottom:calc(34px + var(--sb));z-index:5;max-width:470px;margin:auto;border-radius:20px;padding:12px;border:3px solid var(--g);box-shadow:0 8px 22px rgba(0,0,0,.22);display:none}
+.panel.on{display:block}
+.panel .q{font-size:15.5px;font-weight:800;text-align:center;line-height:1.6;margin-bottom:8px}
+.ctr{display:flex;align-items:center;gap:8px;margin:5px 0}
+.ctr span{flex:1;font-size:14.5px;font-weight:800}
+.ctr b{width:34px;text-align:center;font-size:21px;font-weight:800}
+.ctr button{width:40px;height:36px;border-radius:12px;border:none;font-size:21px;font-weight:800;background:#e9f4ec;color:var(--t);box-shadow:0 3px 0 #c5d9ca}
+.made{text-align:center;font-size:13.5px;font-weight:800;margin:6px 0;color:var(--g)}
+.big{display:block;width:100%;border:none;border-radius:16px;padding:11px;font-size:16px;font-weight:800;color:#fff;background:var(--g);box-shadow:0 4px 0 #1b4a30;margin-top:6px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt{border:3px solid #dbe7dd;background:#f5faf6;border-radius:14px;padding:10px 4px;font-size:15px;font-weight:800;color:var(--t)}
+.opt.ok{background:var(--g);border-color:var(--g);color:#fff}.opt.no{background:var(--r);border-color:var(--r);color:#fff}
+.prog{text-align:center;font-size:12px;color:#556;margin-top:6px;font-weight:700}
+#guide{position:fixed;right:-8px;bottom:calc(30px + var(--sb));height:19vh;max-height:170px;z-index:4;pointer-events:none;transition:opacity .3s}
 #guide.jump{animation:jump .6s ease}
-@keyframes slide{from{transform:translateX(120%)}to{transform:none}}
-@keyframes jump{30%{transform:translateY(-24px)}60%{transform:none}80%{transform:translateY(-7px)}}
-#bubble{position:fixed;right:12px;bottom:calc(32px + min(30vh,280px) + env(safe-area-inset-bottom,0px));z-index:4;max-width:230px;background:#fff;border:2.5px solid var(--y);border-radius:18px 18px 4px 18px;padding:9px 12px;font-size:13.5px;font-weight:700;line-height:1.6;box-shadow:0 5px 14px rgba(0,0,0,.15)}
+@keyframes jump{30%{transform:translateY(-22px)}60%{transform:none}80%{transform:translateY(-6px)}}
+.foot{position:fixed;bottom:0;left:0;right:0;z-index:6;text-align:center;font-size:12px;padding:6px 6px calc(6px + var(--sb));font-weight:700}
 .hide{display:none!important}
-.foot{position:fixed;bottom:0;left:0;right:0;z-index:5;text-align:center;font-size:12px;background:rgba(255,255,255,.9);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));font-weight:700}
-.camBtn{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:7;border:none;border-radius:40px;padding:16px 28px;font-size:19px;font-weight:800;color:#fff;background:var(--g);box-shadow:0 6px 0 #1b4a30;display:none}
-#start{position:fixed;inset:0;z-index:20;background:radial-gradient(ellipse at 50% 35%,#3d7a55 0,#1f4a33 55%,#122c1f 100%);display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto;perspective:900px}
+/* البداية */
+#start{position:fixed;inset:0;z-index:20;background:radial-gradient(ellipse at 50% 35%,#3d7a55 0,#1f4a33 55%,#122c1f 100%);display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto}
 #start:before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:38px 38px;pointer-events:none}
-#start .in{position:relative}
-#start .in{width:100%;max-width:560px;margin:auto;text-align:center;padding:16px;background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1.5px solid rgba(255,255,255,.45);border-radius:22px;color:#fff;box-shadow:0 20px 50px rgba(0,0,0,.3)}
-#start h1{color:#fff!important}#start .by{color:#fff}
-#start .hdr img{filter:brightness(0) invert(1)}
-.atomwrap{display:flex;justify-content:center;align-items:center;gap:18px;margin:6px 0 12px;flex-wrap:wrap}
-.atom{position:relative;width:150px;height:150px;transform-style:preserve-3d}
-.atom .nuc{position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffe9a8,#e0a83a 60%,#9a6a12);box-shadow:0 0 22px #f7d154}
-.atom .orb{position:absolute;inset:0;border:2px solid rgba(255,255,255,.55);border-radius:50%;animation:spin 6s linear infinite}
-.atom .orb:nth-child(2){transform:rotateX(70deg) rotateY(0)}.atom .orb:nth-child(3){transform:rotateX(70deg) rotateY(60deg)}.atom .orb:nth-child(4){transform:rotateX(70deg) rotateY(120deg)}
-.atom .orb i{position:absolute;top:-6px;left:50%;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#9DC9F0;box-shadow:0 0 10px #9DC9F0}
-@keyframes spin{to{rotate:360deg}}
-.atom .orb:nth-child(2){animation:o1 5s linear infinite}.atom .orb:nth-child(3){animation:o2 6s linear infinite}.atom .orb:nth-child(4){animation:o3 7s linear infinite}
+#start .in{position:relative;width:100%;max-width:520px;text-align:center;padding:18px;background:rgba(255,255,255,.14);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1.5px solid rgba(255,255,255,.45);border-radius:22px;color:#fff;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+#start .hdr{display:flex;justify-content:space-between;align-items:center;text-align:right;font-size:13px;font-weight:700;line-height:1.7}
+#start .hdr img{height:52px;filter:brightness(0) invert(1)}
+#start h1{font-size:27px;font-weight:800;margin:6px 0}
+#start p{font-size:14.5px;font-weight:700;line-height:1.7;margin-bottom:14px}
+.atom{position:relative;width:150px;height:150px;margin:8px auto 4px;transform-style:preserve-3d}
+.atom .nuc{position:absolute;left:50%;top:50%;width:28px;height:28px;margin:-14px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ff9d8f,#d33a2c 60%,#7a1a12);box-shadow:0 0 22px #ff6a55}
+.atom .orb{position:absolute;inset:0;border:2px solid rgba(255,255,255,.55);border-radius:50%}
+.atom .orb i{position:absolute;top:-6px;left:50%;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#7cc4ff;box-shadow:0 0 12px #7cc4ff}
+.atom .orb:nth-child(2){animation:o1 3s linear infinite}.atom .orb:nth-child(3){animation:o2 4s linear infinite}.atom .orb:nth-child(4){animation:o3 5s linear infinite}
 @keyframes o1{from{transform:rotateX(70deg) rotateY(0) rotateZ(0)}to{transform:rotateX(70deg) rotateY(0) rotateZ(360deg)}}
 @keyframes o2{from{transform:rotateX(70deg) rotateY(60deg) rotateZ(0)}to{transform:rotateX(70deg) rotateY(60deg) rotateZ(360deg)}}
 @keyframes o3{from{transform:rotateX(70deg) rotateY(120deg) rotateZ(0)}to{transform:rotateX(70deg) rotateY(120deg) rotateZ(360deg)}}
-.pt3{direction:ltr;display:grid;grid-template-columns:repeat(18,11px);grid-auto-rows:11px;gap:2px;transform:rotateX(28deg) rotateY(-14deg);transform-style:preserve-3d;animation:tilt 7s ease-in-out infinite alternate}
-.pt3 b{border-radius:2px;box-shadow:0 2px 0 rgba(0,0,0,.25);animation:glow 3s ease-in-out infinite}
-@keyframes tilt{to{transform:rotateX(18deg) rotateY(14deg)}}
-@keyframes glow{50%{filter:brightness(1.35)}}
-#start .hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;text-align:right;font-size:12.5px;font-weight:700;line-height:1.6}
-#start .hdr img{height:54px}
-#start h1{font-size:28px;font-weight:800;color:var(--g);margin:4px 0}
-#start p{color:#fff;font-size:15px;margin-bottom:14px;font-weight:700}
-.hero{display:flex;align-items:flex-end;justify-content:center;gap:8px;margin-bottom:10px}
-.hero img{height:170px}
-.hero .mini{display:grid;grid-template-columns:repeat(4,38px);gap:4px;direction:ltr}
-.hero .mini span{height:38px;border-radius:7px;display:grid;place-items:center;font-weight:800;font-size:15px}
-.choice{display:block;width:100%;border:none;background:#fff;border-radius:20px;margin-bottom:12px;box-shadow:0 8px 22px rgba(0,0,0,.12);text-align:right;padding:14px 18px;border-right:8px solid var(--g)}
-.choice b{display:block;font-size:19px;color:var(--t)}
-.choice small{display:block;font-size:13px;color:#557;margin-top:3px}
-.by{font-size:13px;margin-top:8px;font-weight:700}
-.modal{position:fixed;inset:0;z-index:30;background:rgba(30,43,34,.45);display:none;align-items:center;justify-content:center;padding:16px}
-.modal.on{display:flex}
-.box{background:#fff;border-radius:24px;width:100%;max-width:520px;max-height:90vh;overflow:auto;padding:18px;box-shadow:0 14px 40px rgba(0,0,0,.3);animation:up .35s}
-.box h2{font-size:20px;text-align:center;margin-bottom:10px;color:var(--g)}
-.box .q{font-size:17px;font-weight:800;text-align:center;line-height:1.7;margin:8px 0}
-.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-.opt{border:3px solid #dbe7dd;background:#f5faf6;border-radius:16px;padding:13px 6px;font-size:16px;font-weight:800;color:var(--t)}
-.opt.ok{background:var(--g);border-color:var(--g);color:#fff}
-.opt.no{background:var(--r);border-color:var(--r);color:#fff}
-.prog{text-align:center;font-size:13px;color:#667;margin-top:6px}
-.close{display:block;margin:14px auto 0;border:none;border-radius:20px;padding:9px 22px;font-weight:800;background:#eee;color:var(--t)}
-.medal{font-size:64px;text-align:center}
+.go{display:block;width:100%;border:none;border-radius:20px;padding:15px;font-size:19px;font-weight:800;color:var(--t);background:#fff;box-shadow:0 6px 0 rgba(0,0,0,.25);margin-bottom:10px}
+.go2{border:none;background:none;color:#fff;font-size:13.5px;font-weight:700;text-decoration:underline}
+.by{font-size:13px;margin-top:10px;font-weight:700}
 canvas#cf{position:fixed;inset:0;pointer-events:none;z-index:40}
-@media (max-height:520px){#bubble{display:none}#guide{height:42vh}}
-
-
-.choice{background:rgba(255,255,255,.85)!important}
-#card.card,.tabs{background:rgba(255,255,255,.55)!important;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
-
-/* ---------- الجدول الدوري مبني بالكود (بدون صور) ---------- */
-#ptWrap{position:fixed;inset:0;z-index:2;display:none;perspective:1200px;perspective-origin:50% 40%;touch-action:none;overflow:hidden}
-#pt{--c:50px;position:absolute;left:50%;top:53%;display:grid;direction:ltr;gap:4px;
- grid-template-columns:30px repeat(18,var(--c));grid-template-rows:26px repeat(7,var(--c)) 14px repeat(2,var(--c));
- transform-style:preserve-3d;transform-origin:50% 50%}
-#pt .el{position:relative;border-radius:8px;border:1.5px solid rgba(30,43,34,.55);display:flex;flex-direction:column;align-items:center;justify-content:center;
- line-height:1;color:#1E2B22;cursor:pointer;user-select:none;-webkit-user-select:none;
- transform:translateZ(var(--tz,0px)) scale(var(--sc,1));opacity:1;
- box-shadow:0 4px 0 rgba(30,43,34,.35),inset 0 1px 0 rgba(255,255,255,.7);
- transition:transform .45s cubic-bezier(.2,.9,.3,1.25),opacity .35s,box-shadow .35s;transition-delay:var(--d,0ms)}
-#pt .el i{position:absolute;top:3px;left:4px;font-style:normal;font-size:10px;font-weight:700}
-#pt .el b{font-size:21px;font-weight:800;margin-top:5px}
-#pt .el u{text-decoration:none;font-size:7.5px;font-weight:700;margin-top:3px;max-width:94%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;direction:rtl}
-#pt .metal{background:linear-gradient(160deg,#c9e3f8,#9DC9F0)}
-#pt .nonmetal{background:linear-gradient(160deg,#fde89a,#F7D154)}
-#pt .metalloid{background:linear-gradient(160deg,#cdeab8,#A8D88A)}
-#pt .unknown{background:linear-gradient(160deg,#dcdce2,#B9B9C3)}
-#pt:not(.in) .el{--tz:520px;opacity:0}
-#pt.done .el{transition-delay:0ms}
-#pt.filtering .el:not(.up):not(.sel){opacity:.28}
-#pt .el.up{--tz:48px;box-shadow:0 14px 18px rgba(0,0,0,.28)}
-#pt .el.sel{--tz:95px;--sc:1.7;opacity:1;box-shadow:0 18px 26px rgba(0,0,0,.35);z-index:3}
-#pt .gh,#pt .ph{display:grid;place-items:center;font-size:13px;font-weight:800;color:#fff;background:rgba(46,107,71,.88);border-radius:7px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .3s}
-#pt .gh.on,#pt .ph.on{background:var(--y);color:#1E2B22}
-#pt .fl{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;background:rgba(30,43,34,.55);border-radius:7px;direction:rtl}
-#pt{transition:top .4s}
-body.carded #pt{top:38%}
-@media (orientation:landscape){body.carded #pt{top:31%}body.carded .card{max-width:470px;padding:9px 12px;bottom:calc(84px + env(safe-area-inset-bottom,0px))}body.carded .card .info p{font-size:13px;line-height:1.55}body.carded .card .key{width:78px}body.carded .card .key .s{font-size:30px}}
-@media (orientation:portrait){#pt{top:41%}.filters{left:64px;right:10px;flex-direction:row;flex-wrap:wrap;justify-content:center}.filters button{padding:6px 11px;font-size:12.5px}}
+@media (orientation:landscape) and (max-height:520px){
+ #info{left:auto;right:10px;bottom:calc(110px + var(--sb));width:380px}
+ .panel{left:auto;right:10px;width:380px;bottom:calc(30px + var(--sb))}
+ #guide{display:none}
+}
 </style>
 </head>
 <body>
-<div id="bg"><div class="b on" style="background-image:url(bg1.webp)"></div><div class="b" style="background-image:url(bg2.webp)"></div><div class="b" style="background-image:url(bg3.webp)"></div><div class="b" style="background-image:url(bg4.webp)"></div></div>
 <video id="cam" playsinline muted autoplay></video>
+<div id="fallback"></div>
 <canvas id="gl"></canvas>
-<div id="ptWrap"><div id="pt"></div></div>
 <canvas id="cf"></canvas>
+
 <div class="bar">العلوم • ثالث متوسط • الفصل 4 • مقدمة في الجدول الدوري ⚛️</div>
+<div class="modes glass">
+ <button id="m-explore" class="on" onclick="setMode('explore')">🔭 استكشفي</button>
+ <button id="m-build" onclick="setMode('build')">🧱 ابني الذرّة</button>
+ <button id="m-guess" onclick="setMode('guess')">❓ خمّني العنصر</button>
+</div>
 <div class="tools">
- <button title="إعادة الوضع" onclick="resetView()">↺</button>
- <button title="تغيير الخلفية" onclick="nextBg()">🖼️</button>
- <button title="الكاميرا" onclick="toggleCam()">📷</button>
- <button title="إخفاء المرشدة" onclick="toggleGuide()">👧</button>
+ <button class="glass" title="أعيدي الذرّة أمامكِ" onclick="recenter()">🎯</button>
+ <button class="glass" title="الكاميرا" onclick="toggleCam()">📷</button>
+ <button class="glass" title="الصوت" id="sndBtn" onclick="toggleSnd()">🔊</button>
 </div>
-<div class="filters" id="filters">
- <button style="background:var(--met)" onclick="lift('metal')">الفلزات</button>
- <button style="background:var(--non)" onclick="lift('nonmetal')">اللافلزات</button>
- <button style="background:var(--mld)" onclick="lift('metalloid')">أشباه الفلزات</button>
- <button style="background:#d9ecdf" onclick="lift('representative')">الممثلة</button>
- <button style="background:#f3dcc0" onclick="lift('transition')">الانتقالية</button>
- <button style="background:#fff" onclick="lift(null)">الكل</button>
+<div id="toast" class="glass off"></div>
+
+<div id="info" class="glass">
+ <div class="key" id="key"><div class="z" id="kz"></div><div class="s" id="ks"></div><div class="m" id="km"></div></div>
+ <div class="det">
+  <h3><span id="kn"></span><span class="tag" id="kt"></span></h3>
+  <div class="cnt">
+   <div><span class="dot" style="background:#e2483d"></span>بروتونات<b id="cp"></b></div>
+   <div><span class="dot" style="background:#aab3ba"></span>نيوترونات<b id="cn"></b></div>
+   <div><span class="dot" style="background:#3aa0ff"></span>إلكترونات<b id="ce"></b></div>
+  </div>
+  <p id="kp"></p>
+ </div>
 </div>
-<div class="card" id="card">
- <div class="key" id="k"><div class="z" id="kz"></div><div class="s" id="ks"></div><div class="n" id="kn"></div><div class="m" id="km"></div></div>
- <div class="info"><h3><span id="c-title"></span><span class="tag" id="c-tag"></span></h3><p id="c-text"></p>
- <div class="row"><button onclick="say(curText)">🔊 استمعي</button><button onclick="hideCard()">✕ إغلاق</button></div></div>
+<div id="strip" class="glass"></div>
+
+<div class="panel glass" id="p-build">
+ <div class="q" id="bq"></div>
+ <div class="ctr"><span><span class="dot" style="background:#e2483d"></span>بروتونات</span><button onclick="add('p',-1)">−</button><b id="bp">0</b><button onclick="add('p',1)">+</button></div>
+ <div class="ctr"><span><span class="dot" style="background:#aab3ba"></span>نيوترونات</span><button onclick="add('n',-1)">−</button><b id="bn">0</b><button onclick="add('n',1)">+</button></div>
+ <div class="ctr"><span><span class="dot" style="background:#3aa0ff"></span>إلكترونات</span><button onclick="add('e',-1)">−</button><b id="be">0</b><button onclick="add('e',1)">+</button></div>
+ <div class="made" id="bmade"></div>
+ <button class="big" onclick="checkBuild()">✔ تحقّقي من ذرّتي</button>
 </div>
-<img id="guide" src="girl-r.webp" alt="المرشدة">
-<div id="bubble">أهلًا يا مستكشفة! المسي أي عنصر لتقرئي مفتاحه 🔍</div>
-<div class="actions" id="actions"></div>
-<div class="foot">المعلمة: د. أفنان الطلحي</div>
+
+<div class="panel glass" id="p-guess">
+ <div class="q" id="gq">عُدّي الإلكترونات ومستويات الطاقة… ما هذا العنصر؟</div>
+ <div class="opts" id="gopts"></div>
+ <div class="prog" id="gprog"></div>
+</div>
+
+<img id="guide" src="girl-r.webp" alt="">
+<div class="foot glass">المعلمة: د. أفنان الطلحي</div>
 
 <div id="start"><div class="in">
  <div class="hdr"><div>المملكة العربية السعودية<br>وزارة التعليم</div><img src="moe.png" alt="وزارة التعليم"></div>
- <div class="atomwrap"><div class="atom"><span class="nuc"></span><span class="orb"><i></i></span><span class="orb"><i></i></span><span class="orb"><i></i></span></div><div class="pt3" id="pt3"></div></div>
- <h1>مختبر الجدول الدوري ⚛️</h1>
- <p>جدول دوري ثلاثي الأبعاد تلمسينه وتدوّرينه وتكتشفين عناصره!</p>
- <button class="choice" onclick="enter('table')"><b>🧱 ابدئي استكشاف الجدول الدوري</b><small>118 عنصرًا • الفلزات واللافلزات وأشباه الفلزات</small></button>
+ <div class="atom"><span class="nuc"></span><span class="orb"><i></i></span><span class="orb"><i></i></span><span class="orb"><i></i></span></div>
+ <h1>داخل الذرّة 🔬</h1>
+ <p>افتحي الكاميرا وستظهر الذرّة أمامكِ في الغرفة!<br>حرّكي الجوال حولها، والمسيها، وابني ذرّاتكِ بنفسكِ.</p>
+ <button class="go" onclick="begin(true)">📷 ابدئي وافتحي الكاميرا</button>
+ <button class="go2" onclick="begin(false)">أو ابدئي بدون كاميرا</button>
  <div class="by">المعلمة: د. أفنان الطلحي</div>
 </div></div>
-<div class="modal" id="m-quiz"><div class="box" id="quizBox"></div></div>
 
 <script src="elements.js"></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js"}}</script>
 <script type="module">
 import * as THREE from 'three';
-(()=>{const c={metal:'#9DC9F0',nonmetal:'#F7D154',metalloid:'#A8D88A',unknown:'#B9B9C3'};const d=document.getElementById('pt3');ELEMENTS.filter(e=>!e.f).forEach((e,i)=>{const b=document.createElement('b');b.style.gridColumn=e.g;b.style.gridRow=e.p;b.style.background=c[e.cat];b.style.animationDelay=(i%18)*.12+'s';d.appendChild(b);});})();
-const E = ELEMENTS, bySym = s => E.find(e => e.sym === s);
-const COL = {metal:'#9DC9F0', nonmetal:'#F7D154', metalloid:'#A8D88A', unknown:'#B9B9C3'};
-const FACT = {H:'أخف العناصر وأولها في الجدول الدوري؛ يُستعمل وقودًا نظيفًا في مشروع نيوم.',C:'لافلز صلب؛ نجده في الجرافيت (رصاص القلم) والألماس، وفي جسمكِ.',
- O:'غاز لافلزي نتنفسه، ويكوّن مع الهيدروجين الماء H₂O.',Na:'فلز نشط في المجموعة 1؛ يتحد مع الكلور فيكوّن ملح الطعام NaCl.',
- Si:'شبه فلز يوصل الكهرباء جزئيًا؛ تُصنع منه الشرائح الإلكترونية والألواح الشمسية.',Fe:'فلز انتقالي صلب؛ ذكره الله في القرآن: ﴿وأنزلنا الحديد فيه بأس شديد ومنافع للناس﴾.',
- Hg:'الفلز الوحيد السائل عند درجة حرارة الغرفة؛ اسمه يعني «الفضة السائلة».',Au:'فلز لامع قابل للطرق والسحب؛ رمزه من الكلمة اللاتينية Aurum بمعنى «بزوغ الضوء».'};
-const QUIZ = {
- around:[{q:'ما العدد الذري للحديد Fe؟',o:['26','55.845','8','4'],a:0,m:'Fe'},{q:'أيّ هذه العناصر سائل عند درجة حرارة الغرفة؟',o:['الزئبق Hg','الذهب Au','الصوديوم Na','الكربون C'],a:0,m:'Hg'},
-  {q:'السيليكون Si يُصنَّف على أنه:',o:['شبه فلز','فلز','لافلز','غاز نبيل'],a:0,m:'Si'},{q:'ما الكتلة الذرية للأكسجين O؟',o:['15.999','8','16 بالضبط','32'],a:0,m:'O'},
-  {q:'رمز الذهب Au مأخوذ من الكلمة اللاتينية:',o:['Aurum','Argentum','Natrium','Ferrum'],a:0,m:'Au'}],
- table:[{q:'كم عدد الدورات في الجدول الدوري؟',o:['7','18','8','10'],a:0},{q:'أين تقع اللافلزات غالبًا؟',o:['يمين الجدول','يسار الجدول','أسفل الجدول','وسط الجدول'],a:0},
-  {q:'العناصر في المجموعات 3–12 تُسمّى:',o:['العناصر الانتقالية','العناصر الممثلة','الغازات النبيلة','أشباه الفلزات'],a:0},{q:'كم عدد أشباه الفلزات في الجدول؟',o:['8','17','18','3'],a:0},
-  {q:'رُتّبت العناصر في الجدول الحديث حسب تزايد:',o:['العدد الذري','الكتلة الذرية','الكثافة','تاريخ الاكتشاف'],a:0}]};
+
+/* ---------- البيانات ---------- */
+const EL = ELEMENTS.slice(0, 20).map(e => ({...e, n: Math.round(parseFloat(e.mass)) - e.z}));
+const byZ = z => EL[z - 1];
+const COL = {metal:'#9DC9F0', nonmetal:'#F7D154', metalloid:'#A8D88A'};
+const shellsOf = e => { const caps = [2, 8, 8, 8], out = []; let left = e; for (const c of caps){ if (left <= 0) break; out.push(Math.min(c, left)); left -= c; } return out; };
+const LEVELS = ['', 'مستوى واحد', 'مستويين', 'ثلاثة مستويات', 'أربعة مستويات'];
 const shuffle = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(v => v[1]);
+const $ = id => document.getElementById(id);
 
-/* ---------- speech (no music, no tones) ---------- */
-let VOICE = null;
-function pickVoice(){ try{ const vs = speechSynthesis.getVoices().filter(v => /^ar/i.test(v.lang)); if (vs.length) VOICE = vs.find(v => /female|zeina|hoda|salma|laila|mariam|google/i.test(v.name)) || vs[0]; }catch(e){} }
+/* ---------- الصوت والمرشدة ---------- */
+let VOICE = null, sound = true;
+function pickVoice(){ try{ const vs = speechSynthesis.getVoices().filter(v => /^ar/i.test(v.lang)); if (vs.length) VOICE = vs.find(v => /female|zeina|hoda|salma|laila|mariam|amira|google/i.test(v.name)) || vs[0]; }catch(e){} }
 if ('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-window.say = t => { try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t.replace(/[⚛️🔍💡🏅﴿﴾]/g, '،')); u.lang = 'ar-SA'; if (VOICE) u.voice = VOICE; u.rate = 1.05; speechSynthesis.speak(u); }catch(e){} };
-const bubble = document.getElementById('bubble'), guide = document.getElementById('guide');
-const talk = (t, sp = false) => { bubble.textContent = t; if (sp) say(t); };
-const jump = () => { guide.classList.remove('jump'); void guide.offsetWidth; guide.classList.add('jump'); };
-window.toggleGuide = () => { guide.classList.toggle('hide'); bubble.classList.toggle('hide'); };
+const say = t => { if (!sound) return; try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t.replace(/[🔬⚛️🎯✨🌟💡🏅👏🔍]/gu, '،')); u.lang = 'ar-SA'; if (VOICE) u.voice = VOICE; u.rate = 1.25; speechSynthesis.speak(u); }catch(e){} };
+window.toggleSnd = () => { sound = !sound; $('sndBtn').textContent = sound ? '🔊' : '🔇'; if (!sound) try{ speechSynthesis.cancel(); }catch(e){} };
+let toastT = 0;
+const talk = (t, sp = true, ms = 5500) => { const el = $('toast'); el.textContent = t; el.classList.remove('off'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.add('off'), ms); if (sp) say(t); };
+const jump = () => { const g = $('guide'); g.classList.remove('jump'); void g.offsetWidth; g.classList.add('jump'); };
 
-/* ---------- camera ---------- */
-const video = document.getElementById('cam');
-let facing = 'environment', stream = null;
-window.startCam = async () => {
+/* ---------- الكاميرا ---------- */
+const video = $('cam'); let stream = null;
+async function startCam(){
   try{
-    if (stream) stream.getTracks().forEach(t => t.stop());
-    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing}, width:{ideal:1280}, height:{ideal:720}}, audio:false});
-    video.srcObject = stream; await video.play(); video.style.display = 'block';
-    video.style.transform = facing === 'user' ? 'scaleX(-1)' : 'none';
-  }catch(e){ stream = null; video.style.display = 'none'; talk('تعذّر فتح الكاميرا، وستبقى الخلفية كما هي 🖼️'); }
-};
-window.toggleCam = () => { if (stream){ stream.getTracks().forEach(t => t.stop()); stream = null; video.style.display = 'none'; talk('عادت الخلفية 🖼️'); } else startCam(); };
-/* خلفيات متغيرة */
-const BGS = [...document.querySelectorAll('#bg .b')]; let bgi = 0;
-window.nextBg = () => { BGS[bgi].classList.remove('on'); bgi = (bgi + 1) % BGS.length; BGS[bgi].classList.add('on'); };
-setInterval(nextBg, 15000);
-
-/* ---------- textures ---------- */
-function tileTex(e, big){
-  const c = document.createElement('canvas'); const S = big ? 512 : 128; c.width = c.height = S; const x = c.getContext('2d');
-  x.fillStyle = COL[e.cat]; x.fillRect(0, 0, S, S);
-  x.strokeStyle = '#1E2B22'; x.lineWidth = S * .03; x.strokeRect(S * .02, S * .02, S * .96, S * .96);
-  x.fillStyle = '#1E2B22'; x.textAlign = 'center'; x.textBaseline = 'middle';
-  if (big){
-    x.font = '700 44px Almarai'; x.fillText(e.en, S / 2, 60);
-    x.font = '800 56px Almarai'; x.fillText(e.z, S / 2, 130);
-    x.font = '800 190px Almarai'; x.fillText(e.sym, S / 2, 285);
-    x.font = '700 48px Almarai'; x.fillText(e.mass, S / 2, 420);
-    x.font = '700 40px Almarai'; x.fillText(e.ar, S / 2, 475);
-  } else {
-    x.font = '700 22px Almarai'; x.fillText(e.z, S / 2, 22);
-    x.font = '800 54px Almarai'; x.fillText(e.sym, S / 2, 74);
-  }
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
+    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}, width:{ideal:1280}, height:{ideal:720}}, audio:false});
+    video.srcObject = stream; await video.play(); video.style.display = 'block'; $('fallback').style.display = 'none';
+  }catch(e){ stream = null; video.style.display = 'none'; $('fallback').style.display = 'block'; talk('تعذّر فتح الكاميرا، فوضعتُ لكِ خلفية المختبر 🔬', false); }
 }
+function stopCam(){ if (stream) stream.getTracks().forEach(t => t.stop()); stream = null; video.style.display = 'none'; $('fallback').style.display = 'block'; }
+window.toggleCam = () => stream ? stopCam() : startCam();
 
-/* ---------- three ---------- */
-const canvas = document.getElementById('gl');
+/* ---------- المشهد ---------- */
+const canvas = $('gl');
 const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setClearColor(0x000000, 0);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setClearColor(0, 0);
 const scene = new THREE.Scene();
-const cam = new THREE.PerspectiveCamera(45, 1, .1, 200); cam.position.set(0, 1, 9); cam.lookAt(0, 0, 0);
-scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8a7a, 1.3));
-const dl = new THREE.DirectionalLight(0xffffff, 1.4); dl.position.set(3, 5, 6); scene.add(dl);
-const world = new THREE.Group(); scene.add(world);
-let current = 'table', tiles = [], selected = null, liftCat = null;
-const SIDE = new THREE.MeshStandardMaterial({color:0xf3f6f2, roughness:.6});
+const cam = new THREE.PerspectiveCamera(60, 1, .05, 100);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x445566, 1.6));
+const dl = new THREE.DirectionalLight(0xffffff, 1.8); dl.position.set(2, 4, 3); scene.add(dl);
+const anchor = new THREE.Group(); scene.add(anchor);          // مثبّت في الغرفة
+const holder = new THREE.Group(); anchor.add(holder);         // يدور باللمس
+const SPH = new THREE.SphereGeometry(1, 28, 20);
+const MP = new THREE.MeshStandardMaterial({color:0xe2483d, roughness:.35, metalness:.05, emissive:0x3a0500});
+const MN = new THREE.MeshStandardMaterial({color:0xb8c0c7, roughness:.45, metalness:.1});
+const ME = new THREE.MeshStandardMaterial({color:0x5bb6ff, emissive:0x1c6fd1, emissiveIntensity:1.1, roughness:.2});
+const MR = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:.55});
+const glowTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d'); const g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  g.addColorStop(0, 'rgba(140,210,255,1)'); g.addColorStop(.4, 'rgba(80,170,255,.45)'); g.addColorStop(1, 'rgba(80,170,255,0)'); x.fillStyle = g; x.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c); })();
+const GLOW = new THREE.SpriteMaterial({map:glowTex, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending});
+const nucGlowMat = new THREE.SpriteMaterial({map:glowTex, color:0xff7a66, transparent:true, opacity:.55, depthWrite:false, blending:THREE.AdditiveBlending});
 
-function buildAround(){
-  ['H','C','O','Na','Si','Fe','Hg','Au'].forEach(s => {
-    const e = bySym(s);
-    const front = new THREE.MeshStandardMaterial({map:tileTex(e, true), roughness:.5});
-    const m = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, .35), [SIDE, SIDE, SIDE, SIDE, front, front]);
-    m.userData.e = e; world.add(m); tiles.push(m);
+let atom = null, born = 0;
+const TILTS = [[0, 0], [.95, .35], [-.75, 1.1], [.4, -1.2]];
+function makeAtom(p, n, e){
+  const g = new THREE.Group(), total = p + n;
+  const nuc = new THREE.Group(); g.add(nuc);
+  const R = total > 1 ? .2 * Math.cbrt(total) + .06 : 0;
+  shuffle([...Array(p).fill('p'), ...Array(n).fill('n')]).forEach((t, i) => {
+    const m = new THREE.Mesh(SPH, t === 'p' ? MP : MN); m.scale.setScalar(.19);
+    const k = i + .5, phi = Math.acos(1 - 2 * k / total), th = Math.PI * (1 + Math.sqrt(5)) * k;
+    m.position.setFromSphericalCoords(R * (.6 + .4 * ((i * 7) % 5) / 4), phi, th); m.userData.kind = t; nuc.add(m);
   });
-  layoutAround();
-}
-function layoutAround(){
-  const narrow = innerWidth < innerHeight;
-  tiles.forEach((m, i) => {
-    const c = narrow ? i % 2 : i % 4, r = narrow ? Math.floor(i / 2) : Math.floor(i / 4);
-    const x = narrow ? (c - .5) * 2.0 : (c - 1.5) * 2.0, y = narrow ? (1.5 - r) * 1.85 : (.5 - r) * 2.0;
-    m.position.set(x, y, 0); m.userData.base = m.position.clone();
+  if (total){ const s = new THREE.Sprite(nucGlowMat); s.scale.setScalar(R * 4 + 1); nuc.add(s); }
+  const shells = shellsOf(e).map((c, k) => {
+    const r = R + 1.05 + k * .85, piv = new THREE.Group(); piv.rotation.set(Math.PI / 2 + TILTS[k][0], TILTS[k][1], 0); g.add(piv);
+    piv.add(new THREE.Mesh(new THREE.TorusGeometry(r, .014, 8, 160), MR));
+    const els = []; for (let i = 0; i < c; i++){ const m = new THREE.Mesh(SPH, ME); m.scale.setScalar(.085); m.userData.kind = 'e'; m.userData.level = k + 1;
+      const s = new THREE.Sprite(GLOW); s.scale.setScalar(5); m.add(s); piv.add(m); els.push(m); }
+    return {piv, els, r, sp:1.1 / (k + 1) + .25, off:Math.random() * 6};
   });
+  return {g, nuc, shells};
 }
-/* ---------- الجدول الدوري: مربعات حقيقية مبنية بالكود ---------- */
-const ptWrap = document.getElementById('ptWrap'), pt = document.getElementById('pt');
-const PT = {rx:18, ry:0, s:1, px:0, py:0, fit:1};
-let ptBuilt = false;
-function buildPT(){
-  if (ptBuilt) return; ptBuilt = true;
-  let h = '';
-  for (let g = 1; g <= 18; g++) h += '<div class="gh" data-g="' + g + '" style="grid-column:' + (g + 1) + ';grid-row:1">' + g + '</div>';
-  for (let p = 1; p <= 7; p++) h += '<div class="ph" data-p="' + p + '" style="grid-column:1;grid-row:' + (p + 1) + '">' + p + '</div>';
-  h += '<div class="fl" style="grid-column:2/5;grid-row:10">اللانثانيدات</div><div class="fl" style="grid-column:2/5;grid-row:11">الأكتينيدات</div>';
-  E.forEach(e => {
-    const col = e.f ? e.c + 5 : e.g + 1, row = e.f ? 9 + e.f : e.p + 1;
-    h += '<div class="el ' + e.cat + '" data-sym="' + e.sym + '" style="grid-column:' + col + ';grid-row:' + row + ';--d:' + (e.z * 14) + 'ms"><i>' + e.z + '</i><b>' + e.sym + '</b><u>' + e.ar + '</u></div>';
-  });
-  pt.innerHTML = h;
-  requestAnimationFrame(() => requestAnimationFrame(() => pt.classList.add('in')));
-  setTimeout(() => pt.classList.add('done'), 2400);
+function showAtom(p, n, e, pop = true){
+  if (atom){ holder.remove(atom.g); atom.g.traverse(o => { if (o.isMesh && o.geometry !== SPH) o.geometry.dispose(); }); }
+  atom = makeAtom(p, n, e); holder.add(atom.g); born = pop ? clock.getElapsedTime() : -9;
 }
-function applyPT(){
-  pt.style.transform = 'translate(-50%,-50%) translate(' + PT.px + 'px,' + PT.py + 'px) scale(' + (PT.fit * PT.s) + ') rotateX(' + PT.rx + 'deg) rotateY(' + PT.ry + 'deg)';
-}
-function fitPT(){
-  const w = pt.offsetWidth, h = pt.offsetHeight; if (!w) return;
-  PT.fit = Math.min((innerWidth - 20) / w, (innerHeight - 220) / h, 1.25); applyPT();
-}
-function markUp(fn){
-  pt.classList.toggle('filtering', !!fn);
-  pt.querySelectorAll('.el').forEach(d => d.classList.toggle('up', !!fn && fn(bySym(d.dataset.sym))));
-  pt.querySelectorAll('.gh,.ph').forEach(d => d.classList.remove('on'));
-}
-window.liftG = g => { markUp(e => !e.f && e.g === g); pt.querySelector('.gh[data-g="' + g + '"]').classList.add('on');
-  talk('المجموعة ' + g + ': عمود رأسي، وعناصرها متشابهة في خصائصها', true); };
-window.liftP = p => { markUp(e => e.p === p); pt.querySelector('.ph[data-p="' + p + '"]').classList.add('on');
-  talk('الدورة ' + p + ': صف أفقي، يزداد فيه العدد الذري بمقدار 1 من اليسار إلى اليمين', true); };
 
-/* لمس الجدول: إصبع واحد للتدوير • إصبعان للتقريب والتحريك • نقرة لاختيار عنصر أو مجموعة أو دورة */
-let tp = new Map(), tDown = null, tMoved = false, tTarget = null, p0 = 1, s0 = 1, mid0 = null, pan0 = null;
-const mid = () => { const [a, b] = [...tp.values()]; return {x:(a.x + b.x) / 2, y:(a.y + b.y) / 2, d:Math.hypot(a.x - b.x, a.y - b.y)}; };
-ptWrap.addEventListener('pointerdown', e => {
-  tTarget = tp.size === 0 ? e.target.closest('[data-sym],[data-g],[data-p]') : null;
-  try{ ptWrap.setPointerCapture(e.pointerId); }catch(_){}
-  tp.set(e.pointerId, {x:e.clientX, y:e.clientY});
-  if (tp.size === 1){ tDown = {x:e.clientX, y:e.clientY}; tMoved = false; }
-  if (tp.size === 2){ const m = mid(); p0 = m.d || 1; s0 = PT.s; mid0 = m; pan0 = {x:PT.px, y:PT.py}; tMoved = true; }
-});
-ptWrap.addEventListener('pointermove', e => {
-  if (!tp.has(e.pointerId)) return; const prev = tp.get(e.pointerId); tp.set(e.pointerId, {x:e.clientX, y:e.clientY});
-  if (tp.size === 2){ const m = mid(); PT.s = Math.min(5, Math.max(.6, s0 * m.d / p0)); PT.px = pan0.x + m.x - mid0.x; PT.py = pan0.y + m.y - mid0.y; applyPT(); return; }
-  if (Math.hypot(e.clientX - tDown.x, e.clientY - tDown.y) > 8) tMoved = true;
-  if (!tMoved) return;
-  PT.ry = Math.max(-55, Math.min(55, PT.ry + (e.clientX - prev.x) * .25));
-  PT.rx = Math.max(-15, Math.min(60, PT.rx - (e.clientY - prev.y) * .25)); applyPT();
-});
-const tEnd = e => { tp.delete(e.pointerId);
-  if (e.type === 'pointerup' && !tMoved && tp.size === 0 && tTarget){
-    const d = tTarget.dataset; if (d.sym) select(d.sym); else if (d.g) liftG(+d.g); else if (d.p) liftP(+d.p);
-  } };
-ptWrap.addEventListener('pointerup', tEnd); ptWrap.addEventListener('pointercancel', tEnd);
-
-function build(){
-  world.clear(); tiles = []; selected = null; liftCat = null;
-  if (current === 'around') buildAround(); else { buildPT(); markUp(null); }
-}
-window.setScene = s => {
-  current = s;
-  document.getElementById('filters').style.display = s === 'table' ? 'flex' : 'none';
-  ptWrap.style.display = s === 'table' ? 'block' : 'none';
-  canvas.style.display = s === 'table' ? 'none' : 'block';
-  build(); hideCard(); resetView(); resize();
-  document.getElementById('actions').innerHTML = '<button onclick="openQuiz()">🎯 تحدّي المستكشفة</button>';
-  talk(s === 'around' ? 'هذه عناصر من حولنا… المسي أي عنصر لتقرئي مفتاحه 🔍'
-    : 'هذا الجدول الدوري! المسي أي عنصر لتقرئي مفتاحه، أو رقم مجموعة أو دورة لترتفع أمامكِ 🔍' + (innerWidth < innerHeight ? ' (اقلبي الجوال بالعرض ليكبر الجدول)' : ''), true);
-  try{ history.replaceState(null, '', '?scene=' + s); }catch(e){}
+/* ---------- التثبيت في الغرفة بحساس الحركة ---------- */
+const zee = new THREE.Vector3(0, 0, 1), eul = new THREE.Euler(), q0 = new THREE.Quaternion(), q1 = new THREE.Quaternion(-Math.sqrt(.5), 0, 0, Math.sqrt(.5));
+let devQ = null, refQ = null; const camQ = new THREE.Quaternion();
+function onOri(ev){ if (ev.alpha == null) return; const d = Math.PI / 180, ori = ((screen.orientation && screen.orientation.angle) || window.orientation || 0) * d;
+  const q = new THREE.Quaternion(); eul.set(ev.beta * d, ev.alpha * d, -ev.gamma * d, 'YXZ'); q.setFromEuler(eul); q.multiply(q1); q.multiply(q0.setFromAxisAngle(zee, -ori));
+  devQ = q; if (!refQ) recenter(); }
+window.recenter = () => {
+  rotX = .25; rotY = 0; scl = 1;
+  if (devQ){ const e = new THREE.Euler().setFromQuaternion(devQ, 'YXZ'); refQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, e.y, 0, 'YXZ')); }
 };
-const LIFT_TXT = {metal:'الفلزات: يسار الجدول ووسطه', nonmetal:'اللافلزات: يمين الجدول (17 عنصرًا)', metalloid:'أشباه الفلزات: بين الفلزات واللافلزات (8 عناصر)',
-  representative:'العناصر الممثلة: المجموعتان 1 و2 والمجموعات من 13 إلى 18', transition:'العناصر الانتقالية: المجموعات من 3 إلى 12، وجميعها فلزات'};
-window.lift = cat => { liftCat = cat; markUp(cat ? (e => e.cat === cat || e.block === cat) : null);
-  talk(cat ? 'ارتفعت ' + LIFT_TXT[cat] : 'عادت كل العناصر إلى مكانها', true); };
-
-function resize(){
-  const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); cam.aspect = w / h;
-  const narrow = w < h;
-  cam.position.z = current === 'table' ? (narrow ? Math.max(15, 4.4 / (Math.tan(22.5 * Math.PI / 180) * w / h)) : 9.5) : (narrow ? 11.5 : 8.5);
-  cam.position.y = 0; cam.lookAt(0, 0, 0); cam.updateProjectionMatrix();
-  if (current === 'around' && tiles.length) layoutAround();
-  if (current === 'table') fitPT();
+async function startMotion(){
+  try{ if (typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) await DeviceOrientationEvent.requestPermission(); }catch(e){}
+  addEventListener('deviceorientation', onOri);
 }
-addEventListener('resize', resize);
 
-/* ---------- interaction ---------- */
-let rotY = 0, rotX = .1, scl = 1;
-window.resetView = () => { rotY = 0; rotX = .1; scl = 1; Object.assign(PT, {rx:18, ry:0, s:1, px:0, py:0}); applyPT(); };
+/* ---------- اللمس: تدوير وتكبير ونقر ---------- */
+let rotX = .25, rotY = 0, scl = 1, pts = new Map(), down = null, moved = false, p0 = 1, s0 = 1;
+canvas.addEventListener('pointerdown', e => { try{ canvas.setPointerCapture(e.pointerId); }catch(_){} pts.set(e.pointerId, {x:e.clientX, y:e.clientY}); if (pts.size === 1){ down = {x:e.clientX, y:e.clientY}; moved = false; }
+  if (pts.size === 2){ const [a, b] = [...pts.values()]; p0 = Math.hypot(a.x - b.x, a.y - b.y) || 1; s0 = scl; moved = true; } });
+canvas.addEventListener('pointermove', e => { if (!pts.has(e.pointerId)) return; const pr = pts.get(e.pointerId); pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
+  if (pts.size === 2){ const [a, b] = [...pts.values()]; scl = Math.min(2.6, Math.max(.45, s0 * Math.hypot(a.x - b.x, a.y - b.y) / p0)); return; }
+  if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8) moved = true;
+  if (moved){ rotY += (e.clientX - pr.x) * .01; rotX = Math.max(-1.3, Math.min(1.3, rotX + (e.clientY - pr.y) * .008)); } });
+const up = e => { pts.delete(e.pointerId); if (e.type === 'pointerup' && !moved && pts.size === 0) tap(e); };
+canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', up);
 const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
-let pts = new Map(), downPos = null, moved = false, pinch0 = 0, scl0 = 1;
-canvas.addEventListener('pointerdown', e => { canvas.setPointerCapture(e.pointerId); pts.set(e.pointerId, {x:e.clientX, y:e.clientY}); downPos = {x:e.clientX, y:e.clientY}; moved = false;
-  if (pts.size === 2){ const [a, b] = [...pts.values()]; pinch0 = Math.hypot(a.x - b.x, a.y - b.y); scl0 = scl; } });
-canvas.addEventListener('pointermove', e => { if (!pts.has(e.pointerId)) return; const prev = pts.get(e.pointerId); pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
-  if (pts.size === 2){ const [a, b] = [...pts.values()]; scl = Math.min(2.4, Math.max(.5, scl0 * Math.hypot(a.x - b.x, a.y - b.y) / pinch0)); moved = true; return; }
-  if (Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y) > 8) moved = true;
-  rotY += (e.clientX - prev.x) * .008; rotX = Math.max(-.7, Math.min(.8, rotX + (e.clientY - prev.y) * .005)); });
-canvas.addEventListener('pointerup', e => { pts.delete(e.pointerId); if (!moved && pts.size === 0) tap(e); });
-canvas.addEventListener('pointercancel', e => pts.delete(e.pointerId));
-function tap(e){ ptr.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(ptr, cam);
-  const hit = ray.intersectObjects(tiles, false)[0]; if (hit) select(hit.object.userData.e.sym); }
-let curText = '';
-function where(e){ return e.f ? (e.f === 1 ? 'اللانثانيدات (أسفل الجدول)' : 'الأكتينيدات (أسفل الجدول)') : 'الدورة ' + e.p + ' • المجموعة ' + e.g; }
-function blockAr(e){ return {representative:'عنصر ممثل', transition:'عنصر انتقالي', inner:'عنصر انتقالي داخلي'}[e.block]; }
-function select(sym, speak = true){
-  const e = bySym(sym); selected = sym;
-  pt.querySelectorAll('.el.sel').forEach(d => d.classList.remove('sel'));
-  if (current === 'table'){ const d = pt.querySelector('.el[data-sym="' + sym + '"]'); if (d) d.classList.add('sel'); }
-  const k = document.getElementById('k'); k.style.background = COL[e.cat];
-  document.getElementById('kz').textContent = e.z; document.getElementById('ks').textContent = e.sym;
-  document.getElementById('kn').textContent = e.en; document.getElementById('km').textContent = e.mass;
-  document.getElementById('c-title').textContent = e.ar + ' ' + e.sym;
-  document.getElementById('c-tag').textContent = CAT_AR[e.cat];
-  const txt = 'العدد الذري ' + e.z + ' • الكتلة الذرية ' + e.mass + ' • ' + STATE_AR[e.state] + ' • ' + where(e) + ' • ' + blockAr(e) + '. ' + (FACT[sym] || '');
-  document.getElementById('c-text').textContent = txt;
-  curText = e.ar + '. ' + txt; document.getElementById('card').classList.add('on'); document.body.classList.add('carded'); talk(e.ar + ': ' + CAT_AR[e.cat] + ' عدده الذري ' + e.z, speak); jump();
+function tap(e){
+  if (!atom) return; ptr.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(ptr, cam);
+  const hit = ray.intersectObjects(atom.g.children, true).find(h => h.object.userData.kind); if (!hit) return;
+  const o = hit.object, k = o.userData.kind; o.scale.multiplyScalar(1.6); setTimeout(() => o.scale.divideScalar(1.6), 450); jump();
+  if (k === 'p') talk('بروتون 🔴 شحنته موجبة، ويوجد في النواة. عدد البروتونات هو العدد الذري، وهو الذي يحدد نوع العنصر.');
+  else if (k === 'n') talk('نيوترون ⚪ متعادل الشحنة، ويوجد في النواة مع البروتونات.');
+  else talk('إلكترون 🔵 شحنته سالبة، ويدور حول النواة في مستوى الطاقة ' + o.userData.level + '.');
 }
-window.hideCard = () => { document.getElementById('card').classList.remove('on'); document.body.classList.remove('carded'); selected = null; pt.querySelectorAll('.el.sel').forEach(d => d.classList.remove('sel')); };
 
-/* ---------- loop ---------- */
+/* ---------- الحلقة ---------- */
 const clock = new THREE.Clock();
-function loop(){ requestAnimationFrame(loop); const t = clock.getElapsedTime();
-  world.scale.setScalar(scl);
-  if (current === 'around'){
-    tiles.forEach((m, i) => { m.rotation.y = rotY + Math.sin(t * .6 + i) * .35; m.rotation.x = rotX; const b = m.userData.base; m.position.y = b.y + Math.sin(t * 1.3 + i) * .06;
-      const s = m.userData.e.sym === selected ? 1.12 : 1; m.scale.lerp(new THREE.Vector3(s, s, s), .15); });
-    renderer.render(scene, cam);
-  } }
-loop();
+function resize(){ const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix();
+  if (w < h) anchor.position.set(0, .2, -12); else anchor.position.set(h < 520 ? -3.2 : -1.5, h < 520 ? -.6 : 0, -9.5); }
+addEventListener('resize', resize); resize();
+function loop(){
+  requestAnimationFrame(loop); const t = clock.getElapsedTime();
+  if (devQ && refQ){ const target = refQ.clone().invert().multiply(devQ); camQ.slerp(target, .35); cam.quaternion.copy(camQ); }
+  holder.rotation.set(rotX, rotY + t * .12, 0);
+  const a = Math.min(1, (t - born) / .7), pop = a >= 1 ? 1 : 1 + 2.2 * Math.pow(a - 1, 3) + 1.2 * Math.pow(a - 1, 2);
+  holder.scale.setScalar(scl * Math.max(.01, pop));
+  if (atom){
+    atom.nuc.rotation.y = t * .5; atom.nuc.rotation.x = Math.sin(t * .7) * .3;
+    atom.shells.forEach(s => s.els.forEach((m, i) => { const ang = s.off + t * s.sp + i * Math.PI * 2 / s.els.length; m.position.set(Math.cos(ang) * s.r, Math.sin(ang) * s.r, 0); }));
+  }
+  renderer.render(scene, cam);
+}
 
-/* ---------- start ---------- */
-window.enter = s => { document.getElementById('start').style.display = 'none'; setScene('table'); };
-document.fonts.load('800 20px Almarai').then(() => {
-  const qs = new URLSearchParams(location.search).get('scene');
-  if (qs){ document.getElementById('start').style.display = 'none'; setScene('table'); }
-});
+/* ---------- وضع الاستكشاف ---------- */
+function infoText(e){
+  const sh = shellsOf(e.z), last = sh[sh.length - 1];
+  return 'تدور إلكتروناته في <em>' + LEVELS[sh.length] + '</em> ← يقع في <em>الدورة ' + e.p + '</em>' +
+    (e.z === 2 ? ' • مستواه الأول ممتلئ ← <em>المجموعة 18</em> (غاز نبيل)' : ' • إلكترونات المستوى الأخير: <em>' + last + '</em> ← <em>المجموعة ' + e.g + '</em>') +
+    ' • التوزيع: ' + sh.join('، ');
+}
+function explore(z, speak = true){
+  const e = byZ(z); showAtom(e.z, e.n, e.z);
+  $('key').style.background = COL[e.cat]; $('kz').textContent = e.z; $('ks').textContent = e.sym; $('km').textContent = e.mass;
+  $('kn').textContent = e.ar + ' ' + e.sym; $('kt').textContent = CAT_AR[e.cat];
+  $('cp').textContent = e.z; $('cn').textContent = e.n; $('ce').textContent = e.z; $('kp').innerHTML = infoText(e);
+  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', +c.dataset.z === z));
+  const c = document.querySelector('.chip[data-z="' + z + '"]'); if (c) c.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+  if (speak){ jump(); talk('ذرّة ' + e.ar + ': عدد البروتونات ' + e.z + '، وعدد النيوترونات ' + e.n + '، وعدد الإلكترونات ' + e.z + '، تدور في ' + LEVELS[shellsOf(e.z).length] + '؛ لذلك يقع في الدورة ' + e.p + '.'); }
+}
+$('strip').innerHTML = EL.map(e => '<button class="chip ' + e.cat + '" data-z="' + e.z + '" onclick="pick(' + e.z + ')"><i>' + e.z + '</i><b>' + e.sym + '</b><u>' + e.ar + '</u></button>').join('');
+window.pick = z => explore(z);
 
-/* ---------- quiz ---------- */
-let qi = 0, first = 0, missed = false, QS = [];
-window.closeM = id => document.getElementById(id).classList.remove('on');
-window.openQuiz = () => { qi = 0; first = 0; QS = QUIZ[current].map(q => { const idx = shuffle(q.o.map((_, i) => i)); return {q:q.q, o:idx.map(i => q.o[i]), a:idx.indexOf(q.a), m:q.m}; });
-  document.getElementById('m-quiz').classList.add('on'); renderQ(); };
-function renderQ(){ const Q = QS[qi], box = document.getElementById('quizBox'); missed = false;
-  box.innerHTML = '<h2>🎯 تحدّي المستكشفة</h2><div class="q">' + Q.q + '</div><div class="opts">' + Q.o.map((o, i) => '<button class="opt" data-i="' + i + '">' + o + '</button>').join('') +
-    '</div><div class="prog">السؤال ' + (qi + 1) + ' من ' + QS.length + '</div><button class="close" onclick="closeM(\'m-quiz\')">إغلاق</button>';
-  box.querySelectorAll('.opt').forEach(b => b.onclick = () => answer(+b.dataset.i, b)); }
-function answer(i, b){ const Q = QS[qi]; if (b.classList.contains('ok')) return;
-  if (i === Q.a){ b.classList.add('ok'); jump(); if (!missed) first++; talk('أحسنتِ! إجابة صحيحة 🌟'); if (Q.m) select(Q.m, false);
-    setTimeout(() => { qi++; qi < QS.length ? renderQ() : win(); }, 1300); }
-  else { b.classList.add('no'); missed = true; talk('حاولي مرة أخرى 💡'); } }
-function win(){ confetti();
-  document.getElementById('quizBox').innerHTML = '<div class="medal">🏅</div><h2>مستكشفة الجدول الدوري!</h2><p class="q">أجبتِ من أول محاولة عن ' + first + ' من ' + QS.length + '</p><button class="close" onclick="closeM(\'m-quiz\')">رائع! أكملي الاستكشاف</button>';
-  talk('أحسنتِ! أنتِ مستكشفة حقيقية 🏅', true); }
-const cv = document.getElementById('cf'), cx = cv.getContext('2d'); let P = [];
-function confetti(){ cv.width = innerWidth; cv.height = innerHeight; const C = ['#2E6B47', '#E0A83A', '#9DC9F0', '#F7D154', '#A8D88A', '#C83B3B'];
-  for (let i = 0; i < 160; i++) P.push({x:Math.random() * cv.width, y:-20 - Math.random() * cv.height * .4, vx:(Math.random() - .5) * 3, vy:2 + Math.random() * 3, r:4 + Math.random() * 5, c:C[i % 6], a:Math.random() * 6}); cl(); }
+/* ---------- ابني الذرّة ---------- */
+const TARGETS = shuffle([1, 2, 3, 6, 7, 8, 10, 11, 12, 13, 17, 18, 19, 20]); let ti = 0, B = {p:0, n:0, e:0}, built = 0;
+function newTarget(){ const e = byZ(TARGETS[ti % TARGETS.length]); B = {p:0, n:0, e:0};
+  $('bq').innerHTML = '🧱 ابني ذرّة <b>' + e.ar + ' ' + e.sym + '</b><br><small>العدد الذري ' + e.z + ' • الكتلة الذرية ' + e.mass + '</small>';
+  refreshBuild(); talk('ابني ذرّة ' + e.ar + '. أضيفي البروتونات والنيوترونات والإلكترونات.'); }
+function refreshBuild(){
+  $('bp').textContent = B.p; $('bn').textContent = B.n; $('be').textContent = B.e;
+  showAtom(B.p, B.n, B.e, false);
+  const e = B.p >= 1 && B.p <= 20 ? byZ(B.p) : null;
+  $('bmade').textContent = e ? 'ذرّتكِ الآن: ' + e.ar + ' ' + e.sym + (B.e === B.p ? ' • متعادلة الشحنة ✓' : ' • غير متعادلة') : 'أضيفي بروتونًا لتبدأ ذرّتكِ';
+}
+window.add = (k, d) => { const max = {p:20, n:24, e:20}[k]; const v = B[k] + d; if (v < 0 || v > max) return; B[k] = v; refreshBuild();
+  if (k === 'p' && d > 0 && B.p >= 1 && B.p <= 20) talk('أصبحت ذرّتكِ ' + byZ(B.p).ar + '! عدد البروتونات يحدد العنصر.', true, 2500); };
+window.checkBuild = () => { const e = byZ(TARGETS[ti % TARGETS.length]);
+  if (B.p !== e.z){ talk('عدد البروتونات يساوي العدد الذري. كم العدد الذري لـ' + e.ar + '؟ 💡'); return; }
+  if (B.e !== e.z){ talk('في الذرّة المتعادلة: عدد الإلكترونات يساوي عدد البروتونات 💡'); return; }
+  if (B.n !== e.n){ talk('عدد النيوترونات = الكتلة الذرية مقرّبة − العدد الذري، أي ' + Math.round(parseFloat(e.mass)) + ' − ' + e.z + ' 💡'); return; }
+  built++; confetti(); jump(); born = clock.getElapsedTime(); talk('أحسنتِ! بنيتِ ذرّة ' + e.ar + ' بنجاح 🌟 عدد الذرّات التي بنيتِها: ' + built);
+  ti++; setTimeout(newTarget, 3200); };
+
+/* ---------- خمّني العنصر ---------- */
+let GQ = [], gi = 0, gScore = 0, gMiss = false;
+function startGuess(){ GQ = shuffle(EL.slice(0, 18).map(e => e.z)).slice(0, 6); gi = 0; gScore = 0; renderGuess(); }
+function renderGuess(){
+  if (gi >= GQ.length){ confetti(); $('gopts').innerHTML = ''; $('gq').innerHTML = '🏅 أحسنتِ! عرفتِ ' + gScore + ' من ' + GQ.length + ' من أول محاولة<br><button class="big" onclick="startGuess()">🔁 العبي مرة أخرى</button>'; $('gprog').textContent = ''; talk('أنتِ خبيرة ذرّات! 🏅'); return; }
+  const z = GQ[gi], e = byZ(z); gMiss = false; showAtom(e.z, e.n, e.z);
+  $('gq').innerHTML = 'عُدّي البروتونات 🔴 أو الإلكترونات 🔵… ما هذا العنصر؟';
+  const opts = shuffle([z, ...shuffle(EL.filter(x => x.z !== z && Math.abs(x.z - z) <= 4).map(x => x.z)).slice(0, 3)]);
+  $('gopts').innerHTML = opts.map(o => '<button class="opt" data-z="' + o + '">' + byZ(o).ar + ' ' + byZ(o).sym + '</button>').join('');
+  $('gopts').querySelectorAll('.opt').forEach(b => b.onclick = () => answer(+b.dataset.z, b));
+  $('gprog').textContent = 'السؤال ' + (gi + 1) + ' من ' + GQ.length;
+}
+function answer(z, b){ const e = byZ(GQ[gi]); if (b.classList.contains('ok')) return;
+  if (z === e.z){ b.classList.add('ok'); if (!gMiss) gScore++; jump(); talk('صحيح! ' + e.ar + ' فيه ' + e.z + ' إلكترونات، فعدده الذري ' + e.z + ' 🌟', true, 2600); gi++; setTimeout(renderGuess, 2400); }
+  else { b.classList.add('no'); gMiss = true; talk('حاولي مرة أخرى… المسي الذرّة وكبّريها بإصبعين لتعدّي 💡', true, 2600); } }
+
+/* ---------- الأوضاع ---------- */
+let mode = 'explore';
+window.setMode = m => { mode = m; ['explore', 'build', 'guess'].forEach(x => $('m-' + x).classList.toggle('on', x === m));
+  $('info').classList.toggle('hide', m !== 'explore'); $('strip').classList.toggle('hide', m !== 'explore');
+  $('p-build').classList.toggle('on', m === 'build'); $('p-guess').classList.toggle('on', m === 'guess');
+  $('guide').classList.toggle('hide', m !== 'explore'); recenter();
+  if (m === 'explore') explore(6); else if (m === 'build') newTarget(); else startGuess(); };
+
+/* ---------- البداية ---------- */
+window.begin = async withCam => { $('start').style.display = 'none'; startMotion(); if (withCam) startCam(); else $('fallback').style.display = 'block';
+  loop(); setMode('explore'); setTimeout(() => talk('المسي أي جزء من الذرّة لتعرفي اسمه، وحرّكي الجوال حولها، أو اختاري عنصرًا من الأسفل 🔍'), 6500); };
+if (new URLSearchParams(location.search).has('demo')) document.fonts.ready.then(() => begin(false));
+
+/* ---------- احتفال ---------- */
+const cv = $('cf'), cx = cv.getContext('2d'); let P = [];
+function confetti(){ cv.width = innerWidth; cv.height = innerHeight; const C = ['#2E6B47', '#E0A83A', '#9DC9F0', '#F7D154', '#A8D88A', '#e2483d'];
+  for (let i = 0; i < 150; i++) P.push({x:Math.random() * cv.width, y:-20 - Math.random() * cv.height * .4, vx:(Math.random() - .5) * 3, vy:2 + Math.random() * 3, r:4 + Math.random() * 5, c:C[i % 6], a:Math.random() * 6}); cl(); }
 function cl(){ cx.clearRect(0, 0, cv.width, cv.height); P.forEach(p => { p.x += p.vx; p.y += p.vy; p.a += .1; cx.save(); cx.translate(p.x, p.y); cx.rotate(p.a); cx.fillStyle = p.c; cx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r); cx.restore(); });
   P = P.filter(p => p.y < cv.height + 30); if (P.length) requestAnimationFrame(cl); else cx.clearRect(0, 0, cv.width, cv.height); }
 </script>
