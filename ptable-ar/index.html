@@ -13,7 +13,10 @@
 html,body{height:100%;overflow:hidden;font-family:Almarai,sans-serif;color:var(--t);background:#1b2a22}
 button{font-family:inherit;cursor:pointer}
 #cam{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
-#fallback{position:fixed;inset:-10px;z-index:0;background:url(bg2.webp) center/cover;filter:blur(3px);display:none}
+#fallback{position:fixed;inset:0;z-index:0;display:none;overflow:hidden;background:#2a3a30}
+#fallback .fb{position:absolute;inset:-8px;background-size:cover;opacity:0;transition:opacity 1.3s;filter:blur(1.5px)}
+#fallback .fb.on{opacity:1}
+#fallback:after{content:'';position:absolute;inset:0;background:rgba(20,40,30,.18)}
 #gl{position:fixed;inset:0;width:100vw;height:100vh;width:100%;height:100%;z-index:1;touch-action:none}
 .glass{background:rgba(255,255,255,.78);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 .bar{position:fixed;top:0;left:0;right:0;z-index:6;background:rgba(46,107,71,.94);color:#fff;font-size:13px;text-align:center;padding:calc(7px + var(--sa)) 8px 7px;font-weight:700}
@@ -100,7 +103,7 @@ canvas#cf{position:fixed;inset:0;pointer-events:none;z-index:40}
 </head>
 <body>
 <video id="cam" playsinline muted autoplay></video>
-<div id="fallback"></div>
+<div id="fallback"><div class="fb on" style="background-image:url(bg8.webp);background-position:14% 30%"></div><div class="fb" style="background-image:url(bg6.webp);background-position:24% 30%"></div><div class="fb" style="background-image:url(bg7.webp);background-position:40% 30%"></div><div class="fb" style="background-image:url(bg5.webp);background-position:38% 30%"></div><div class="fb" style="background-image:url(bg1.webp);background-position:38% 30%"></div><div class="fb" style="background-image:url(bg2.webp);background-position:55% 30%"></div><div class="fb" style="background-image:url(bg3.webp);background-position:45% 30%"></div><div class="fb" style="background-image:url(bg4.webp);background-position:30% 30%"></div></div>
 <canvas id="gl"></canvas>
 <canvas id="cf"></canvas>
 
@@ -113,7 +116,7 @@ canvas#cf{position:fixed;inset:0;pointer-events:none;z-index:40}
 <div class="tools">
  <button class="glass" title="أعيدي الذرّة أمامكِ" onclick="recenter()">🎯</button>
  <button class="glass" title="الكاميرا" onclick="toggleCam()">📷</button>
- <button class="glass" title="الصوت" id="sndBtn" onclick="toggleSnd()">🔊</button>
+ <button class="glass" title="تغيير الخلفية" onclick="nextFb()">🖼️</button>
  <button class="glass" title="إخفاء الكلام" id="eyeBtn" onclick="toggleClean()">👁️</button>
 </div>
 <div id="toast" class="glass off"></div>
@@ -175,11 +178,13 @@ const shuffle = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).
 const $ = id => document.getElementById(id);
 
 /* ---------- الصوت والمرشدة ---------- */
-let VOICE = null, sound = true;
+let VOICE = null, sound = false;
 function pickVoice(){ try{ const vs = speechSynthesis.getVoices().filter(v => /^ar/i.test(v.lang)); if (vs.length) VOICE = vs.find(v => /female|zeina|hoda|salma|laila|mariam|amira|google/i.test(v.name)) || vs[0]; }catch(e){} }
 if ('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 const say = t => { if (!sound) return; try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t.replace(/[🔬⚛️🎯✨🌟💡🏅👏🔍]/gu, '،')); u.lang = 'ar-SA'; if (VOICE) u.voice = VOICE; u.rate = 1.25; speechSynthesis.speak(u); }catch(e){} };
-window.toggleSnd = () => { sound = !sound; $('sndBtn').textContent = sound ? '🔊' : '🔇'; if (!sound) try{ speechSynthesis.cancel(); }catch(e){} };
+const FB = [...document.querySelectorAll('#fallback .fb')]; let fbi = 0;
+window.nextFb = () => { if (stream) stopCam(); $('fallback').style.display = 'block'; FB[fbi].classList.remove('on'); fbi = (fbi + 1) % FB.length; FB[fbi].classList.add('on'); };
+setInterval(() => { if (!stream) { FB[fbi].classList.remove('on'); fbi = (fbi + 1) % FB.length; FB[fbi].classList.add('on'); } }, 12000);
 let toastT = 0;
 window.toggleClean = () => { const c = document.body.classList.toggle('clean'); $('eyeBtn').textContent = c ? '💬' : '👁️'; if (c) $('toast').classList.add('off'); };
 $('toast').onclick = () => $('toast').classList.add('off');
@@ -192,7 +197,7 @@ async function startCam(){
   try{
     stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}, width:{ideal:1280}, height:{ideal:720}}, audio:false});
     video.srcObject = stream; await video.play(); video.style.display = 'block'; $('fallback').style.display = 'none';
-  }catch(e){ stream = null; video.style.display = 'none'; $('fallback').style.display = 'block'; talk('تعذّر فتح الكاميرا، فوضعتُ لكِ خلفية المختبر 🔬', false); }
+  }catch(e){ stream = null; video.style.display = 'none'; $('fallback').style.display = 'block'; talk('تعذّر فتح الكاميرا، فوضعتُ لكِ الخلفية 🖼️', false); }
 }
 function stopCam(){ if (stream) stream.getTracks().forEach(t => t.stop()); stream = null; video.style.display = 'none'; $('fallback').style.display = 'block'; }
 window.toggleCam = () => stream ? stopCam() : startCam();
