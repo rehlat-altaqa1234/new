@@ -355,7 +355,7 @@ const ITEMS=[
  {id:"braid",name:"ضفائر الشعر",lock:"wave"},
  {id:"dye",name:"صبغ الشعر",colors:["pb","py","tp","mr","rb","pp"]},
  {id:"blush",name:"أحمر الخدود",colors:["#f48fb1","#ff8a80","#ffb3c7"]},
- {id:"lashes",name:"رموش طويلة",colors:["#3d2433","#6b4428","#4b3a9c"]},
+ {id:"clips",name:"مشابك قلوب",colors:["#ff6fa5","#ffd54f","#7fd8f5","#b388ff"]},
  {id:"lips",name:"أحمر الشفاه",colors:["#e0457b","#ef5350","#c2185b"]},
  {id:"ab",name:"تلميع الأجسام المضادة",colors:["#ffd54f","#80deea","#f48fb1","#b39ddb"]},
  {id:"bow",name:"فيونكة",colors:["#e94e8a","#8456cf","#1fa391","#f2b630"]},
@@ -369,7 +369,7 @@ const ITEM_MSG={
  braid:["ضفائر متينة!","مترابطة بإحكام كما يرتبط الجسم المضاد بمولد الضد ويجعله غير فعّال."],
  dye:["صبغة جديدة للشعر!","لكل لون شخصية… كما أن لكل جسم مضاد مولد ضد محددًا 🎨"],
  blush:["خدود وردية!","تذكّرنا بالاحمرار في الالتهاب حين يتدفق دم أكثر إلى منطقة الإصابة."],
- lashes:["رموش حارسة!","تحمي العين كما يحمي خط الدفاع الأول الجسم كله."],
+ clips:["مشابك قلوب لامعة! 💖","تثبّت الشعر في مكانه كما تثبّت الأجسام المضادة مولد الضد فتجعله غير فعّال."],
  lips:["ابتسامة الذاكرة!","الخلايا البائية الذاكرة تبتسم لأنها تتذكر المسبب إن عاد مرة أخرى 😊"],
  ab:["أجسام مضادة لامعة!","هذه مهمتك الحقيقية كخلية بائية: إنتاج الأجسام المضادة ✨"],
  bow:["فيونكة محكمة!","مربوطة بإحكام مثل المخاط الذي يمنع البكتيريا من الالتصاق بالقناة الهضمية."],
@@ -480,6 +480,9 @@ function avatar(s,i){
   if(L.glasses){const c=L.glasses;g+=`<circle cx="80" cy="128" r="17" fill="rgba(220,240,255,.25)" stroke="${c}" stroke-width="3.6"/><circle cx="120" cy="128" r="17" fill="rgba(220,240,255,.25)" stroke="${c}" stroke-width="3.6"/><path d="M97,126 Q100,122 103,126" stroke="${c}" stroke-width="3.2" fill="none"/>`;}
   // hair
   g+= stage===0?hairMessy(i,c1,c2):stage===1?hairCurly(c1,c2):stage===2?hairWave(c1,c2):hairBraid(c1,c2);
+  // heart clips
+  if(L.clips){const c=L.clips,P=stage===0?[[60,70,-20],[72,56,-8],[52,88,-30]]:stage===1?[[58,74,-20],[70,60,-8],[50,92,-30]]:[[60,66,-25],[50,82,-35],[74,56,-10]];
+    P.forEach(([x,y,r],k)=>{g+=`<g transform="translate(${x},${y}) rotate(${r}) scale(${k?1.1:1.35})"><path d="M0,-2 C-3,-7 -10,-5 -9,1 C-8,5 -3,8 0,11 C3,8 8,5 9,1 C10,-5 3,-7 0,-2 Z" fill="${c}" stroke="${OL}" stroke-width="2.2" stroke-linejoin="round"/><circle cx="-3.5" cy="-1.5" r="1.8" fill="#fff" opacity=".9"/></g>`;});}
   // bow
   if(L.bow){const c=L.bow;g+=`<g transform="translate(140,62) rotate(15)"><path d="M0,0 L-18,-11 L-16,11 Z" fill="${c}" stroke="${OL}" stroke-width="2.6" stroke-linejoin="round"/><path d="M0,0 L18,-11 L16,11 Z" fill="${c}" stroke="${OL}" stroke-width="2.6" stroke-linejoin="round"/><circle r="5.5" fill="${lighten(c,.25)}" stroke="${OL}" stroke-width="2.4"/></g>`;}
   // crown
@@ -495,7 +498,8 @@ const IC={
  braid:`<svg viewBox="0 0 40 40"><ellipse cx="20" cy="9" rx="6" ry="5" fill="#f7a8d0" stroke="#3d2433" stroke-width="1.6"/><ellipse cx="20" cy="17" rx="6" ry="5" fill="#8ec5f5" stroke="#3d2433" stroke-width="1.6"/><ellipse cx="20" cy="25" rx="6" ry="5" fill="#f7a8d0" stroke="#3d2433" stroke-width="1.6"/><path d="M15,31 L20,38 L25,31 Z" fill="#8ec5f5" stroke="#3d2433" stroke-width="1.6"/></svg>`,
  dye:`<svg viewBox="0 0 40 40"><circle cx="13" cy="14" r="7" fill="#f7a8d0"/><circle cx="27" cy="14" r="7" fill="#8ec5f5"/><circle cx="13" cy="27" r="7" fill="#ffe27a"/><circle cx="27" cy="27" r="7" fill="#c79bea"/></svg>`,
  blush:`<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="14" fill="#f8c6d6" stroke="#e48aa9" stroke-width="2"/><circle cx="20" cy="20" r="8" fill="#f48fb1"/></svg>`,
- lashes:`<svg viewBox="0 0 40 40"><ellipse cx="20" cy="25" rx="10" ry="10" fill="#3d2433"/><circle cx="23" cy="21" r="3.5" fill="#fff"/><path d="M28,17l5,-5M23,14l2,-7M17,14l-2,-7M12,17l-5,-5" stroke="#3d2433" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+ clips:`<svg viewBox="0 0 40 40"><g transform="translate(13,17) scale(1.15)"><path d="M0,-2 C-3,-7 -10,-5 -9,1 C-8,5 -3,8 0,11 C3,8 8,5 9,1 C10,-5 3,-7 0,-2 Z" fill="#ff6fa5" stroke="#3d2433" stroke-width="1.4"/></g><g transform="translate(28,24) scale(.95)"><path d="M0,-2 C-3,-7 -10,-5 -9,1 C-8,5 -3,8 0,11 C3,8 8,5 9,1 C10,-5 3,-7 0,-2 Z" fill="#ffd54f" stroke="#3d2433" stroke-width="1.4"/></g><circle cx="11" cy="15" r="1.6" fill="#fff"/></svg>`,
+ lashesOld:`<svg viewBox="0 0 40 40"><ellipse cx="20" cy="25" rx="10" ry="10" fill="#3d2433"/><circle cx="23" cy="21" r="3.5" fill="#fff"/><path d="M28,17l5,-5M23,14l2,-7M17,14l-2,-7M12,17l-5,-5" stroke="#3d2433" stroke-width="2.2" stroke-linecap="round"/></svg>`,
  lips:`<svg viewBox="0 0 40 40"><path d="M8,17 Q20,21 32,17 Q20,36 8,17 Z" fill="#e0457b" stroke="#3d2433" stroke-width="1.8"/></svg>`,
  ab:`<svg viewBox="0 0 40 40"><path d="M20,36 V20 M20,20 L9,6 M20,20 L31,6" stroke="#3d2433" stroke-width="7" stroke-linecap="round"/><path d="M20,36 V20 M20,20 L9,6 M20,20 L31,6" stroke="#ffd54f" stroke-width="4" stroke-linecap="round"/><circle cx="9" cy="6" r="2.4" fill="#fff"/><circle cx="31" cy="6" r="2.4" fill="#fff"/></svg>`,
  bow:`<svg viewBox="0 0 40 40"><path d="M20,20 L4,10 L6,30 Z M20,20 L36,10 L34,30 Z" fill="#e94e8a"/><circle cx="20" cy="20" r="5" fill="#c2185b"/></svg>`,
