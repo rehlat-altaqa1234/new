@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>المختبر الافتراضي | المناعة والمرض</title>
+<link href="fonts.css" rel="stylesheet">
+<style>
+:root{--navy:#4a2c6e;--gold:#A8741A;--teal:#127a6e;--hot:#C2185B;--vio:#8456cf;--pink:#e46aa0}
+*{box-sizing:border-box}
+body{margin:0;font-family:Almarai,sans-serif;color:var(--navy);min-height:100vh;background:#f3e9fb url(img/microscope.jpg) left center/cover fixed no-repeat}
+header{position:relative;min-height:150px;display:flex;align-items:flex-end}
+header::before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(74,44,110,.9),rgba(74,44,110,.15))}
+.hin{position:relative;padding:18px 20px;color:#fff;width:100%;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.hin h1{margin:0;font-size:clamp(22px,4vw,34px)}.hin p{margin:6px 0 0;opacity:.95}
+.logos img{height:58px;background:#fff;border-radius:10px;padding:4px}
+nav{display:flex;gap:8px;overflow-x:auto;padding:12px;background:rgba(255,255,255,.8);backdrop-filter:blur(6px);position:sticky;top:0;z-index:5;border-radius:14px;margin-top:8px}
+nav button{flex:0 0 auto;border:2px solid var(--navy);background:#fff;color:var(--navy);font:inherit;font-weight:700;padding:9px 14px;border-radius:999px;cursor:pointer}
+nav button.on{background:var(--navy);color:#fff}
+main{max-width:1100px;margin:auto;padding:16px}
+@media(min-width:1000px){.wrapL{width:62vw;max-width:1000px;margin-right:2vw!important;margin-left:auto!important}}
+.lab{display:none}.lab.on{display:block;animation:fi .4s}@keyframes fi{from{opacity:0;transform:translateY(8px)}}
+.card{background:rgba(255,255,255,.85);backdrop-filter:blur(5px);border:1px solid rgba(255,255,255,.6);border-radius:16px;padding:16px;box-shadow:0 4px 14px rgba(74,44,110,.12);margin-bottom:14px}
+h2{margin:0 0 6px;font-size:24px}
+.q{background:rgba(241,234,252,.95);border-right:5px solid var(--vio);padding:10px 12px;border-radius:10px;margin:8px 0;line-height:1.8}
+.row{display:flex;gap:14px;flex-wrap:wrap}.col{flex:1 1 300px}
+canvas{direction:ltr;width:100%;background:#fffaff;border-radius:12px;border:1px solid #e3d3f2;display:block}
+label{display:block;font-weight:700;margin:10px 0 4px}
+input[type=range]{width:100%;accent-color:var(--vio)}
+input[type=number]{font:inherit;padding:6px;border-radius:8px;border:1px solid #c9b6e0;width:100%}
+.btn{border:0;background:var(--teal);color:#fff;font:inherit;font-weight:700;padding:10px 16px;border-radius:10px;cursor:pointer;margin:6px 0 0 6px}
+.btn.gold{background:var(--gold)}.btn.hot{background:var(--hot)}.btn.vio{background:var(--vio)}
+.out{font-size:18px;font-weight:800;color:var(--teal);margin-top:8px;line-height:1.8}
+table{border-collapse:collapse;width:100%;margin-top:8px;background:#fff}td,th{border:1px solid #d9c8ec;padding:6px;text-align:center}th{background:var(--navy);color:#fff}
+.reveal{display:none;background:#E7F5EF;border-right:5px solid #2E8B57;padding:10px;border-radius:10px;margin-top:6px;line-height:1.9}
+.tag{display:inline-block;background:var(--vio);color:#fff;border-radius:999px;padding:3px 12px;font-size:13px;margin-bottom:6px}
+.chips button{border:2px solid var(--navy);background:#fff;font:inherit;font-weight:700;padding:6px 12px;border-radius:10px;margin:3px;cursor:pointer;color:var(--navy)}
+.chips button.on{background:var(--navy);color:#fff}
+.chk{display:inline-flex;align-items:center;gap:6px;margin:4px 0 4px 14px;font-weight:700}
+.chk input{width:20px;height:20px;accent-color:var(--vio)}
+footer{text-align:center;padding:12px;font-size:14px;background:rgba(255,255,255,.8);margin:0 16px 16px;border-radius:12px}
+</style>
+</head>
+<body>
+<header><div class="hin"><div><h1>🔬 المختبر الافتراضي: المناعة والمرض</h1><p>العلوم • الفصل 5 • الدرس 2 • أ. ثناء إبراهيم بارجاء</p></div><div class="logos"><img src="img/moe.png" alt="وزارة التعليم"></div></div></header>
+<nav id="nav" class="wrapL"></nav>
+<main class="wrapL">
+
+<section class="lab" id="def" data-t="① خط الدفاع الأول">
+<div class="card"><span class="tag">تجربة 1</span><h2>خط الدفاع الأول: هل تنجح الجراثيم في الدخول؟</h2>
+<div class="q">فعّلي الحواجز أو أوقفيها، ثم أطلقي الجراثيم نحو الجسم، وراقبي كم منها يُصدّ وكم يدخل.</div>
+<canvas id="dC" width="900" height="360"></canvas>
+<div><label class="chk"><input type="checkbox" id="dSkin" checked> 🧴 الجلد السليم</label><label class="chk"><input type="checkbox" id="dMuc" checked> 🌬 المخاط والأهداب</label><label class="chk"><input type="checkbox" id="dAcid" checked> 🍽 حمض المعدة</label><label class="chk"><input type="checkbox" id="dCut"> 🩹 جرح في الجلد</label></div>
+<button class="btn hot" onclick="dGo()">🦠 أطلقي 30 جرثومة</button>
+<div class="out" id="dO"></div>
+<button class="btn gold" onclick="rv('r1')">▶ ماذا تلاحظين؟</button>
+<div class="reveal" id="r1">الجلد السليم يمنع معظم المسببات (إفرازاته حمضية)، والمخاط يحجزها والأهداب تطردها، وحمض الهيدروكلوريك في المعدة يقتل بعضها. أما الجرح فيفتح طريقًا للمسببات، فيحدث الالتهاب ويلجأ الجسم إلى خط الدفاع الثاني (جهاز المناعة). لذلك نغسل الجرح بالماء والصابون ونطهّره ونغطيه.</div></div>
+</section>
+
+<section class="lab" id="key" data-t="② القفل والمفتاح">
+<div class="card"><span class="tag">تجربة 2</span><h2>الجسم المضاد ومولد الضد: طابقي القفل بالمفتاح</h2>
+<div class="q">على سطح المسبب مولد ضد له شكل خاص. اختاري الجسم المضاد الذي يطابقه ليرتبط به ويجعله غير فعّال.</div>
+<canvas id="kC" width="900" height="340"></canvas>
+<div class="chips" id="kCh"></div>
+<button class="btn vio" onclick="kNew()">🔄 مسبب جديد</button>
+<div class="out" id="kO"></div>
+<button class="btn gold" onclick="rv('r2')">▶ القاعدة</button>
+<div class="reveal" id="r2">الجسم المضاد بروتين يتشكّل استجابةً لمولد ضد محدد، فيرتبط به ويجعله غير فعّال. لذلك لا يحميك تطعيم الحصبة من أمراض أخرى أعراضها مشابهة؛ فكل جسم مضاد يطابق مولد ضده فقط.</div></div>
+</section>
+
+<section class="lab" id="grow" data-t="③ تكاثر البكتيريا">
+<div class="card"><span class="tag">تجربة 3</span><h2>تكاثر البكتيريا: ح = 2ⁿ</h2>
+<div class="q">غيّري زمن الانقسام والزمن الكلي، وراقبي عدد البكتيريا. ثم احسبي عدد الخلايا بنفسك وتحققي.</div>
+<canvas id="gC" width="900" height="300"></canvas>
+<div class="row"><div class="col"><label>زمن الانقسام = <b id="gTdV">10</b> ث</label><input type="range" id="gTd" min="10" max="60" step="10" value="10">
+<label>الزمن الكلي = <b id="gTV">30</b> ث</label><input type="range" id="gT" min="0" max="120" step="10" value="30"></div>
+<div class="col"><label>احسبي عدد الخلايا ح:</label><input type="number" id="gIn" placeholder="مثال: 8">
+<button class="btn vio" onclick="gChk()">✔ تحققي</button> <button class="btn" onclick="gRow()">＋ أضيفي للجدول</button>
+<div class="out" id="gO"></div></div></div>
+<table><thead><tr><th>زمن الانقسام (ث)</th><th>الزمن الكلي (ث)</th><th>ن</th><th>ح = 2ⁿ</th></tr></thead><tbody id="gTb"></tbody></table>
+<button class="btn gold" onclick="rv('r3')">▶ بعد 5 ساعات؟</button>
+<div class="reveal" id="r3">ن = (5 × 60 × 60) ÷ 10 = 1800 انقسام، فيكون ح = 2¹⁸⁰⁰ (عدد كبير جدًّا). لهذا يوصي الطبيب بإكمال المضاد الحيوي؛ فالبكتيريا المتبقية تتكاثر بسرعة وتهاجم الجسم من جديد.</div></div>
+</section>
+
+<section class="lab" id="resp" data-t="④ الاستجابة والطُّعم">
+<div class="card"><span class="tag">تجربة 4</span><h2>الاستجابة الأولى والثانية والطُّعم</h2>
+<div class="q">اختاري الموقف وراقبي كمية الأجسام المضادة في الدم مع الأيام. متى يمرض الجسم؟ ومتى لا يمرض؟</div>
+<canvas id="rC" width="900" height="340"></canvas>
+<div class="chips" id="rCh"><button onclick="rSet(0)">🦠 الإصابة الأولى</button><button onclick="rSet(1)">🔁 الإصابة الثانية</button><button onclick="rSet(2)">💉 الطُّعم ثم الإصابة</button><button onclick="rSet(3)">🐴 مناعة اصطناعية</button></div>
+<div class="out" id="rO"></div>
+<button class="btn gold" onclick="rv('r4')">▶ القاعدة</button>
+<div class="reveal" id="r4">في الإصابة الأولى تتأخر الاستجابة فيمرض الجسم. وفي الإصابة الثانية تنتج الخلايا البائية الذاكرة أجسامًا مضادة كثيرة بسرعة فلا يمرض (مناعة طبيعية). والطُّعم مولدات ضد تمنح مناعة طبيعية دون المرض. أما المناعة الاصطناعية فأجسام مضادة جاهزة من حيوان، تحمي بسرعة لكنها لا تدوم طويلًا.</div></div>
+</section>
+
+<section class="lab" id="blood" data-t="⑤ فصائل الدم">
+<div class="card"><span class="tag">تجربة 5</span><h2>تفاعلات فصيلة الدم (استقصاء ص 34)</h2>
+<div class="q">اختاري كوب فصيلة الدم، ثم أضيفي إليه مولد الضد A (عصير الليمون لفصيلتي B وO، والماء لفصيلتي A وAB)، ولاحظي: هل يحدث تخثر؟</div>
+<canvas id="bC" width="900" height="300"></canvas>
+<div class="chips" id="bCh"></div>
+<button class="btn hot" onclick="bAdd()">💧 أضيفي مولد الضد A</button> <button class="btn" onclick="bReset()">↺ أكواب جديدة</button>
+<div class="out" id="bO"></div>
+<table><thead><tr><th>فصيلة الدم</th><th>المادة المضافة</th><th>تخثر الدم؟</th></tr></thead><tbody id="bTb"></tbody></table>
+<button class="btn gold" onclick="rv('r5')">▶ التحليل</button>
+<div class="reveal" id="r5">تتخثر الفصيلتان B وO عند إضافة مولد الضد A، ولا تتخثر الفصيلتان A وAB. لذلك يجب معرفة فصيلة الدم قبل نقله؛ فإذا لم تتوافق مولدات الضد مع فصيلة دم المريض قد يحدث تخثر للدم.</div></div>
+</section>
+
+<section class="lab" id="spread" data-t="⑥ انتقال العدوى">
+<div class="card"><span class="tag">تجربة 6</span><h2>انتقال العدوى في الصف وأثر الوقاية</h2>
+<div class="q">في الصف 30 طالبة، أُصيبت إحداهن بالإنفلونزا. غيّري نسبة غسل اليدين ونسبة المطعّمات، ثم شغّلي الأيام وراقبي انتشار المرض.</div>
+<canvas id="sC" width="900" height="340"></canvas>
+<div class="row"><div class="col"><label>غسل اليدين وتغطية العطاس = <b id="sWV">20</b>٪</label><input type="range" id="sW" min="0" max="100" step="10" value="20"></div>
+<div class="col"><label>المطعّمات = <b id="sVV">0</b>٪</label><input type="range" id="sV" min="0" max="100" step="10" value="0"></div></div>
+<button class="btn hot" onclick="sRun()">▶ شغّلي 14 يومًا</button> <button class="btn" onclick="sReset()">↺ من جديد</button>
+<div class="out" id="sO"></div>
+<button class="btn gold" onclick="rv('r6')">▶ ماذا تلاحظين؟</button>
+<div class="reveal" id="r6">تنتقل الأمراض المعدية بالاتصال المباشر أو عبر الهواء والأدوات الملوثة. كلما زاد غسل اليدين وتغطية العطاس قلّ الانتقال، والمطعّمات يملكن أجسامًا مضادة فلا يمرضن ولا ينقلن المرض، فيحمين زميلاتهن أيضًا.</div></div>
+</section>
+
+</main>
+<footer>المختبر الافتراضي • العلوم • الفصل 5 • الدرس 2: المناعة والمرض<div style="margin-top:6px">معلمة المادة: أ. ثناء إبراهيم بارجاء</div><div style="margin-top:6px;font-size:18px;font-weight:800;color:#C2185B">صُمّم بحب ♥ د. أفنان الطلحي</div></footer>
+<audio id="sClick" src="snd/drop.mp3" preload="auto"></audio><audio id="sOk" src="snd/applause.mp3" preload="auto"></audio><audio id="sNo" src="snd/knock.mp3" preload="auto"></audio>
+<script>
+const $=i=>document.getElementById(i);
+const snd=n=>{try{const a=$(n).cloneNode();a.volume=.6;a.play().catch(()=>{})}catch(e){}};
+function rv(id){const e=$(id);e.style.display=e.style.display==='block'?'none':'block';snd('sClick')}
+const labs=[...document.querySelectorAll('.lab')];
+$('nav').innerHTML=labs.map((l,i)=>`<button onclick="go(${i})">${l.dataset.t}</button>`).join('');
+function go(i){labs.forEach((l,j)=>l.classList.toggle('on',i===j));[...$('nav').children].forEach((b,j)=>b.classList.toggle('on',i===j));snd('sClick');try{history.replaceState(null,'','#'+labs[i].id)}catch(e){}}
+const OL='#3d2433';
+function rr(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
+function bact(g,x,y,s,c){g.save();g.translate(x,y);g.scale(s,s);rr(g,-22,-10,44,20,10);g.fillStyle=c;g.fill();g.lineWidth=2.5;g.strokeStyle=OL;g.stroke();g.fillStyle=OL;g.beginPath();g.arc(-6,0,2,0,7);g.arc(6,0,2,0,7);g.fill();g.restore()}
+function virus(g,x,y,s,c){g.save();g.translate(x,y);g.scale(s,s);g.strokeStyle=OL;g.lineWidth=2.5;for(let k=0;k<10;k++){const a=k*Math.PI/5;g.beginPath();g.moveTo(Math.cos(a)*14,Math.sin(a)*14);g.lineTo(Math.cos(a)*21,Math.sin(a)*21);g.stroke();g.beginPath();g.arc(Math.cos(a)*22,Math.sin(a)*22,3,0,7);g.fillStyle=c;g.fill();g.stroke()}g.beginPath();g.arc(0,0,15,0,7);g.fillStyle=c;g.fill();g.stroke();g.restore()}
+function txt(g,t,x,y,size=18,c=OL,al='center'){g.fillStyle=c;g.font=`700 ${size}px Almarai`;g.textAlign=al;g.direction='rtl';g.fillText(t,x,y)}
+
+// 1 defense
+let D=[],dStat={b:0,i:0};
+const gates=[{y:70,name:'الجلد',id:'dSkin',p:.97},{y:180,name:'الأنف: مخاط وأهداب',id:'dMuc',p:.85},{y:290,name:'الفم والمعدة: حمض',id:'dAcid',p:.75}];
+function dGo(){snd('sClick');dStat={b:0,i:0};D=[];for(let k=0;k<30;k++){const g=k%3;D.push({x:-20-k*28,y:gates[g].y+(Math.random()-.5)*40,g,st:0,t:Math.random()*6,v:Math.random()<.5})}}
+function dDraw(){const C=$('dC'),g=C.getContext('2d'),W=C.width,H=C.height;g.clearRect(0,0,W,H);
+ const gx=600;g.fillStyle='#fde7ef';g.fillRect(gx+40,0,W-gx-40,H);txt(g,'داخل الجسم',780,30,20,'#c2185b');
+ gates.forEach((gt,i)=>{const on=$(gt.id).checked,cut=i===0&&$('dCut').checked;
+  g.fillStyle=on?(i==0?'#f4a990':i==1?'#b2ebf2':'#fff59d'):'#eee';rr(g,gx,gt.y-45,40,90,10);g.fill();g.strokeStyle=OL;g.lineWidth=2;g.stroke();
+  if(i==1&&on){g.strokeStyle='#9575cd';g.lineWidth=4;for(let k=0;k<6;k++){g.beginPath();g.moveTo(gx,gt.y-38+k*15);g.quadraticCurveTo(gx-14,gt.y-40+k*15+Math.sin(Date.now()/150+k)*6,gx-22,gt.y-30+k*15);g.stroke()}}
+  if(cut){g.fillStyle='#e53935';g.fillRect(gx,gt.y-8,40,16)}
+  txt(g,gt.name,gx-20,gt.y-52,15,'#4a2c6e','left')});
+ D.forEach(b=>{const gt=gates[b.g],on=$(gt.id).checked,cut=b.g===0&&$('dCut').checked;
+  if(b.st===0){b.x+=4;if(b.x>=gx-20){const p=cut?.15:(on?gt.p:0);if(Math.random()<p){b.st=1;dStat.b++}else{b.st=2;dStat.i++}}}
+  else if(b.st===1){b.x-=2.5;b.y+=Math.sin(b.t+=.3)*2;b.a=(b.a??1)-.02}
+  else if(b.st===2){b.x+=3;if(b.x>W-30)b.x=W-30-Math.random()*60}
+  if(b.x>-30&&(b.a??1)>0){g.globalAlpha=Math.max(0,b.a??1);b.v?virus(g,b.x,b.y,.7,'#ef6a8a'):bact(g,b.x,b.y,.8,'#a5d6a7');g.globalAlpha=1}});
+ $('dO').textContent=D.length?`صُدّت: ${dStat.b} • دخلت الجسم: ${dStat.i}`+(dStat.i>6?' ⚠ سيلجأ الجسم إلى خط الدفاع الثاني':''):'اضغطي «أطلقي» لبدء التجربة';
+ requestAnimationFrame(dDraw)}
+
+// 2 lock & key
+const SH=['مربع','مثلث','نصف دائرة','نجمة'];let kTarget=0,kPick=-1,kAnim=0;
+function shapePath(g,k,x,y,s,dir){g.beginPath();if(k===0){g.rect(x-14*s,y-(dir>0?0:20*s),28*s,20*s)}else if(k===1){g.moveTo(x-16*s,y);g.lineTo(x,y+dir*22*s);g.lineTo(x+16*s,y)}else if(k===2){g.arc(x,y,15*s,dir>0?0:Math.PI,dir>0?Math.PI:2*Math.PI)}else{for(let i=0;i<5;i++){const a=i*2*Math.PI/5-Math.PI/2*dir;g.lineTo(x+Math.cos(a)*17*s,y+Math.sin(a)*17*s+dir*6*s);const b=a+Math.PI/5;g.lineTo(x+Math.cos(b)*7*s,y+Math.sin(b)*7*s+dir*6*s)}}g.closePath()}
+function antibody(g,x,y,s,c,k){g.save();g.lineCap='round';[[OL,13],[c,8]].forEach(([col,w])=>{g.strokeStyle=col;g.lineWidth=w*s;g.beginPath();g.moveTo(x,y+60*s);g.lineTo(x,y+15*s);g.lineTo(x-30*s,y-20*s);g.moveTo(x,y+15*s);g.lineTo(x+30*s,y-20*s);g.stroke()});
+ [[-30,-20],[30,-20]].forEach(([dx,dy])=>{g.fillStyle='#fff';shapePath(g,k,x+dx*s,y+dy*s,.8*s,-1);g.fill();g.strokeStyle=OL;g.lineWidth=2;g.stroke()});g.restore()}
+function kNew(){kTarget=Math.floor(Math.random()*4);kPick=-1;kAnim=0;$('kO').textContent='اختاري الجسم المضاد المناسب ⬇';snd('sClick')}
+$('kCh').innerHTML=SH.map((s,i)=>`<button onclick="kSel(${i})">جسم مضاد بطرف «${s}»</button>`).join('');
+function kSel(i){kPick=i;kAnim=0;const ok=i===kTarget;setTimeout(()=>{$('kO').textContent=ok?'🎉 تطابق! ارتبط الجسم المضاد بمولد الضد وأصبح المسبب غير فعّال':'✖ لا يتطابق الشكل؛ هذا الجسم المضاد لا يرتبط بمولد الضد هذا';snd(ok?'sOk':'sNo')},900)}
+function kDraw(){const C=$('kC'),g=C.getContext('2d'),W=C.width,H=C.height;g.clearRect(0,0,W,H);
+ const vx=W/2,vy=230;g.save();g.strokeStyle=OL;g.lineWidth=3;g.beginPath();g.arc(vx,vy+60,70,Math.PI,2*Math.PI);g.fillStyle='#ef6a8a';g.fill();g.stroke();g.restore();
+ [-45,45].forEach(dx=>{g.fillStyle='#ffd166';shapePath(g,kTarget,vx+dx,vy-10,1,-1);g.fill();g.strokeStyle=OL;g.lineWidth=2.5;g.stroke()});
+ txt(g,'مسبب المرض ومولدات الضد على سطحه',vx,H-12,18);
+ if(kPick>=0){kAnim=Math.min(1,kAnim+.02);const ok=kPick===kTarget;const t=ok?kAnim:Math.min(kAnim,.7);
+  const y0=20+t*80+(ok?0:Math.sin(kAnim*20)*(kAnim>.65?6:0));g.save();g.translate(vx,y0+60);g.scale(1,-1);antibody(g,0,0,1.5,ok?'#ffd54f':'#90caf9',kPick);g.restore()}
+ else{txt(g,'؟',vx,90,60,'#8456cf')}
+ requestAnimationFrame(kDraw)}
+
+// 3 growth
+let gRows=[];['gTd','gT'].forEach(i=>$(i).oninput=gDraw);
+function gVals(){const td=+$('gTd').value,T=+$('gT').value,n=Math.floor(T/td);return{td,T,n,c:Math.pow(2,n)}}
+function gDraw(){const {td,T,n,c}=gVals();$('gTdV').textContent=td;$('gTV').textContent=T;const C=$('gC'),g=C.getContext('2d'),W=C.width,H=C.height;g.clearRect(0,0,W,H);
+ const show=Math.min(c,256),L=show<=16?[1,14,60,44]:show<=64?[.6,24,36,30]:[.42,34,25,22];for(let i=0;i<show;i++){const[s,cols,dx,dy]=L;bact(g,W-40-(i%cols)*dx,36+Math.floor(i/cols)*dy,s,['#a5d6a7','#80deea','#f8bbd0','#ffe082'][i%4])}
+ if(c>256)txt(g,`… و${(c-256).toLocaleString('ar-EG')} خلية أخرى`,W/2,H-40,20,'#c2185b');
+ txt(g,`ن = ${T} ÷ ${td} = ${n}   ←   ح = 2^${n} = ${c.toLocaleString('en')}`,W/2,H-12,22,'#127a6e')}
+function gChk(){const {c}=gVals(),v=+$('gIn').value;const ok=v===c;$('gO').textContent=ok?'🎉 أحسنتِ! حساب صحيح':'💡 ن = الزمن الكلي ÷ زمن الانقسام، ثم ح = 2 مرفوعًا للقوة ن';snd(ok?'sOk':'sNo')}
+function gRow(){const {td,T,n,c}=gVals();gRows.push(`<tr><td>${td}</td><td>${T}</td><td>${n}</td><td>${c.toLocaleString('en')}</td></tr>`);$('gTb').innerHTML=gRows.join('');snd('sClick')}
+
+// 4 response
+const RS=[{t:'الإصابة الأولى: الاستجابة بطيئة وقليلة ← يمرض الجسم عدة أيام حتى تتكوّن الأجسام المضادة',f:d=>.35*Math.exp(-((d-10)**2)/18),sick:[2,10],ev:[[0,'دخول المسبب']]},
+{t:'الإصابة الثانية: الخلايا البائية الذاكرة تنتج أجسامًا مضادة كثيرة بسرعة ← لا يمرض الجسم',f:d=>.1+.85*Math.exp(-((d-4)**2)/5)*(d>0?1:0)+(d<4?0:0),sick:null,ev:[[0,'المسبب نفسه']]},
+{t:'الطُّعم ثم الإصابة: مولدات ضد الطُّعم تمنح مناعة طبيعية، وعند دخول المسبب تكون الاستجابة سريعة ← لا مرض',f:d=>.22*Math.exp(-((d-8)**2)/10)+(d>16?.85*Math.exp(-((d-20)**2)/5):0)+(d>16?.08:0),sick:null,ev:[[0,'الطُّعم'],[16,'المسبب']]},
+{t:'مناعة اصطناعية: أجسام مضادة جاهزة من حيوان تُحقن فتحمي فورًا، لكنها تختفي ولا تدوم طويلًا',f:d=>d<0?0:.8*Math.exp(-d/6),sick:null,ev:[[0,'حقن أجسام جاهزة']]}];
+let rI=0,rT=0;function rSet(i){rI=i;rT=0;[...$('rCh').children].forEach((b,j)=>b.classList.toggle('on',i===j));$('rO').textContent=RS[i].t;snd('sClick')}
+function rDraw(){const C=$('rC'),g=C.getContext('2d'),W=C.width,H=C.height;g.clearRect(0,0,W,H);const ox=70,oy=H-50,gw=W-110,gh=H-100,days=30;
+ g.strokeStyle=OL;g.lineWidth=3;g.beginPath();g.moveTo(ox,oy-gh);g.lineTo(ox,oy);g.lineTo(ox+gw,oy);g.stroke();
+ txt(g,'كمية الأجسام المضادة',ox+90,oy-gh-8,16,OL);txt(g,'الأيام ←',ox+gw-30,oy+30,16,OL);
+ for(let d=0;d<=days;d+=5)txt(g,d,ox+d/days*gw,oy+22,14,'#777');
+ const R=RS[rI];rT=Math.min(days,rT+.15);
+ if(R.sick){g.fillStyle='rgba(239,106,138,.18)';g.fillRect(ox+R.sick[0]/days*gw,oy-gh,(Math.min(rT,R.sick[1])-R.sick[0])/days*gw>0?(Math.min(rT,R.sick[1])-R.sick[0])/days*gw:0,gh);if(rT>R.sick[0])txt(g,'🤒 فترة المرض',ox+(R.sick[0]+4)/days*gw,oy-gh+24,16,'#c2185b')}
+ R.ev.forEach(([d,t])=>{g.strokeStyle='#e46aa0';g.setLineDash([8,6]);g.beginPath();g.moveTo(ox+d/days*gw,oy);g.lineTo(ox+d/days*gw,oy-gh);g.stroke();g.setLineDash([]);txt(g,t,ox+d/days*gw+6,oy-gh+48,15,'#e46aa0','left')});
+ g.strokeStyle='#8456cf';g.lineWidth=5;g.beginPath();for(let d=0;d<=rT;d+=.1){const x=ox+d/days*gw,y=oy-R.f(d)*gh;d?g.lineTo(x,y):g.moveTo(x,y)}g.stroke();
+ requestAnimationFrame(rDraw)}
+
+// 5 blood
+const BT=[{t:'A',clot:false,add:'ماء'},{t:'B',clot:true,add:'عصير ليمون'},{t:'AB',clot:false,add:'ماء'},{t:'O',clot:true,add:'عصير ليمون'}];
+let bSel=0,bState=[0,0,0,0],bRows=[];
+$('bCh').innerHTML=BT.map((b,i)=>`<button onclick="bPick(${i})">كوب الفصيلة ${b.t}</button>`).join('');
+function bPick(i){bSel=i;[...$('bCh').children].forEach((x,j)=>x.classList.toggle('on',i===j));snd('sClick')}
+function bAdd(){if(bState[bSel])return;bState[bSel]=1;const b=BT[bSel];snd('sClick');setTimeout(()=>{$('bO').textContent=`الفصيلة ${b.t} + مولد الضد A (${b.add}): ${b.clot?'يتخثر الدم ✔':'لا يتخثر الدم ✖'}`;bRows.push(`<tr><td>${b.t}</td><td>${b.add}</td><td>${b.clot?'نعم ✔':'لا ✖'}</td></tr>`);$('bTb').innerHTML=bRows.join('')},1200)}
+function bReset(){bState=[0,0,0,0];bRows=[];$('bTb').innerHTML='';$('bO').textContent='';snd('sClick')}
+function bDraw(){const C=$('bC'),g=C.getContext('2d'),W=C.width,H=C.height;g.clearRect(0,0,W,H);
+ BT.forEach((b,i)=>{const x=W-130-i*210,y=90;g.save();if(i===bSel){g.shadowColor='#8456cf';g.shadowBlur=18}
+  g.beginPath();g.moveTo(x-55,y);g.lineTo(x-45,y+150);g.quadraticCurveTo(x,y+170,x+45,y+150);g.lineTo(x+55,y);g.strokeStyle=OL;g.lineWidth=4;g.stroke();g.restore();
+  g.save();g.beginPath();g.moveTo(x-51,y+40);g.lineTo(x-45,y+150);g.quadraticCurveTo(x,y+170,x+45,y+150);g.lineTo(x+51,y+40);g.closePath();g.fillStyle='#e57373';g.fill();
+  if(bState[i]){bState[i]=Math.min(60,bState[i]+.6);if(b.clot&&bState[i]>8){g.fillStyle='#8e2424';for(let k=0;k<18;k++){const a=k*2.4,r=(k%5)*7;g.beginPath();g.arc(x+Math.cos(a)*r*1.3,y+110+Math.sin(a)*r*.7+Math.min(20,bState[i]/3),4+k%3*2,0,7);g.fill()}}
+   if(bState[i]<25){g.fillStyle=b.add==='ماء'?'#90caf9':'#fff176';g.beginPath();g.arc(x,y-30+bState[i]*2.5,7,0,7);g.fill()}}
+  g.restore();txt(g,'فصيلة '+b.t,x,y-50,22,'#4a2c6e');});
+ requestAnimationFrame(bDraw)}
+
+// 6 spread
+let S=[],sDay=0,sHist=[],sTimer=null;
+function sReset(){clearInterval(sTimer);const w=+$('sW').value,v=+$('sV').value;$('sWV').textContent=w;$('sVV').textContent=v;S=[];const nv=Math.round(30*v/100);const idx=[...Array(30).keys()].sort(()=>Math.random()-.5);
+ for(let i=0;i<30;i++)S.push({st:0,vac:false,d:0});for(let k=0;k<nv;k++)S[idx[k]].vac=true;const first=idx.find(i=>!S[i].vac)??idx[0];S[first].st=1;S[first].vac=false;sDay=0;sHist=[1];$('sO').textContent='اليوم 0: طالبة واحدة مصابة';sDraw()}
+['sW','sV'].forEach(i=>$(i).oninput=sReset);
+function sStep(){const w=+$('sW').value/100;const nb=i=>[i-1,i+1,i-6,i+6].filter(j=>j>=0&&j<30&&!(Math.abs((j%6)-(i%6))>1));const inf=S.map((s,i)=>s.st===1?i:-1).filter(i=>i>=0);
+ inf.forEach(i=>{nb(i).concat([Math.floor(Math.random()*30)]).forEach(j=>{const t=S[j];if(t.st===0&&Math.random()<.55*(1-w*.8)*(t.vac?.05:1))t.st=3})});
+ S.forEach(s=>{if(s.st===3){s.st=1;s.d=0}else if(s.st===1&&++s.d>=4)s.st=2});sDay++;const c=S.filter(s=>s.st>=1).length;sHist.push(S.filter(s=>s.st===1).length);
+ $('sO').textContent=`اليوم ${sDay}: أُصيبت حتى الآن ${c} طالبة من 30`;sDraw();if(sDay>=14){clearInterval(sTimer);snd(c<8?'sOk':'sNo')}}
+function sRun(){sReset();sTimer=setInterval(sStep,450);snd('sClick')}
+function sDraw(){const C=$('sC'),g=C.getContext('2d'),W=C.width,H=C.height;g.clearRect(0,0,W,H);
+ S.forEach((s,i)=>{const x=W-60-(i%6)*72,y=45+Math.floor(i/6)*62;g.beginPath();g.arc(x,y,24,0,7);g.fillStyle=s.st===1?'#ef6a8a':s.st===2?'#a5d6a7':s.vac?'#b3e5fc':'#fff';g.fill();g.strokeStyle=OL;g.lineWidth=2.5;g.stroke();
+  g.fillStyle=OL;g.beginPath();g.arc(x-8,y-4,2.5,0,7);g.arc(x+8,y-4,2.5,0,7);g.fill();g.beginPath();s.st===1?g.arc(x,y+12,6,Math.PI,0):g.arc(x,y+4,7,0,Math.PI);g.stroke();if(s.vac)txt(g,'💉',x+20,y-16,14)});
+ txt(g,'🔴 مصابة  🟢 تعافت  🔵 مطعّمة  ⚪ سليمة',200,H-14,15,OL);
+ const ox=30,oy=H-50,gw=360,gh=230;g.strokeStyle=OL;g.lineWidth=2;g.beginPath();g.moveTo(ox,oy-gh);g.lineTo(ox,oy);g.lineTo(ox+gw,oy);g.stroke();txt(g,'عدد المصابات يوميًّا',ox+100,oy-gh-6,14,OL);
+ g.strokeStyle='#ef6a8a';g.lineWidth=4;g.beginPath();sHist.forEach((v,d)=>{const x=ox+d/14*gw,y=oy-v/30*gh;d?g.lineTo(x,y):g.moveTo(x,y)});g.stroke()}
+
+{const h=location.hash.slice(1);const k=labs.findIndex(l=>l.id===h);go(k<0?0:k)}
+document.fonts.ready.then(()=>{kNew();rSet(0);bPick(0);sReset();gDraw();dDraw();kDraw();rDraw();bDraw()});
+</script>
+</body></html>

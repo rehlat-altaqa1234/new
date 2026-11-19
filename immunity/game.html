@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>لعبة: مغامرة حراس المناعة | المناعة والمرض</title>
+<link href="fonts.css" rel="stylesheet">
+<style>
+:root{--navy:#2B2A6B;--vio:#6A3FB5;--hot:#C2185B;--gold:#A8741A;--teal:#1F7A80;--ok:#2E8B57;--no:#C0392B}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;font-family:Almarai,sans-serif;color:#fff;background:#120f2e url(img/salon.jpg) center/cover fixed}
+body::before{content:"";position:fixed;inset:0;background:linear-gradient(180deg,rgba(18,15,46,.55),rgba(18,15,46,.9));z-index:0}
+.scr{position:relative;z-index:1;display:none;min-height:100vh;padding:16px;max-width:760px;margin:auto;flex-direction:column;justify-content:center}
+.scr.on{display:flex;animation:fi .4s}@keyframes fi{from{opacity:0;transform:translateY(12px)}}
+.glass{background:rgba(30,26,80,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.18);border-radius:22px;padding:18px}
+h1{font-size:clamp(28px,7vw,46px);margin:6px 0;text-align:center;text-shadow:0 3px 16px rgba(194,24,91,.6)}
+.sub{text-align:center;opacity:.92;line-height:1.8}
+.logo{display:block;margin:0 auto 6px;height:62px;background:#fff;border-radius:12px;padding:4px}
+input.nm{width:100%;font:inherit;font-size:20px;padding:12px;border-radius:14px;border:2px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;text-align:center;margin:12px 0}
+.btn{display:block;width:100%;font:inherit;font-weight:800;font-size:20px;border:0;border-radius:16px;padding:14px;color:#fff;cursor:pointer;margin-top:10px;background:linear-gradient(135deg,#C2185B,#F2B01E);box-shadow:0 6px 20px rgba(194,24,91,.45)}
+.btn.s{background:linear-gradient(135deg,#1F7A80,#6A3FB5);box-shadow:none}
+.lv{display:grid;gap:12px;margin-top:12px}
+.lvb{display:flex;align-items:center;gap:12px;font:inherit;color:#fff;text-align:right;border:2px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);border-radius:18px;padding:12px;cursor:pointer}
+.lvb .ic{font-size:38px}.lvb b{font-size:19px;display:block}.lvb small{opacity:.85}.lvb .st{margin-right:auto;font-size:20px;letter-spacing:2px}
+.lvb.lock{opacity:.45;pointer-events:none}
+#hud{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:800;font-size:17px;margin-bottom:10px}
+#bar{height:10px;border-radius:9px;background:rgba(255,255,255,.18);overflow:hidden;margin-bottom:12px}#bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#F2B01E,#C2185B);transition:width .25s linear}
+#qt{font-size:clamp(19px,4.6vw,24px);line-height:1.8;font-weight:800;margin:6px 0 12px}
+.ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
+.op{display:block;width:100%;font:inherit;font-weight:700;font-size:18px;text-align:right;color:#fff;border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);border-radius:14px;padding:13px;margin:8px 0;cursor:pointer;transition:.15s}
+.op:active{transform:scale(.98)}.op.ok{background:var(--ok);border-color:#fff}.op.no{background:var(--no);border-color:#fff;animation:sh .35s}
+@keyframes sh{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.num{display:flex;gap:8px}.num input{flex:1;font:inherit;font-size:22px;padding:12px;border-radius:14px;border:2px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;text-align:center}
+#fb{display:none;margin-top:10px;padding:12px;border-radius:14px;line-height:1.8;background:rgba(46,139,87,.3);border-right:5px solid #7CFFB2}
+#fb.bad{background:rgba(192,57,43,.3);border-color:#FF9A8A}
+.pill{background:rgba(255,255,255,.14);padding:5px 12px;border-radius:999px}
+#toast{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%) scale(.7);font-size:44px;font-weight:800;opacity:0;transition:.35s;z-index:9;pointer-events:none;text-shadow:0 3px 16px rgba(0,0,0,.6)}
+#toast.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.cert{background:#fff;color:var(--navy);border-radius:22px;padding:20px;text-align:center;border:6px double #A8741A}
+.cert h2{margin:4px 0;color:var(--hot);font-size:28px}.cert .big{font-size:clamp(20px,6vw,34px);letter-spacing:2px}.cert{width:100%}
+.foot{position:relative;z-index:1;text-align:center;font-weight:800;color:#FFB3CF;padding:10px}
+canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:8}
+</style></head><body>
+<canvas id="fx"></canvas>
+<div id="toast"></div>
+
+<section class="scr on" id="s0"><div class="glass">
+<img class="logo" src="img/moe.png" alt="وزارة التعليم">
+<img src="img/cell13.png" style="display:block;margin:0 auto;height:110px"><h1>🛡 مغامرة حراس المناعة</h1>
+<p class="sub">لعبة درس المناعة والمرض • العلوم • الفصل 5 الدرس 2<br>ساعدي الخلية البائية: اجتازي ثلاث بوابات، واجمعي النجوم، وصدّي الجراثيم!</p>
+<input class="nm" id="nm" placeholder="اكتبي اسمك هنا ✎" maxlength="30">
+<button class="btn" onclick="toMap()">ابدئي المغامرة ▶</button>
+<p class="sub" style="font-size:14px;margin-top:10px">لكل سؤال 30 ثانية • ثلاثة قلوب ❤ في كل بوابة • نقاط إضافية للسرعة والإجابات المتتالية</p>
+</div></section>
+
+<section class="scr" id="s1"><div class="glass">
+<h1 style="font-size:28px">🗺 خريطة البوابات</h1><p class="sub" id="hi"></p>
+<div class="lv" id="lv"></div>
+<button class="btn s" onclick="finish()">🏆 شهادتي</button>
+</div></section>
+
+<section class="scr" id="s2"><div class="glass">
+<div id="hud"><span class="pill" id="hL"></span><span class="pill" id="hH"></span><span class="pill" id="hS"></span></div>
+<div id="bar"><i id="bi"></i></div>
+<div style="opacity:.8;font-size:15px" id="qn"></div>
+<div id="qt"></div><div id="qa"></div><div id="fb"></div>
+<button class="btn" id="nx" style="display:none" onclick="next()">التالي ◀</button>
+</div></section>
+
+<section class="scr" id="s3"><div class="cert" id="cert"></div>
+<button class="btn" onclick="toMap()">🗺 العودة للخريطة</button>
+<button class="btn s" onclick="resetAll()">↻ العب من جديد</button></section>
+
+<div class="foot">معلمة المادة: أ. ثناء إبراهيم بارجاء • صُمّم بحب ♥ د. أفنان الطلحي</div>
+
+<audio id="aOk" src="snd/applause.mp3" preload="auto"></audio><audio id="aNo" src="snd/knock.mp3" preload="auto"></audio>
+<audio id="aCl" src="snd/drop.mp3" preload="auto"></audio><audio id="aTk" src="snd/tick.mp3" preload="auto"></audio><audio id="aWh" src="snd/whoosh.mp3" preload="auto"></audio><audio id="aBl" src="snd/bell.mp3" preload="auto"></audio>
+<script>
+const $=i=>document.getElementById(i);
+const play=(id,v=.7)=>{try{const a=$(id).cloneNode();a.volume=v;a.play().catch(()=>{})}catch(e){}};
+const E=t=>`<span class="ltr">${t}</span>`;
+const LV=[
+{ic:'🛡',t:'بوابة خطوط الدفاع',d:'الجلد والمخاط والأهداب والالتهاب',Q:[
+{q:'خط الدفاع الأول (العام) في الجسم يعمل ضد:',o:['مسبب مرض واحد محدد','المواد الضارة والمخلوقات المسببة للأمراض','الهرمونات في الدم'],a:1,e:'أما خط الدفاع الثاني (الخاص) فيعمل ضد مسببات أمراض معينة ويتمثل في جهاز المناعة.'},
+{q:'تراكيب شبيهة بالشعيرات في الجهاز التنفسي تعيق دخول مسببات المرض:',o:['الأهداب','الحويصلات الهوائية','الصمامات'],a:0,e:'تتحرك الأهداب مع المخاط فتطرد المسببات العالقة، ونتخلص منها بالعطاس والسعال.'},
+{q:'إفرازات الغدد الدهنية في الجلد قاعدية فتمنع نمو البكتيريا.',tf:1,a:1,e:'خطأ؛ إفرازاتها حمضية، ولا تستطيع بعض المسببات النمو في البيئة الحمضية.'},
+{q:'بكتيريا تنقسم كل 10 ثوانٍ. عدد الخلايا الناتجة من خلية واحدة بعد 30 ثانية =',n:8,tol:.01,e:E('ن = 30 ÷ 10 = 3 ← ح = 2³ = 8')},
+{q:'عند الالتهاب يحمرّ النسيج وترتفع حرارته لأن:',o:['الشعيرات تتسع فيتدفق دم أكثر','الدم يتوقف عن الوصول إليه','الجلد يصبح أسمك'],a:0,e:'وتأتي خلايا دم بيضاء تبتلع البكتيريا في منطقة الإصابة.'},
+{q:'الحمض الذي تفرزه المعدة فيقتل بعض البكتيريا:',o:['حمض الكاربوليك','حمض الهيدروكلوريك','حمض الستريك'],a:1,e:'ويوقف أيضًا نشاط الفيروسات التي تدخل مع الطعام.'}]},
+{ic:'🔗',t:'بوابة جهاز المناعة',d:'مولد الضد والأجسام المضادة والطُّعم',Q:[
+{q:'الجزيئات المعقدة الغريبة التي لا تنتمي إلى الجسم تسمى:',o:['مولدات الضد','الأجسام المضادة','الإنزيمات'],a:0,e:'قد تكون منفصلة أو موجودة على سطح مسببات المرض.'},
+{q:'الخلايا التي تنتج الأجسام المضادة:',o:['الخلايا التائية القاتلة','الخلايا البائية','خلايا الدم الحمراء'],a:1,e:'تحفّزها الخلايا التائية المساعدة فتنتج الأجسام المضادة.'},
+{q:'يرتبط كل جسم مضاد بأي مولد ضد يدخل الجسم.',tf:1,a:1,e:'خطأ؛ كل جسم مضاد يرتبط بمولد ضد محدد فقط ويجعله غير فعّال.'},
+{q:'يتكوّن الطُّعم (اللقاح) من:',o:['أجسام مضادة جاهزة من حيوان','مولدات ضد تمنح مناعة طبيعية','مضادات حيوية'],a:1,e:'يُعطى بالحقن أو بالفم، ويقيك من المرض لكنه ليس علاجًا.'},
+{q:'المناعة الاصطناعية لا تدوم طويلًا بخلاف المناعة الطبيعية.',tf:1,a:0,e:'صح؛ لأن الأجسام المضادة فيها جاهزة من حيوانات أخرى.'},
+{q:'كم انقسامًا تمرّ به بكتيريا تنقسم كل 10 ثوانٍ خلال ساعة واحدة؟',n:360,tol:.01,e:E('ن = 3600 ÷ 10 = 360 انقسامًا')}]},
+{ic:'🦠',t:'بوابة الأمراض',d:'المسببات والانتقال والأمراض غير المعدية',Q:[
+{q:'مرض تسببه الأوليات:',o:['السل','الملاريا','الإنفلونزا'],a:1,e:'ومن أمراض الأوليات أيضًا مرض النوم.'},
+{q:'ابتكر العالم الفرنسي لويس باستور:',o:['البسترة','الأشعة السينية','المجهر'],a:0,e:'تسخين السائل إلى درجة حرارة تقتل معظم البكتيريا فيه.'},
+{q:'يهاجم فيروس HIV المسبب للإيدز:',o:['الخلايا التائية','خلايا الجلد','خلايا العظام'],a:0,e:'يتضاعف داخلها ثم تنفجر لتخرج فيروسات جديدة.'},
+{q:'السكري من الأمراض غير المعدية.',tf:1,a:0,e:'صح؛ ينتج عن خلل في مستويات الأنسولين ولا ينتقل بالعدوى.'},
+{q:'المادة التي يفرزها الجسم في الحساسية فتسبب احمرار الأنسجة وتورمها:',o:['الأنسولين','الهستامين','الهيموجلوبين'],a:1,e:'لذلك تُستعمل مضادات الهستامين لعلاج الحساسية.'},
+{q:'لاحظ العلاقة بين المرض وعدم النظافة فاستعمل حمض الكاربوليك:',o:['جوزيف ليستر','روبرت كوخ','لويس باستور'],a:0,e:'فانخفض عدد الوفيات بين مرضاه.'}]}];
+let S=JSON.parse(localStorage.getItem('immGame')||'null')||{name:'',best:[0,0,0],stars:[0,0,0]};
+const save=()=>{try{localStorage.setItem('immGame',JSON.stringify(S))}catch(e){}};
+function show(i){document.querySelectorAll('.scr').forEach((s,j)=>s.classList.toggle('on',s.id==='s'+i));scrollTo(0,0)}
+if(S.name)$('nm').value=S.name;
+function toMap(){const n=$('nm').value.trim();if(n)S.name=n;save();play('aWh',.5);
+$('hi').textContent=(S.name?'مرحبًا يا '+S.name+' 🌟 ':'')+'اختاري بوابة:';
+$('lv').innerHTML=LV.map((l,i)=>{const lock=i>0&&S.stars[i-1]===0;return `<button class="lvb${lock?' lock':''}" onclick="startLv(${i})"><span class="ic">${lock?'🔒':l.ic}</span><span><b>${i+1}. ${l.t}</b><small>${l.d}</small></span><span class="st">${'⭐'.repeat(S.stars[i])}${'☆'.repeat(3-S.stars[i])}</span></button>`}).join('');show(1)}
+let L,qi,score,hearts,streak,timer,tl,locked,order;
+function startLv(i){L=i;qi=0;score=0;hearts=3;streak=0;order=LV[i].Q.map((_,k)=>k).sort(()=>Math.random()-.5);play('aBl',.6);show(2);ask()}
+function hud(){$('hL').textContent=LV[L].ic+' '+LV[L].t;$('hH').textContent='❤'.repeat(hearts)+'🖤'.repeat(3-hearts);$('hS').textContent='⭐ '+score}
+function ask(){const q=LV[L].Q[order[qi]];locked=false;hud();$('qn').textContent='السؤال '+(qi+1)+' من '+LV[L].Q.length;$('qt').innerHTML=q.q;$('fb').style.display='none';$('nx').style.display='none';
+if(q.n!==undefined){$('qa').innerHTML=`<div class="num"><input id="ni" type="number" inputmode="decimal" step="any" placeholder="الإجابة"><button class="btn" style="width:auto;margin:0" onclick="chkN()">✔</button></div>`}
+else{const opts=q.tf?['✓ صح','✗ خطأ']:q.o;$('qa').innerHTML=opts.map((o,k)=>`<button class="op" onclick="chk(${k},this)">${q.tf?'':'أبج'[k]+') '}${o}</button>`).join('')}
+tl=30;$('bi').style.width='100%';clearInterval(timer);timer=setInterval(()=>{tl--;$('bi').style.width=(tl/30*100)+'%';if(tl<=5&&tl>0)play('aTk',.4);if(tl<=0){clearInterval(timer);res(false,null,'⏰ انتهى الوقت!')}},1000)}
+function chk(k,b){if(locked)return;const q=LV[L].Q[order[qi]];const ok=k===q.a;b.classList.add(ok?'ok':'no');if(!ok)$('qa').children[q.a].classList.add('ok');res(ok)}
+function chkN(){if(locked)return;const q=LV[L].Q[order[qi]],v=parseFloat($('ni').value);if(isNaN(v))return;res(Math.abs(v-q.n)<=Math.abs(q.n)*q.tol)}
+function res(ok,_,msg){locked=true;clearInterval(timer);const q=LV[L].Q[order[qi]];
+if(ok){streak++;const pts=10+Math.max(0,tl)+(streak>=3?10:0);score+=pts;toast('+'+pts+(streak>=3?' 🔥':''));play('aOk',.6);burst()}else{streak=0;hearts--;play('aNo',.7)}
+hud();$('fb').className=ok?'':'bad';$('fb').innerHTML=(msg?msg+'<br>':'')+(ok?'🎉 أحسنتِ! ':'💡 ')+q.e;$('fb').style.display='block';$('nx').style.display='block';
+$('nx').textContent=(hearts<=0||qi+1>=LV[L].Q.length)?'النتيجة 🏁':'التالي ◀'}
+function next(){play('aCl',.5);if(hearts<=0||qi+1>=LV[L].Q.length){endLv();return}qi++;ask()}
+function endLv(){const max=LV[L].Q.length*40;const st=hearts<=0?0:score>=max*.6?3:score>=max*.4?2:1;S.stars[L]=Math.max(S.stars[L],st);S.best[L]=Math.max(S.best[L],score);save();
+if(st>=2){play('aOk',.8);for(let i=0;i<4;i++)setTimeout(burst,i*250)}
+toast(st?'⭐'.repeat(st):'حاولي مجددًا 💪');setTimeout(toMap,1300)}
+function finish(){const tot=S.best.reduce((a,b)=>a+b,0),st=S.stars.reduce((a,b)=>a+b,0);
+$('cert').innerHTML=`<img src="img/moe.png" style="height:56px"><h2>شهادة إنجاز 🏆</h2><p>تشهد مغامرة حراس المناعة أن البطلة</p><div style="font-size:30px;font-weight:800;color:#6A3FB5;margin:6px 0">${S.name||'............'}</div>
+<p>اجتازت بوابات درس المناعة والمرض (العلوم • الفصل 5 • الدرس 2)</p><div class="big">${'⭐'.repeat(st)}${'☆'.repeat(9-st)}</div><p style="font-size:22px;font-weight:800">مجموع النقاط: ${tot}</p>
+<p style="color:#C2185B;font-weight:800">${st>=8?'بطلة المناعة الأولى! 🌟':st>=5?'رائعة! واصلي التألق ✨':'بداية جميلة، أعيدي البوابات لجمع نجوم أكثر 💪'}</p><p style="font-size:14px">معلمة المادة: أ. ثناء إبراهيم بارجاء • صُمّم بحب ♥ د. أفنان الطلحي</p>`;show(3);if(st>=5){play('aOk',.8);for(let i=0;i<6;i++)setTimeout(burst,i*200)}}
+function resetAll(){S={name:S.name,best:[0,0,0],stars:[0,0,0]};save();toMap()}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),900)}
+// rainbow confetti
+const fx=$('fx'),g=fx.getContext('2d');let P=[];function rs(){fx.width=innerWidth;fx.height=innerHeight}rs();addEventListener('resize',rs);
+function burst(){for(let i=0;i<70;i++)P.push({x:innerWidth/2,y:innerHeight*.4,vx:(Math.random()-.5)*12,vy:-Math.random()*12-3,h:Math.random()*300,l:60})}
+(function loop(){g.clearRect(0,0,fx.width,fx.height);P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.35;p.l--;g.fillStyle=`hsl(${p.h},95%,60%)`;g.fillRect(p.x,p.y,7,11)});P=P.filter(p=>p.l>0);requestAnimationFrame(loop)})();
+</script>
+</body></html>

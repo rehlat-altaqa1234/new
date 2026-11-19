@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>الواقع المعزز | المناعة والمرض</title>
+<link href="fonts.css" rel="stylesheet">
+<style>
+:root{--navy:#1E3557;--gold:#A8741A;--teal:#1F7A80;--hot:#E0622B;--cold:#2B7BB9}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#0b1626;font-family:Almarai,sans-serif;color:#fff;touch-action:none}
+#cam{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+#bgFallback{position:fixed;inset:0;background:url(img/lavender.jpg) center/cover;z-index:0}
+#gl{position:fixed;inset:0;z-index:1}
+.glass{background:rgba(15,30,55,.62);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.18);border-radius:18px}
+#top{position:fixed;top:calc(8px + env(safe-area-inset-top));left:8px;right:8px;z-index:3;display:flex;align-items:center;gap:8px;padding:6px 10px}
+#top img{height:34px;background:#fff;border-radius:8px;padding:2px}#top h1{flex:1;margin:0;font-size:clamp(14px,3.6vw,20px);text-align:center}
+#info{position:fixed;top:calc(64px + env(safe-area-inset-top));right:8px;z-index:3;width:min(420px,calc(100% - 16px));padding:12px 14px;transition:.3s}
+#info h2{margin:0 0 4px;font-size:20px;color:#F2C14E}#info p{margin:0;font-size:15px;line-height:1.75}
+#info.min p{display:none}
+#bottom{position:fixed;bottom:calc(8px + env(safe-area-inset-bottom));left:8px;right:8px;z-index:3}
+#chips{display:flex;gap:8px;overflow-x:auto;padding:8px;scrollbar-width:none}#chips::-webkit-scrollbar{display:none}
+#chips button{flex:0 0 auto;font:inherit;font-weight:800;font-size:15px;color:#fff;border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);padding:9px 14px;border-radius:999px;cursor:pointer}
+#chips button.on{background:linear-gradient(135deg,#E0622B,#F2B01E);border-color:#fff;box-shadow:0 0 18px rgba(242,176,30,.7)}
+#ctrl{display:flex;gap:8px;align-items:center;padding:8px 10px;margin-bottom:8px;flex-wrap:wrap}
+#ctrl label{font-size:14px;font-weight:700}#ctrl input[type=range]{flex:1;min-width:140px;accent-color:#E0622B}
+.ib{font:inherit;font-weight:800;font-size:14px;color:#fff;border:0;border-radius:12px;padding:9px 12px;cursor:pointer;background:var(--teal)}
+.ib.g{background:var(--gold)}.ib.h{background:var(--hot)}
+#side{position:fixed;left:10px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:10px}
+#side button{width:50px;height:50px;border-radius:50%;border:2px solid rgba(255,255,255,.4);background:rgba(15,30,55,.6);color:#fff;font-size:22px;cursor:pointer;backdrop-filter:blur(8px)}
+#quiz,#shot,#perm,#intro{position:fixed;inset:0;z-index:5;display:none;align-items:center;justify-content:center;background:rgba(5,12,24,.55);padding:16px}
+#quiz .box,#shot .box,#perm .box,#intro .box{width:min(520px,100%);padding:18px;text-align:center}
+#quiz h3{margin:0 0 12px;font-size:21px;line-height:1.6}
+.qo{display:block;width:100%;font:inherit;font-weight:700;font-size:17px;margin:8px 0;padding:12px;border-radius:14px;border:2px solid rgba(255,255,255,.4);background:rgba(255,255,255,.1);color:#fff;cursor:pointer;text-align:right}
+.qo.ok{background:#2E8B57;border-color:#2E8B57}.qo.no{background:#C0392B;border-color:#C0392B}
+#qfb{min-height:24px;margin-top:8px;line-height:1.7}
+#shot img{width:100%;border-radius:12px}
+#toast{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%) scale(.8);z-index:6;font-size:30px;font-weight:800;opacity:0;transition:.35s;pointer-events:none;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+#toast.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#hint{position:fixed;left:50%;top:58%;transform:translateX(-50%);z-index:2;font-size:14px;background:rgba(0,0,0,.4);padding:6px 12px;border-radius:999px;transition:opacity 1s;pointer-events:none}
+.big{font-size:54px;margin:4px 0}
+</style></head><body>
+<div id="bgFallback"></div>
+<video id="cam" playsinline muted autoplay></video>
+<canvas id="gl"></canvas>
+<div id="top" class="glass"><img src="img/moe.png" alt=""><h1>🔍 الواقع المعزز: المناعة من حولي</h1><span style="width:34px"></span></div>
+<div id="info" class="glass" onclick="this.classList.toggle('min')"><h2 id="iT"></h2><p id="iP"></p></div>
+<div id="side"><button onclick="openQuiz()" title="سؤال">❓</button><button onclick="snap()" title="التقاط">📸</button><button onclick="recenter()" title="توسيط">🎯</button><button onclick="toggleSnd()" id="sndB" title="الصوت">🔊</button></div>
+<div id="hint">اسحبي لتدوير النموذج • قرّبي بإصبعين • حرّكي الجوال حولك</div>
+<div id="bottom"><div id="ctrl" class="glass"></div><div id="chips" class="glass"></div><div style="text-align:center;font-size:13px;font-weight:800;margin-top:4px;text-shadow:0 1px 6px rgba(0,0,0,.8)">صُمّم بحب ♥ د. أفنان الطلحي</div></div>
+<div id="quiz"><div class="box glass"><h3 id="qq"></h3><div id="qo"></div><div id="qfb"></div><button class="ib g" onclick="closeQ()" style="margin-top:10px">إغلاق</button></div></div>
+<div id="shot"><div class="box glass"><img id="shotImg" alt=""><p>اضغطي مطولًا على الصورة لحفظها، أو:</p><a id="dl" class="ib h" style="display:inline-block;text-decoration:none" download="ar-immunity.png">⬇ حفظ الصورة</a> <button class="ib" onclick="document.getElementById('shot').style.display='none'">إغلاق</button></div></div>
+<div id="perm"><div class="box glass"><div class="big">📷</div><h3>اسمحي بالوصول إلى الكاميرا</h3><p style="line-height:1.8">لعرض النماذج فوق ما حولك. إن ظهرت رسالة الإذن اضغطي «سماح».</p><button class="ib h" onclick="startCam(true)">تشغيل الكاميرا</button> <button class="ib" onclick="document.getElementById('perm').style.display='none'">المتابعة بدون كاميرا</button></div></div>
+<div id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ---------- camera: request immediately ----------
+const video=document.getElementById('cam');
+async function startCam(fromBtn){
+  try{
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw 0;
+    const st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false});
+    video.srcObject=st;await video.play().catch(()=>{});document.getElementById('bgFallback').style.display='none';document.getElementById('perm').style.display='none';
+  }catch(e){document.getElementById('perm').style.display='flex'}
+  if(fromBtn)enableGyro();
+}
+startCam(false);
+
+// ---------- sounds (natural only) ----------
+const SND={};['applause','knock','drop','bubble','whoosh'].forEach(n=>{SND[n]=new Audio('snd/'+n+'.mp3')});SND.bubble.loop=true;
+let sndOn=true,amb=null,unlocked=false;
+function sfx(n,v=.8){if(!sndOn)return;try{const a=SND[n].cloneNode();a.volume=v;a.play().catch(()=>{})}catch(e){}}
+function ambient(n){if(amb){amb.pause();amb=null}if(!n||!sndOn||!unlocked)return;amb=SND[n];amb.volume=.35;amb.currentTime=0;amb.play().catch(()=>{})}
+function toggleSnd(){sndOn=!sndOn;document.getElementById('sndB').textContent=sndOn?'🔊':'🔇';if(!sndOn&&amb)amb.pause();else ambient(SC[cur].amb)}
+document.addEventListener('pointerdown',()=>{if(!unlocked){unlocked=true;enableGyro();ambient(SC[cur].amb)}},{once:false});
+
+// ---------- three ----------
+const cv=document.getElementById('gl');
+const R=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true,preserveDrawingBuffer:true});
+R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(innerWidth,innerHeight);R.outputEncoding=THREE.sRGBEncoding;
+const scene=new THREE.Scene();const cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.05,100);
+scene.add(new THREE.HemisphereLight(0xffffff,0x334466,.9));const dl=new THREE.DirectionalLight(0xffffff,.9);dl.position.set(2,4,3);scene.add(dl);
+const pl=new THREE.PointLight(0xffaa66,.6,10);pl.position.set(-2,1,2);scene.add(pl);
+const anchor=new THREE.Group();anchor.position.set(0,-.15,-3);scene.add(anchor);
+const holder=new THREE.Group();anchor.add(holder);
+// shadow disc
+const disc=new THREE.Mesh(new THREE.CircleGeometry(1.5,48),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.22}));disc.rotation.x=-Math.PI/2;disc.position.y=-1.05;anchor.add(disc);
+const ring=new THREE.Mesh(new THREE.RingGeometry(1.45,1.52,64),new THREE.MeshBasicMaterial({color:0xF2C14E,transparent:true,opacity:.8,side:2}));ring.rotation.x=-Math.PI/2;ring.position.y=-1.04;anchor.add(ring);
+addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();R.setSize(innerWidth,innerHeight)});
+
+// ---------- gyro (look around: objects stay in the room) ----------
+let gyro=false,q0=null;const qd=new THREE.Quaternion(),eu=new THREE.Euler(),zee=new THREE.Vector3(0,0,1),q1=new THREE.Quaternion(-Math.sqrt(.5),0,0,Math.sqrt(.5));
+function onOri(e){if(e.alpha==null)return;gyro=true;const a=THREE.MathUtils.degToRad(e.alpha),b=THREE.MathUtils.degToRad(e.beta),g=THREE.MathUtils.degToRad(e.gamma),o=THREE.MathUtils.degToRad(screen.orientation?screen.orientation.angle:(window.orientation||0));
+eu.set(b,a,-g,'YXZ');qd.setFromEuler(eu);qd.multiply(q1);qd.multiply(new THREE.Quaternion().setFromAxisAngle(zee,-o));if(!q0){q0=qd.clone().invert();}}
+function enableGyro(){if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){DeviceOrientationEvent.requestPermission().then(r=>{if(r==='granted')addEventListener('deviceorientation',onOri)}).catch(()=>{})}else addEventListener('deviceorientation',onOri)}
+function recenter(){q0=null;rotY=0;rotX=0;zoom=1;sfx('whoosh',.5)}
+
+// ---------- touch rotate / pinch ----------
+let rotY=0,rotX=0,zoom=1,drag=null,pinch=null;
+cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};document.getElementById('hint').style.opacity=0});
+addEventListener('pointermove',e=>{if(!drag||pinch)return;rotY+=(e.clientX-drag.x)*.01;rotX=Math.max(-.6,Math.min(.6,rotX+(e.clientY-drag.y)*.006));drag={x:e.clientX,y:e.clientY}});
+addEventListener('pointerup',()=>drag=null);
+cv.addEventListener('touchmove',e=>{if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);if(pinch)zoom=Math.max(.5,Math.min(2.2,zoom*d/pinch));pinch=d}},{passive:true});
+cv.addEventListener('touchend',()=>pinch=null);
+cv.addEventListener('wheel',e=>{zoom=Math.max(.5,Math.min(2.2,zoom*(e.deltaY>0?.92:1.08)))},{passive:true});
+
+// ---------- helpers ----------
+const RD=()=>{const u=Math.random()*2-1,a=Math.random()*6.2832,s=Math.sqrt(1-u*u);return new THREE.Vector3(s*Math.cos(a),u,s*Math.sin(a))};
+const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.35,metalness:.1},o));
+function glow(color,size){const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');const gr=g.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.25,color);gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,128,128);
+const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));s.scale.set(size,size,1);return s}
+function label(txt,bg='#1E3557',fg='#fff',w=1.1){const c=document.createElement('canvas');c.width=512;c.height=128;const g=c.getContext('2d');const draw=()=>{g.clearRect(0,0,512,128);g.fillStyle=bg;g.globalAlpha=.88;g.beginPath();g.moveTo(30,10);g.lineTo(482,10);g.quadraticCurveTo(502,10,502,30);g.lineTo(502,98);g.quadraticCurveTo(502,118,482,118);g.lineTo(30,118);g.quadraticCurveTo(10,118,10,98);g.lineTo(10,30);g.quadraticCurveTo(10,10,30,10);g.fill();g.globalAlpha=1;g.fillStyle=fg;g.font='700 52px Almarai';g.textAlign='center';g.textBaseline='middle';g.direction='rtl';g.fillText(s.userData.t,256,66);tex.needsUpdate=true};
+const tex=new THREE.CanvasTexture(c);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false}));s.scale.set(w,w/4,1);s.userData.t=txt;s.userData.set=t=>{s.userData.t=t;draw()};draw();s.renderOrder=10;return s}
+const tcol=(T)=>{const c=Math.max(0,Math.min(1,(T+10)/110));return new THREE.Color().setRGB(.17+c*.8,.48-c*.1+(c>.5?-.2*(c-.5):0),.73-c*.62)};
+let slider=null,sval=60,rodK=1;
+function setCtrl(html){document.getElementById('ctrl').innerHTML=html;document.getElementById('ctrl').style.display=html?'flex':'none'}
+
+// ---------- scenes ----------
+function wl(l){let r=0,g=0,b=0;if(l>=380&&l<440){r=-(l-440)/60;b=1}else if(l<490){g=(l-440)/50;b=1}else if(l<510){g=1;b=-(l-510)/20}else if(l<580){r=(l-510)/70;g=1}else if(l<645){r=1;g=-(l-645)/65}else if(l<=780){r=1}let f=l<420?.3+.7*(l-380)/40:l>700?.3+.7*(780-l)/80:1;return[r*f,g*f,b*f]}
+function filmCol(d,n){let s=[0,0,0];for(let k=400;k<=700;k+=10){const c=wl(k),r=Math.pow(Math.sin(2*Math.PI*n*d/k),2);s[0]+=c[0]*r;s[1]+=c[1]*r;s[2]+=c[2]*r}return s.map(v=>Math.min(255,v/11*255))}
+function filmTex(w,h,fn){const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');const im=g.createImageData(w,h);for(let y=0;y<h;y++)for(let x=0;x<w;x++){const d=fn(x/w,y/h),col=filmCol(d,1.33),o=(y*w+x)*4;im.data[o]=col[0];im.data[o+1]=col[1];im.data[o+2]=col[2];im.data[o+3]=255}g.putImageData(im,0,0);const t=new THREE.CanvasTexture(c);t.wrapS=THREE.RepeatWrapping;return t}
+function fringeTex(lam){const c=document.createElement('canvas');c.width=512;c.height=64;const g=c.getContext('2d');const im=g.createImageData(512,64);const col=wl(lam);for(let x=0;x<512;x++){const X=(x-256)/256*12e-3,th=X/1.0,ph=Math.PI*.25e-3*th/(lam*1e-9),be=Math.PI*.04e-3*th/(lam*1e-9),env=be?Math.pow(Math.sin(be)/be,2):1,k=Math.pow(Math.cos(ph),2)*env;for(let y=0;y<64;y++){const o=(y*512+x)*4;im.data[o]=col[0]*k*255;im.data[o+1]=col[1]*k*255;im.data[o+2]=col[2]*k*255;im.data[o+3]=255}}g.putImageData(im,0,0);return new THREE.CanvasTexture(c)}
+function slitTex(lam,w,white){const W=512,H=64,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');const im=g.createImageData(W,H);
+for(let x=0;x<W;x++){let col=[0,0,0];const th=(x-W/2)/(W/2)*0.03;const L=white?[400,430,460,490,520,550,580,610,640,670,700]:[lam];
+L.forEach(l=>{const b=Math.PI*w*1e-3*th/(l*1e-9),k=b?Math.pow(Math.sin(b)/b,2):1,c2=wl(l),kk=Math.pow(k,.5);col[0]+=c2[0]*kk;col[1]+=c2[1]*kk;col[2]+=c2[2]*kk});
+const n=white?L.length/2.2:1;for(let y=0;y<H;y++){const o=(y*W+x)*4;im.data[o]=Math.min(255,col[0]/n*255);im.data[o+1]=Math.min(255,col[1]/n*255);im.data[o+2]=Math.min(255,col[2]/n*255);im.data[o+3]=255}}
+g.putImageData(im,0,0);return new THREE.CanvasTexture(c)}
+function airyTex(sep){const W=512,H=256,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');const im=g.createImageData(W,H);
+const A=(r)=>{const x=r*3.83/40;if(x<1e-6)return 1;const s=Math.sin(x)/x;return s*s};
+for(let y=0;y<H;y++)for(let x=0;x<W;x++){const r1=Math.hypot(x-(W/2-sep/2),y-H/2),r2=Math.hypot(x-(W/2+sep/2),y-H/2);let k=A(r1)+A(r2);k=Math.min(1,Math.pow(k,.6));const o=(y*W+x)*4;im.data[o]=255*k;im.data[o+1]=240*k;im.data[o+2]=200*k;im.data[o+3]=255}
+g.putImageData(im,0,0);return new THREE.CanvasTexture(c)}
+function cdTex(){const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');
+for(let a=0;a<360;a+=1){const l=400+300*(.5+.5*Math.sin(a*Math.PI/45));const col=wl(l);g.strokeStyle=css3(col,.75);g.beginPath();g.moveTo(128,128);g.lineTo(128+128*Math.cos(a*Math.PI/180),128+128*Math.sin(a*Math.PI/180));g.stroke()}
+const gr=g.createRadialGradient(128,128,10,128,128,128);gr.addColorStop(0,'rgba(230,230,240,1)');gr.addColorStop(.2,'rgba(220,220,235,.9)');gr.addColorStop(.35,'rgba(210,210,230,.2)');gr.addColorStop(1,'rgba(200,200,220,.1)');g.fillStyle=gr;g.fillRect(0,0,256,256);
+g.fillStyle='#0b1626';g.beginPath();g.arc(128,128,16,0,7);g.fill();return new THREE.CanvasTexture(c)}
+function css3(c,a){return `rgba(${Math.round(c[0]*255)},${Math.round(c[1]*255)},${Math.round(c[2]*255)},${a})`}
+let sW=.08,sLam=650,gMode=0,rSep=80,spAng=0;
+const SC=[
+{n:'🧬 الخلية البائية',t:'الخلية البائية (B-cell)',p:'خلية ليمفية تحفّزها الخلايا التائية المساعدة فتنتج الأجسام المضادة (على شكل Y حولها). وتبقى بعضها خلايا ذاكرة متأهبة لأي هجوم جديد من المسبب نفسه. اضغطي «أنتجي» لتطلق أجسامًا مضادة.',
+ amb:'bubble',ctrl:'<button class="ib h" onclick="bShoot=1;sfx(\'drop\',.5)">✨ أنتجي أجسامًا مضادة</button>',
+ q:['وظيفة الخلايا البائية:',['تحطيم الخلايا بالإنزيمات','إنتاج الأجسام المضادة','نقل الأكسجين'],1],
+ build(g){this.c=new THREE.Mesh(new THREE.SphereGeometry(.6,48,32),M(0xc6a6ec,{roughness:.5}));g.add(this.c);
+ const eyeM=M(0x3d2433);[-.18,.18].forEach(x=>{const e=new THREE.Mesh(new THREE.SphereGeometry(.07,16,12),eyeM);e.position.set(x,.08,.56);g.add(e)});
+ const cols=[0xf7a8d0,0x8ec5f5,0xffe27a,0x7fe0d0];for(let i=0;i<14;i++){const t=new THREE.Mesh(new THREE.TorusGeometry(.12+Math.random()*.06,.035,8,24),M(cols[i%4]));t.position.set((Math.random()-.5)*.8,.5+Math.random()*.25,(Math.random()-.5)*.5);t.rotation.set(Math.random()*3,Math.random()*3,0);g.add(t)}
+ this.abs=[];this.free=[];for(let i=0;i<8;i++){const a=yAb(0xffd54f,.35);const th=i/8*6.283;a.position.set(Math.cos(th)*.68,Math.sin(th)*.68*.6-.05,Math.sin(th)*.3);a.lookAt(a.position.clone().multiplyScalar(3));a.rotateX(Math.PI/2);g.add(a)}
+ const l=label('خلية بائية B','#8456cf');l.position.y=1.2;g.add(l);bShoot=0;setCtrl(this.ctrl)},
+ update(dt,t){this.c.scale.setScalar(1+.03*Math.sin(t*3));if(bShoot){bShoot=0;for(let i=0;i<6;i++){const a=yAb([0xffd54f,0x80deea,0xf48fb1][i%3],.3);a.userData.v=RD().multiplyScalar(.9);a.userData.life=3;holder.add(a);this.free.push(a)}}
+ this.free.forEach(a=>{a.position.addScaledVector(a.userData.v,dt);a.rotation.z+=dt*2;a.userData.life-=dt;a.scale.setScalar(Math.max(.01,Math.min(1,a.userData.life)))});this.free=this.free.filter(a=>{if(a.userData.life<=0){holder.remove(a);return false}return true})}},
+{n:'🔗 الجسم المضاد',t:'الجسم المضاد ومولد الضد',p:'الجسم المضاد بروتين على شكل Y يتشكّل استجابةً لمولد ضد محدد. حرّكي المؤشر لتقرّبيه من مولد الضد على سطح المسبب: يرتبط به كالقفل والمفتاح ويجعله غير فعّال.',
+ amb:null,ctrl:'<label>قرّبي الجسم المضاد</label><input type="range" min="0" max="100" value="0" oninput="kVal=+this.value">',
+ q:['يرتبط الجسم المضاد بـ:',['أي مولد ضد','مولد ضد محدد يطابقه','خلايا الدم الحمراء'],1],
+ build(g){kVal=0;this.v=new THREE.Mesh(new THREE.SphereGeometry(.45,32,24),M(0xef6a8a));this.v.position.y=-.55;g.add(this.v);
+ this.ags=[];for(let i=0;i<10;i++){const th=i/10*6.283,k=new THREE.Mesh(new THREE.BoxGeometry(.12,.12,.12),M(0xffd166));k.position.set(Math.cos(th)*.5,-.55+Math.sin(th)*.5,0);g.add(k)}
+ this.ab=yAb(0xffd54f,1);this.ab.rotation.z=Math.PI;g.add(this.ab);this.ll=label('لم يرتبط بعد','#8456cf');this.ll.position.y=1.35;g.add(this.ll);setCtrl(this.ctrl)},
+ update(dt,t){this.ab.position.y=1.0-kVal/100*.45;this.v.rotation.y=t*.5;const ok=kVal>92;const tx=ok?'ارتبط ✔ أصبح المسبب غير فعّال':'لم يرتبط بعد';if(this.ll.userData.t!==tx){this.ll.userData.set(tx);if(ok)sfx('applause',.6)}this.v.material.color.setHex(ok?0xb0a0b8:0xef6a8a)}},
+{n:'🦠 الفيروس',t:'الفيروس والخلية المضيفة',p:'الفيروس جزء صغير من المادة الوراثية محاط بغلاف بروتيني. يغزو الخلية المضيفة ويتكاثر فيها، وعند خروج الفيروسات الجديدة تتحطم الخلية وتموت. اضغطي «اغزي الخلية».',
+ amb:null,ctrl:'<button class="ib h" onclick="vGo=1;sfx(\'whoosh\',.5)">🦠 اغزي الخلية</button>',
+ q:['ماذا يحدث للخلية المضيفة عند خروج الفيروسات الجديدة؟',['تنقسم إلى خليتين','تتحطم وتموت','تصبح خلية مناعة'],1],
+ build(g){vGo=0;this.ph=0;this.cell=new THREE.Mesh(new THREE.SphereGeometry(.6,40,30),M(0xb3e5fc,{transparent:true,opacity:.75}));this.cell.position.x=.5;g.add(this.cell);
+ const n=new THREE.Mesh(new THREE.SphereGeometry(.2,24,16),M(0x9575cd));n.position.x=.5;g.add(n);this.vs=[];this.v=virusM(.22);this.v.position.set(-1.3,.3,0);g.add(this.v);
+ this.ll=label('الخلية المضيفة','#127a6e');this.ll.position.set(.5,1.1,0);g.add(this.ll);setCtrl(this.ctrl)},
+ update(dt,t){this.v.rotation.y+=dt*2;if(vGo){this.ph+=dt;const p=this.ph;
+  if(p<1.5)this.v.position.lerp(new THREE.Vector3(.5,0,0),dt*2);else if(p<3.5){this.v.visible=false;this.cell.scale.setScalar(1+(p-1.5)*.15);this.ll.userData.t!=='الفيروس يتكاثر داخلها…'&&this.ll.userData.set('الفيروس يتكاثر داخلها…')}
+  else if(!this.vs.length){this.cell.visible=false;this.ll.userData.set('تحطمت الخلية وخرجت فيروسات جديدة');sfx('knock',.6);for(let i=0;i<8;i++){const v=virusM(.14);v.position.set(.5,0,0);v.userData.d=RD().multiplyScalar(.8);holder.add(v);this.vs.push(v)}}
+  this.vs.forEach(v=>{if(v.position.distanceTo(new THREE.Vector3(.5,0,0))<1.4)v.position.addScaledVector(v.userData.d,dt);v.rotation.y+=dt*3})}}},
+{n:'🧫 البكتيريا',t:'تكاثر البكتيريا: ح = 2ⁿ',p:'خلية بكتيريا تنقسم إلى خليتين كل 10 ثوانٍ، فيتضاعف عددها مع كل انقسام: 1 ← 2 ← 4 ← 8 … اضغطي «انقسام» وراقبي العدد.',
+ amb:null,ctrl:'<button class="ib g" onclick="bDiv=1;sfx(\'drop\',.5)">➗ انقسام</button><button class="ib" onclick="bReset=1">↺</button>',
+ q:['بعد 3 انقسامات يصبح عدد البكتيريا الناتجة من خلية واحدة:',['6','8','3'],1],
+ build(g){this.g=g;this.list=[];this.n=0;this.add(new THREE.Vector3(0,0,0));this.ll=label('ن = 0  ←  ح = 1','#127a6e','#fff',1.4);this.ll.position.y=1.25;g.add(this.ll);setCtrl(this.ctrl)},
+ add(p){const b=new THREE.Group();const m=new THREE.Mesh(new THREE.CylinderGeometry(.09,.09,.3,16),M(0xa5d6a7));const c1=new THREE.Mesh(new THREE.SphereGeometry(.09,16,12),M(0xa5d6a7));c1.position.y=.15;const c2=c1.clone();c2.position.y=-.15;b.add(m,c1,c2);b.rotation.z=Math.PI/2;b.position.copy(p);this.g.add(b);this.list.push(b)},
+ update(dt,t){if(bReset){bReset=0;this.list.forEach(b=>this.g.remove(b));this.list=[];this.n=0;this.add(new THREE.Vector3());this.ll.userData.set('ن = 0  ←  ح = 1')}
+ if(bDiv&&this.n<6){bDiv=0;this.n++;const old=this.list.slice();old.forEach(b=>this.add(b.position.clone().add(RD().multiplyScalar(.25))));this.ll.userData.set('ن = '+this.n+'  ←  ح = '+Math.pow(2,this.n))}bDiv=0;
+ const N=this.list.length,cols=Math.ceil(Math.sqrt(N));this.list.forEach((b,i)=>{const tgt=new THREE.Vector3((i%cols-(cols-1)/2)*.32,(Math.floor(i/cols)-(Math.ceil(N/cols)-1)/2)*.28,0);b.position.lerp(tgt,dt*3);b.rotation.y=Math.sin(t*2+i)*.3})}},
+{n:'🛡 الجلد والأهداب',still:1,t:'خط الدفاع الأول: المخاط والأهداب',p:'تبطّن المجاري التنفسية أهداب ومخاط؛ يحجز المخاط مسببات المرض وتتحرك الأهداب فتطردها، ونتخلص منها بالعطاس والسعال. وتحت الجلد السليم لا تنفذ معظم البكتيريا.',
+ amb:null,ctrl:'',
+ q:['تراكيب شبيهة بالشعيرات تطرد المسببات من الجهاز التنفسي:',['الأهداب','الصفائح','الحويصلات'],0],
+ build(g){const sl=new THREE.Mesh(new THREE.BoxGeometry(2.4,.3,1),M(0xf4a990));sl.position.y=-.5;g.add(sl);this.cil=[];
+ for(let i=0;i<14;i++)for(let j=0;j<3;j++){const c=new THREE.Mesh(new THREE.CylinderGeometry(.02,.025,.45,8),M(0x9575cd));c.position.set(-1.1+i*.17,-.13,-.3+j*.3);this.cil.push(c);g.add(c)}
+ const mu=new THREE.Mesh(new THREE.BoxGeometry(2.4,.12,1),M(0xb2ebf2,{transparent:true,opacity:.55}));mu.position.y=.14;g.add(mu);
+ this.bs=[];for(let i=0;i<5;i++){const b=new THREE.Mesh(new THREE.SphereGeometry(.07,12,10),M(0x81c784));b.position.set(-1+i*.45,.2,(Math.random()-.5)*.6);g.add(b);this.bs.push(b)}
+ const l=label('مخاط + أهداب','#127a6e');l.position.y=1;g.add(l);setCtrl('')},
+ update(dt,t){this.cil.forEach((c,i)=>{c.rotation.z=.4*Math.sin(t*5+i*.4)});this.bs.forEach(b=>{b.position.x+=dt*.35;if(b.position.x>1.2)b.position.x=-1.2})}},
+{n:'💉 الطُّعم',t:'الطُّعم (اللقاح) والمناعة الطبيعية',p:'الطُّعم يحتوي على مولدات ضد تمنح الجسم مناعة طبيعية؛ فتنتج الخلايا البائية أجسامًا مضادة وتبقى خلايا ذاكرة. حرّكي المؤشر لتري المراحل.',
+ amb:null,ctrl:'<label>المرحلة</label><input type="range" min="0" max="3" step="1" value="0" oninput="vStage=+this.value;sfx(\'drop\',.5)">',
+ q:['يتكوّن الطُّعم من:',['أجسام مضادة جاهزة','مولدات ضد تمنح مناعة طبيعية','مضادات حيوية'],1],
+ build(g){vStage=0;const body=new THREE.Mesh(new THREE.CylinderGeometry(.12,.12,1,24),M(0xe1f5fe,{transparent:true,opacity:.8}));body.rotation.z=Math.PI/2;body.position.set(-.9,.6,0);g.add(body);
+ const nd=new THREE.Mesh(new THREE.CylinderGeometry(.015,.015,.4,8),M(0x9e9e9e,{metalness:.8}));nd.rotation.z=Math.PI/2;nd.position.set(-.2,.6,0);g.add(nd);
+ this.ag=[];for(let i=0;i<6;i++){const k=new THREE.Mesh(new THREE.BoxGeometry(.08,.08,.08),M(0xffd166));k.position.set(-1.2+i*.1,.6,0);g.add(k);this.ag.push(k)}
+ this.cell=new THREE.Mesh(new THREE.SphereGeometry(.4,32,24),M(0xc6a6ec));this.cell.position.set(.5,-.3,0);g.add(this.cell);this.abs=[];
+ for(let i=0;i<6;i++){const a=yAb(0xffd54f,.3);a.visible=false;a.position.set(.5+Math.cos(i)*.8,-.3+Math.sin(i)*.6,0);g.add(a);this.abs.push(a)}
+ this.ll=label('١ الطُّعم: مولدات ضد','#8456cf','#fff',1.4);this.ll.position.y=1.25;g.add(this.ll);setCtrl(this.ctrl)},
+ update(dt,t){const L=['١ الطُّعم: مولدات ضد','٢ تتعرف عليها الخلية البائية','٣ إنتاج الأجسام المضادة','٤ خلايا ذاكرة: مناعة طبيعية ✔'][vStage];if(this.ll.userData.t!==L)this.ll.userData.set(L);
+ this.ag.forEach((k,i)=>{const tg=vStage>=1?new THREE.Vector3(.5+Math.cos(i)*.45,-.3+Math.sin(i)*.45,0):new THREE.Vector3(-1.2+i*.1,.6,0);k.position.lerp(tg,dt*2);k.visible=vStage<3});
+ this.abs.forEach((a,i)=>{a.visible=vStage>=2;a.rotation.z+=dt});this.cell.material.color.setHex(vStage===3?0x7fe0d0:0xc6a6ec);this.cell.scale.setScalar(1+.04*Math.sin(t*3))}}
+];
+let bShoot=0,kVal=0,vGo=0,bDiv=0,bReset=0,vStage=0;
+function yAb(c,s){const g=new THREE.Group(),m=M(c,{roughness:.3,metalness:.2});const st=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,.5,12),m);st.position.y=-.25;g.add(st);[-1,1].forEach(d=>{const a=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,.45,12),m);a.position.set(d*.15,.17,0);a.rotation.z=-d*.6;g.add(a)});g.scale.setScalar(s);return g}
+function virusM(s){const g=new THREE.Group();g.add(new THREE.Mesh(new THREE.SphereGeometry(1,24,16),M(0xef6a8a)));for(let i=0;i<14;i++){const d=RD(),sp=new THREE.Mesh(new THREE.SphereGeometry(.22,10,8),M(0xffb74d));sp.position.copy(d.multiplyScalar(1.25));g.add(sp)}g.scale.setScalar(s);return g}
+let cur=0,built=null;
+function load(i){cur=i;while(holder.children.length)holder.remove(holder.children[0]);const s=SC[i];built=Object.create(s);built.build(holder);
+document.getElementById('iT').textContent=s.t;document.getElementById('iP').textContent=s.p;document.getElementById('info').classList.remove('min');
+document.querySelectorAll('#chips button').forEach((b,j)=>b.classList.toggle('on',j===i));holder.scale.setScalar(.01);pop=0;sfx('whoosh',.55);ambient(s.amb);try{history.replaceState(null,'','#s'+i)}catch(e){}}
+let pop=1;
+document.getElementById('chips').innerHTML=SC.map((s,i)=>`<button onclick="load(${i})">${s.n}</button>`).join('');
+// quiz
+function openQuiz(){const q=SC[cur].q;document.getElementById('qq').textContent='❓ '+q[0];document.getElementById('qfb').textContent='';
+document.getElementById('qo').innerHTML=q[1].map((o,i)=>`<button class="qo" onclick="qa(${i},this)">${'أبج'[i]}) ${o}</button>`).join('');document.getElementById('quiz').style.display='flex';sfx('drop',.5)}
+function qa(i,b){const q=SC[cur].q;if(b.parentNode.dataset.d)return;b.parentNode.dataset.d=1;const ok=i===q[2];b.classList.add(ok?'ok':'no');b.parentNode.children[q[2]].classList.add('ok');
+document.getElementById('qfb').textContent=ok?'🎉 أحسنتِ! إجابة صحيحة':'💡 الإجابة الصحيحة مظلّلة بالأخضر';sfx(ok?'applause':'knock',.8);if(ok)toast('⭐ +10')}
+function closeQ(){document.getElementById('quiz').style.display='none'}
+function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1200)}
+// snapshot
+function snap(){const c=document.createElement('canvas');c.width=cv.width;c.height=cv.height;const g=c.getContext('2d');
+if(video.videoWidth){const vr=video.videoWidth/video.videoHeight,cr=c.width/c.height;let sw=video.videoWidth,sh=video.videoHeight,sx=0,sy=0;if(vr>cr){sw=sh*cr;sx=(video.videoWidth-sw)/2}else{sh=sw/cr;sy=(video.videoHeight-sh)/2}g.drawImage(video,sx,sy,sw,sh,0,0,c.width,c.height)}else{g.fillStyle='#16304f';g.fillRect(0,0,c.width,c.height)}
+g.drawImage(cv,0,0);g.fillStyle='rgba(30,53,87,.8)';g.fillRect(0,c.height-70,c.width,70);g.fillStyle='#fff';g.font='700 30px Almarai';g.textAlign='center';g.direction='rtl';g.fillText(SC[cur].t+' • العلوم • صُمّم بحب ♥ د. أفنان الطلحي',c.width/2,c.height-25);
+const u=c.toDataURL('image/png');document.getElementById('shotImg').src=u;document.getElementById('dl').href=u;document.getElementById('shot').style.display='flex';sfx('drop',.7)}
+// loop
+const clock=new THREE.Clock();
+function loop(){const dt=Math.min(.05,clock.getDelta()),t=clock.elapsedTime;
+if(gyro&&q0){cam.quaternion.copy(q0).multiply(qd)}else{cam.quaternion.set(0,0,0,1)}
+pop=Math.min(1,pop+dt*2.2);const e=1-Math.pow(1-pop,3)*(1-pop*0)+Math.sin(pop*Math.PI)*.08;
+var asp=innerWidth/innerHeight;window.base=asp<1?.38+asp*.42:1;anchor.position.y=asp<1?-.35:-.15;holder.scale.setScalar(Math.max(.01,e)*zoom*base);disc.scale.setScalar(base);disc.position.y=ring.position.y=-1.05*base;holder.rotation.y+=((rotY+((drag||SC[cur].still)?0:t*.15))-holder.rotation.y)*.2;holder.rotation.x+=(rotX-holder.rotation.x)*.2;
+ring.material.opacity=.5+.3*Math.sin(t*3);ring.scale.setScalar((1+.03*Math.sin(t*3))*base);
+if(built)built.update.call(built,dt,t);R.render(scene,cam);requestAnimationFrame(loop)}
+document.fonts.load('700 52px Almarai').finally(()=>{const h=location.hash.match(/^#s(\d)$/);load(h?+h[1]:0);loop()});
+setTimeout(()=>document.getElementById('hint').style.opacity=0,6000);
+</script>
+</body></html>
